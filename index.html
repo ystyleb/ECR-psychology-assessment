@@ -3814,6 +3814,71 @@
         document.addEventListener('DOMContentLoaded', function() {
             showHome();
         });
+
+        /*
+        ========================================
+        微信支付后端API集成说明
+        ========================================
+
+        为了实现真实的微信支付功能，您需要在后端实现以下API接口：
+
+        1. 创建支付订单 API
+        POST /api/payment/create
+        请求体：
+        {
+            "orderId": "ECR_1234567890_abc123",
+            "amount": 1990,
+            "description": "ECR亲密关系测评详细报告",
+            "notifyUrl": "https://your-domain.com/api/payment/notify",
+            "returnUrl": "https://your-domain.com/payment/return",
+            "tradeType": "NATIVE"
+        }
+
+        响应：
+        {
+            "success": true,
+            "qrCodeUrl": "weixin://wxpay/bizpayurl?pr=abc123",
+            "orderId": "ECR_1234567890_abc123",
+            "prepayId": "wx123456789"
+        }
+
+        2. 查询支付状态 API
+        GET /api/payment/status/{orderId}
+
+        响应：
+        {
+            "success": true,
+            "status": "SUCCESS", // SUCCESS, WAITING, FAILED
+            "orderId": "ECR_1234567890_abc123",
+            "transactionId": "wx_transaction_123"
+        }
+
+        3. 支付结果通知 API（微信回调）
+        POST /api/payment/notify
+
+        微信支付成功后会调用此接口，您需要：
+        - 验证签名
+        - 更新订单状态
+        - 返回成功响应给微信
+
+        4. 所需的微信支付配置：
+        - 微信商户号 (mch_id)
+        - 微信应用ID (app_id)
+        - 商户API密钥 (api_key)
+        - 商户证书文件
+
+        5. 推荐的后端技术栈：
+        - Node.js + Express
+        - Python + Flask/Django
+        - Java + Spring Boot
+        - PHP + Laravel
+
+        注意事项：
+        - 前端不能直接调用微信支付API，必须通过后端
+        - 需要配置HTTPS域名
+        - 需要在微信商户平台配置支付授权目录
+        - 建议使用官方SDK进行开发
+        */
     </script>
 </body>
 </html>
