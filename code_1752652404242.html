@@ -1,0 +1,3819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECR亲密关系经历量表 - 专业心理测评</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            /* 主色调 */
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --primary-dark: #5a6fd8;
+            
+            /* 文字颜色 */
+            --text-primary: #2c3e50;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --text-light: #adb5bd;
+            
+            /* 背景色 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            
+            /* 边框和分割线 */
+            --border-light: rgba(0, 0, 0, 0.05);
+            --border-medium: rgba(0, 0, 0, 0.1);
+            --border-primary: rgba(102, 126, 234, 0.2);
+            
+            /* 阴影 */
+            --shadow-light: 0 3px 10px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.08);
+            --shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.12);
+            
+            /* 状态色 */
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #3498db;
+            
+            /* 字体系统 */
+            --font-family-base: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans GB', 'Microsoft YaHei', Roboto, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            
+            /* 间距系统 */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            
+            /* 圆角 */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            
+            /* 行高 */
+            --line-height-tight: 1.25;
+            --line-height-normal: 1.5;
+            --line-height-relaxed: 1.75;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            font-size: var(--font-size-base);
+            line-height: var(--line-height-normal);
+            color: var(--text-primary);
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            font-feature-settings: 'liga' 1, 'kern' 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .intro-section {
+            margin-bottom: 30px;
+        }
+
+        .intro-section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .intro-section p {
+            color: #555;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 25px rgba(252, 182, 159, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option-label {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px 10px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .option-circle {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .option.selected .option-circle {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .labels-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* 简洁结果页样式 */
+        .result-summary {
+            text-align: center;
+        }
+
+        .attachment-type-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .attachment-type-card h2 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        .attachment-type-card .type-subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .scores-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .score-card-summary {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .score-card-summary:hover {
+            transform: translateY(-3px);
+        }
+
+        .score-card-summary h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .score-value-large {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .score-level {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .score-level.low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .score-level.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .score-level.high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .key-features {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+        }
+
+        .key-features h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-item i {
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .health-warning {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #fdcb6e;
+        }
+
+        .health-warning h4 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+        }
+
+        /* 详细报告页样式 */
+        .detailed-report {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .report-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .report-section {
+            background: white;
+            padding: 35px 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .report-section h2 {
+            color: #2c3e50;
+            font-size: 1.9em;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .section-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .chart-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .chart-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .chart-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        /* Canvas四象限图样式 */
+        #quadrantChart {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: #fff;
+        }
+
+        /* 四象限布局样式 */
+        .quadrant-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .quadrant-axis-labels {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .axis-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .axis-x {
+            margin-bottom: 8px;
+        }
+
+        .axis-y {
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 2px;
+            border: 2px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            min-height: 280px;
+            position: relative;
+        }
+
+        .quadrant-grid::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-medium);
+            z-index: 1;
+        }
+
+        .quadrant-grid::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-medium);
+            z-index: 1;
+        }
+
+        .quadrant {
+            background: var(--bg-primary);
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .quadrant:hover {
+            background: var(--bg-secondary);
+            transform: scale(1.02);
+        }
+
+        .quadrant.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: var(--primary-color);
+            box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .quadrant.active::before {
+            content: '★';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: var(--primary-color);
+            font-size: 1.2em;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        .quadrant-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .quadrant-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .quadrant-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .quadrant-desc {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .quadrant-features {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            line-height: var(--line-height-relaxed);
+        }
+
+        .user-position-indicator {
+            margin-top: 15px;
+            padding: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .user-scores {
+            text-align: center;
+        }
+
+        .score-item {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+
+        .score-item strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* 象限特定颜色 */
+        .quadrant-secure {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .quadrant-anxious {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        }
+
+        .quadrant-avoidant {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        }
+
+        .quadrant-chaotic {
+            background: linear-gradient(135deg, #e2d9f3 0%, #d1a3e0 100%);
+        }
+
+        .detailed-analysis {
+            margin: 25px 0;
+        }
+
+        .analysis-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        .analysis-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .analysis-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            border-radius: 0 12px 0 60px;
+        }
+
+        .analysis-item h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .analysis-item p {
+            color: #495057;
+            line-height: 1.7;
+            margin: 0;
+            font-size: 1.05em;
+        }
+
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .suggestion-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .suggestion-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .suggestion-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .suggestion-card h4 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25em;
+            font-weight: 600;
+        }
+
+        .suggestion-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1em;
+        }
+
+        .suggestion-card ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .suggestion-card li {
+            margin-bottom: 12px;
+            color: #495057;
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+            font-size: 1.05em;
+        }
+
+        .suggestion-card li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .suggestion-card li:last-child {
+            margin-bottom: 0;
+        }
+
+        .report-footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="footerGrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.05"/></pattern></defs><rect width="100" height="20" fill="url(%23footerGrid)"/></svg>');
+        }
+
+        .report-footer h3 {
+            margin-bottom: 20px;
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-footer p {
+            opacity: 0.9;
+            line-height: var(--line-height-relaxed);
+            font-size: var(--font-size-base);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-meta {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: var(--font-size-sm);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.8;
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            min-height: 120px;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="20" fill="url(%23grid)"/></svg>');
+            border-radius: 20px 20px 0 0;
+            pointer-events: none;
+        }
+
+        .report-header-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .report-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .report-brand .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+
+        .report-brand .brand-name {
+            font-size: 1.1em;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .modal-header h2 {
+            font-size: 2.2em;
+            font-weight: 300;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 25px;
+            margin-top: 8px;
+            font-size: 0.9em;
+            opacity: 0.85;
+        }
+
+        .report-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 重要提醒区域样式 */
+        .important-notice {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 20px 25px;
+            margin: 0 30px 25px 30px;
+            border-radius: 12px;
+            border-left: 5px solid #ff4757;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .important-notice::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.05) 20px
+            );
+        }
+
+        .notice-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .notice-icon {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+
+        .notice-content {
+            font-size: 0.95em;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+            opacity: 0.95;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .close-btn, .download-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.6em;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover, .download-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .download-btn:active {
+            transform: scale(0.95);
+        }
+
+        .download-btn.downloading {
+            animation: downloadSpin 1s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes downloadSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 消息提示样式 */
+        .message-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            max-width: 300px;
+            word-wrap: break-word;
+        }
+
+        .message-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .message-toast.success {
+            background: linear-gradient(135deg, #52c41a, #389e0d);
+            border-left: 4px solid #237804;
+        }
+
+        .message-toast.error {
+            background: linear-gradient(135deg, #ff4d4f, #cf1322);
+            border-left: 4px solid #a8071a;
+        }
+
+        .message-toast.info {
+            background: linear-gradient(135deg, #1890ff, #096dd9);
+            border-left: 4px solid #0050b3;
+        }
+
+        /* 付费模态框样式 */
+        .payment-modal {
+            max-width: 600px;
+        }
+
+        .payment-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .payment-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3em;
+        }
+
+        .payment-section h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .price-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .price-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="priceGrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="20" fill="url(%23priceGrid)"/></svg>');
+        }
+
+        .price-header {
+            position: relative;
+            z-index: 1;
+        }
+
+        .price-header h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .price-tag {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .currency {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .price {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .original-price {
+            font-size: 1.2em;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .discount-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .price-description {
+            position: relative;
+            z-index: 1;
+        }
+
+        .price-description p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+
+        .qr-code-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ddd;
+        }
+
+        .qr-placeholder {
+            color: #999;
+            text-align: center;
+        }
+
+        .qr-placeholder i {
+            font-size: 3em;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .qr-code-image {
+            max-width: 180px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .payment-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payment-instruction {
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .payment-status {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .payment-status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .payment-status.checking {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .payment-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .payment-status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .payment-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .payment-btn {
+            background: linear-gradient(135deg, #1aad19 0%, #00d100 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 173, 25, 0.4);
+        }
+
+        .security-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+            border-left-color: #27ae60;
+        }
+
+        .security-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #27ae60;
+            font-size: 0.95em;
+        }
+
+        .security-item i {
+            font-size: 1.1em;
+        }
+
+        /* 移动端下载模态框样式 */
+        .mobile-download-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-download-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-download-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-download-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-download-header h3 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .mobile-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .mobile-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .mobile-download-body {
+            padding: 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .download-preview-image {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .download-instruction {
+            color: #667eea;
+            font-size: 1em;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .download-filename {
+            color: #666;
+            font-size: 0.9em;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: var(--font-size-3xl);
+            }
+
+            .content-card {
+                padding: 20px;
+            }
+
+            .options-container {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 6px;
+            }
+
+            .option {
+                padding: 8px 4px;
+            }
+
+            .option-circle {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75em;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .scores-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+
+            .suggestions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .attachment-type-card h2 {
+                font-size: var(--font-size-3xl);
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 95vh;
+                margin: 2.5vh auto;
+            }
+
+            .modal-header {
+                padding: 20px 25px;
+                min-height: 100px;
+            }
+
+            .modal-header h2 {
+                font-size: var(--font-size-2xl);
+            }
+
+            .report-brand .brand-name {
+                font-size: var(--font-size-base);
+            }
+
+            .report-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .report-meta-item {
+                font-size: var(--font-size-sm);
+            }
+
+            .important-notice {
+                margin: 0 20px 20px 20px;
+                padding: 15px 20px;
+            }
+
+            .notice-header {
+                font-size: var(--font-size-base);
+                margin-bottom: 8px;
+            }
+
+            .notice-content {
+                font-size: var(--font-size-sm);
+            }
+
+            .modal-body {
+                padding: 15px 20px;
+            }
+
+            .report-section {
+                padding: 25px 20px;
+                margin-bottom: 20px;
+            }
+
+            .report-section h2 {
+                font-size: var(--font-size-xl);
+                margin-bottom: 20px;
+            }
+
+            .section-number {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8em;
+            }
+
+            .analysis-item {
+                padding: 20px;
+                margin-bottom: 15px;
+            }
+
+            .analysis-item h4 {
+                font-size: var(--font-size-lg);
+                margin-bottom: 12px;
+            }
+
+            .analysis-item p {
+                font-size: var(--font-size-base);
+            }
+
+            .suggestion-card {
+                padding: 20px;
+            }
+
+            .suggestion-card h4 {
+                font-size: var(--font-size-lg);
+                margin-bottom: 15px;
+            }
+
+            .suggestion-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1em;
+            }
+
+            .suggestion-card li {
+                font-size: var(--font-size-base);
+                margin-bottom: 10px;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            /* 四象限移动端适配 */
+            .quadrant-container {
+                margin: 15px 0;
+            }
+
+            .axis-y {
+                left: -25px;
+                font-size: var(--font-size-xs);
+            }
+
+            .quadrant-grid {
+                min-height: 240px;
+                gap: 1px;
+            }
+
+            .quadrant {
+                padding: 12px 8px;
+            }
+
+            .quadrant-icon {
+                font-size: 1.5em;
+                margin-bottom: 5px;
+            }
+
+            .quadrant-title {
+                font-size: var(--font-size-base);
+                margin-bottom: 3px;
+            }
+
+            .quadrant-desc {
+                font-size: var(--font-size-xs);
+                margin-bottom: 6px;
+            }
+
+            .quadrant-features {
+                font-size: 0.65rem;
+            }
+
+            .user-position-indicator {
+                margin-top: 10px;
+                padding: 8px;
+            }
+
+            .score-item {
+                font-size: var(--font-size-xs);
+            }
+
+            .header-buttons {
+                gap: 8px;
+            }
+
+            .close-btn, .download-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2em;
+                padding: 6px;
+            }
+
+            .message-toast {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                font-size: var(--font-size-sm);
+                padding: 12px 16px;
+            }
+
+            /* 付费模态框移动端适配 */
+            .payment-modal {
+                max-width: 95%;
+            }
+
+            .payment-section {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .payment-section h3 {
+                font-size: var(--font-size-lg);
+                margin-bottom: 15px;
+            }
+
+            .price-card {
+                padding: 25px 20px;
+            }
+
+            .price-tag {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .price {
+                font-size: 2.5em;
+            }
+
+            .qr-code-container {
+                padding: 15px;
+                min-height: 150px;
+            }
+
+            .qr-placeholder i {
+                font-size: 2em;
+            }
+
+            .qr-code-image {
+                max-width: 140px;
+            }
+
+            .payment-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .payment-btn {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+
+            .security-features {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .security-item {
+                font-size: var(--font-size-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 首页 -->
+        <div id="homePage" class="page active">
+            <div class="header">
+                <h1><i class="fas fa-heart"></i> ECR亲密关系经历量表</h1>
+                <p class="subtitle">专业的成人依恋类型测评工具</p>
+            </div>
+
+            <div class="content-card">
+                <div class="intro-section">
+                    <h2><i class="fas fa-info-circle"></i> 关于ECR量表</h2>
+                    <p>ECR亲密关系经历量表（Experiences in Close Relationships Inventory）是由Brennan、Clark和Shaver于1998年开发的权威心理测评工具，专门用于测量成人在亲密关系中的依恋模式。</p>
+                    <p>该量表基于依恋理论，通过测量<strong>依恋焦虑</strong>和<strong>依恋回避</strong>两个核心维度，帮助您了解自己在亲密关系中的行为模式和情感需求。</p>
+                </div>
+
+                <div class="intro-section">
+                    <h2><i class="fas fa-brain"></i> 依恋理论背景</h2>
+                    <p>依恋理论由英国精神分析师约翰·鲍尔比提出，认为早期与照料者的关系会形成内在工作模式，影响我们成年后的亲密关系。通过了解自己的依恋类型，您可以：</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>更好地理解自己在关系中的行为模式</li>
+                        <li>识别可能影响关系质量的因素</li>
+                        <li>促进更健康、更满意的亲密关系</li>
+                        <li>提升情感智慧和关系技能</li>
+                    </ul>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>权威可靠</h3>
+                        <p>基于国际权威心理学研究，具有良好的信效度</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-user-secret"></i>
+                        <h3>隐私保护</h3>
+                        <p>所有数据本地处理，不会存储或传输个人信息</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>专业解读</h3>
+                        <p>提供详细的结果分析和专业的心理健康建议</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>便捷测试</h3>
+                        <p>支持PC和移动端，随时随地进行测评</p>
+                    </div>
+                </div>
+
+                <div class="intro-section">
+                    <h2><i class="fas fa-exclamation-triangle"></i> 重要提醒</h2>
+                    <p style="color: #e74c3c; font-weight: 500;">本测评仅供心理健康教育和自我了解使用，不能替代专业心理咨询或治疗。如果您正在经历严重的情感困扰，建议寻求专业心理健康服务。</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn" onclick="startTest()">
+                        <i class="fas fa-play"></i> 开始测试
+                    </button>
+                    <button class="btn btn-secondary" onclick="showInfo()">
+                        <i class="fas fa-question-circle"></i> 测试说明
+                    </button>
+                    <!-- 调试按钮 -->
+                    <button class="btn btn-outline" onclick="goToDebugReport()" style="margin-top: 10px;">
+                        <i class="fas fa-bug"></i> 调试：直接查看报告
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试说明页面 -->
+        <div id="infoPage" class="page">
+            <div class="header">
+                <h1><i class="fas fa-question-circle"></i> 测试说明</h1>
+            </div>
+
+            <div class="content-card">
+                <div class="intro-section">
+                    <h2><i class="fas fa-list-ol"></i> 测试包含内容</h2>
+                    <p>本测试包含36道题目，分为两个维度：</p>
+                    <ul style="margin-left: 20px; margin-top: 15px;">
+                        <li><strong>依恋焦虑维度（18题）</strong>：测量您对被抛弃的担忧和对关系的过度依赖程度</li>
+                        <li><strong>依恋回避维度（18题）</strong>：测量您对亲密和依赖的不适感以及自我依赖的程度</li>
+                    </ul>
+                </div>
+
+                <div class="intro-section">
+                    <h2><i class="fas fa-clock"></i> 完成时间</h2>
+                    <p>测试大约需要10-15分钟完成。请确保您有足够的时间，避免在测试过程中被打断。</p>
+                </div>
+
+                <div class="intro-section">
+                    <h2><i class="fas fa-star"></i> 评分说明</h2>
+                    <p>每道题目采用7点量表评分：</p>
+                    <div class="labels-container" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <span><strong>1</strong> - 非常不赞成</span>
+                        <span><strong>4</strong> - 中性</span>
+                        <span><strong>7</strong> - 非常赞成</span>
+                    </div>
+                </div>
+
+                <div class="intro-section">
+                    <h2><i class="fas fa-lightbulb"></i> 答题建议</h2>
+                    <ul style="margin-left: 20px;">
+                        <li>请根据您在亲密关系（如恋爱关系、婚姻关系）中的真实感受和行为来回答</li>
+                        <li>没有标准答案，请诚实回答，这样才能获得准确的结果</li>
+                        <li>如果从未有过亲密关系经历，请想象自己在这种关系中的可能表现</li>
+                        <li>避免长时间思考，选择最符合直觉的答案</li>
+                    </ul>
+                </div>
+
+                <div class="health-warning">
+                    <h4><i class="fas fa-shield-alt"></i> 隐私承诺</h4>
+                    <p>您的所有答案都将在本地处理，不会被存储、传输或分享给任何第三方。测试结果仅供您个人参考。</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="startTest()">
+                        <i class="fas fa-play"></i> 开始测试
+                    </button>
+                    <button class="btn btn-secondary" onclick="showHome()">
+                        <i class="fas fa-arrow-left"></i> 返回首页
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试页面 -->
+        <div id="testPage" class="page">
+            <div class="header">
+                <h1><i class="fas fa-clipboard-list"></i> ECR亲密关系测评</h1>
+            </div>
+
+            <div class="content-card">
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-number">
+                            题目 <span id="currentQuestionNumber">1</span> / 36
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div style="color: #7f8c8d;">
+                            <span id="progressPercent">3%</span>
+                        </div>
+                    </div>
+
+                    <div class="question-text" id="questionText">
+                        我担心被抛弃。
+                    </div>
+
+                    <div class="labels-container">
+                        <span>非常不赞成</span>
+                        <span>中性</span>
+                        <span>非常赞成</span>
+                    </div>
+
+                    <div class="options-container" id="optionsContainer">
+                        <!-- 选项将通过JavaScript动态生成 -->
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn" style="display: none;">
+                            <i class="fas fa-arrow-left"></i> 上一题
+                        </button>
+                        <button class="btn" onclick="nextQuestion()" id="nextBtn" disabled>
+                            下一题 <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="btn" onclick="submitTest()" id="submitBtn" style="display: none;">
+                            <i class="fas fa-check"></i> 提交测试
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 简洁结果页面 -->
+        <div id="resultPage" class="page">
+            <div class="header">
+                <h1><i class="fas fa-chart-pie"></i> 测试结果</h1>
+                <p class="subtitle">您的依恋类型分析报告</p>
+            </div>
+
+            <div class="content-card result-summary">
+                <div class="attachment-type-card" id="attachmentTypeCard">
+                    <h2 id="attachmentTypeName">安全型依恋</h2>
+                    <p class="type-subtitle">您的主要依恋类型</p>
+                    <p id="typeDescription">基于您的测试结果分析得出</p>
+                </div>
+
+                <div class="scores-summary">
+                    <div class="score-card-summary">
+                        <h3><i class="fas fa-heart-broken"></i> 依恋焦虑</h3>
+                        <div class="score-value-large" id="anxietyScoreSummary">3.2</div>
+                        <div class="score-level" id="anxietyLevel">较低水平</div>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.9em;">对被抛弃的担忧程度</p>
+                    </div>
+                    <div class="score-card-summary">
+                        <h3><i class="fas fa-shield-alt"></i> 依恋回避</h3>
+                        <div class="score-value-large" id="avoidanceScoreSummary">2.8</div>
+                        <div class="score-level" id="avoidanceLevel">较低水平</div>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.9em;">对亲密关系的回避程度</p>
+                    </div>
+                </div>
+
+                <div class="key-features">
+                    <h3><i class="fas fa-star"></i> 主要特征</h3>
+                    <div class="features-list" id="keyFeaturesList">
+                        <!-- 特征列表将通过JavaScript生成 -->
+                    </div>
+                </div>
+
+                <div class="health-warning">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 重要提醒</h4>
+                    <p>本测试结果仅供参考和自我了解使用，不能作为诊断依据。每个人的情况都是独特的，如果您对结果有疑问或需要专业帮助，建议咨询专业的心理健康专家。</p>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn" onclick="showPaymentModal()">
+                        <i class="fas fa-chart-line"></i> 查看详细报告
+                    </button>
+                    <button class="btn btn-outline" onclick="restartTest()">
+                        <i class="fas fa-redo"></i> 重新测试
+                    </button>
+                    <button class="btn btn-secondary" onclick="showHome()">
+                        <i class="fas fa-home"></i> 返回首页
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 付费模态框 -->
+    <div class="modal-overlay" id="paymentModalOverlay">
+        <div class="modal-content payment-modal">
+            <div class="modal-header">
+                <div class="report-header-content">
+                    <div class="report-brand">
+                        <div class="brand-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="brand-name">专业版报告</div>
+                    </div>
+                    <h2>解锁详细分析报告</h2>
+                    <div class="report-meta">
+                        <div class="report-meta-item">
+                            <i class="fas fa-star"></i>
+                            <span>获得专业级心理分析</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-buttons">
+                    <button class="close-btn" onclick="closePaymentModal()" title="关闭">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div class="payment-content">
+                    <!-- 付费说明 -->
+                    <div class="payment-section">
+                        <h3><i class="fas fa-gift"></i> 专业版报告包含</h3>
+                        <div class="features-list">
+                            <div class="feature-item">
+                                <i class="fas fa-chart-pie"></i>
+                                <span>详细的依恋类型可视化分析</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-brain"></i>
+                                <span>深度心理学解读和分析</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>个性化改善建议和指导</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-download"></i>
+                                <span>支持下载保存完整报告</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>专业心理学理论支撑</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-infinity"></i>
+                                <span>永久保存，随时查看</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 价格信息 -->
+                    <div class="payment-section">
+                        <div class="price-card">
+                            <div class="price-header">
+                                <h3>专业版报告</h3>
+                                <div class="price-tag">
+                                    <span class="currency">¥</span>
+                                    <span class="price">19.9</span>
+                                    <span class="original-price">¥39.9</span>
+                                </div>
+                                <div class="discount-badge">限时5折</div>
+                            </div>
+                            <div class="price-description">
+                                <p>一次付费，终身有效</p>
+                                <p>专业心理学团队精心制作</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 微信支付区域 -->
+                    <div class="payment-section">
+                        <h3><i class="fab fa-weixin"></i> 微信支付</h3>
+                        <div class="payment-methods">
+                            <div class="qr-code-container" id="qrCodeContainer">
+                                <div class="qr-placeholder">
+                                    <i class="fas fa-qrcode"></i>
+                                    <p>点击下方按钮生成支付二维码</p>
+                                </div>
+                            </div>
+                            <div class="payment-info">
+                                <p class="payment-instruction">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    使用微信扫描二维码完成支付
+                                </p>
+                                <div class="payment-status" id="paymentStatus">
+                                    <span class="status-text">等待支付...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-buttons">
+                            <button class="btn payment-btn" onclick="generatePaymentQR()">
+                                <i class="fab fa-weixin"></i> 生成支付二维码
+                            </button>
+                            <button class="btn btn-outline" onclick="checkPaymentStatus()" id="checkPaymentBtn" style="display: none;">
+                                <i class="fas fa-sync"></i> 检查支付状态
+                            </button>
+                            <!-- 调试按钮 -->
+                            <button class="btn btn-secondary" onclick="debugPaymentSuccess()" style="font-size: 0.9em;">
+                                <i class="fas fa-bug"></i> 调试：模拟支付成功
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 安全保障 -->
+                    <div class="payment-section security-section">
+                        <h4><i class="fas fa-shield-check"></i> 安全保障</h4>
+                        <div class="security-features">
+                            <div class="security-item">
+                                <i class="fas fa-lock"></i>
+                                <span>微信官方支付，安全可靠</span>
+                            </div>
+                            <div class="security-item">
+                                <i class="fas fa-undo"></i>
+                                <span>7天无理由退款保障</span>
+                            </div>
+                            <div class="security-item">
+                                <i class="fas fa-user-shield"></i>
+                                <span>隐私数据严格保护</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详细报告模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="report-header-content">
+                    <div class="report-brand">
+                        <div class="brand-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="brand-name">心理测评中心</div>
+                    </div>
+                    <h2>ECR亲密关系经历测评报告</h2>
+                    <div class="report-meta">
+                        <div class="report-meta-item">
+                            <i class="fas fa-id-card"></i>
+                            <span>报告编号：ECR<span id="reportNumber"></span></span>
+                        </div>
+                        <div class="report-meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>生成时间：<span id="reportTimeHeader"></span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-buttons">
+                    <button class="download-btn" onclick="downloadReport()" title="下载报告">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="close-btn" onclick="closeDetailedReport()" title="关闭报告">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 重要提醒区域 -->
+            <div class="important-notice">
+                <div class="notice-header">
+                    <div class="notice-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <span>请注意！本报告仅供参考，不能以此做临床诊断！</span>
+                </div>
+                <div class="notice-content">
+                    本测评报告基于ECR亲密关系经历量表的科学分析，仅供心理健康教育和自我认知参考使用。如果您在亲密关系中遇到困扰，建议寻求专业心理咨询师的帮助。任何心理测评都不能替代专业的心理诊断和治疗。
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="detailed-report">
+                    
+                    <!-- 得分可视化 -->
+                    <div class="report-section">
+                        <h2><span class="section-number">1</span><i class="fas fa-chart-bar"></i> 得分可视化分析</h2>
+                        <div class="chart-container">
+                            <div class="chart-card">
+                                <h3>维度得分对比</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <h3>依恋类型分布</h3>
+                                <div class="quadrant-container">
+                                    <div class="quadrant-axis-labels">
+                                        <div class="axis-label axis-x">依恋回避程度 →</div>
+                                        <div class="axis-label axis-y">依恋焦虑程度 →</div>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <canvas id="quadrantChart" width="400" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 详细分析 -->
+                    <div class="report-section">
+                        <h2><span class="section-number">2</span><i class="fas fa-microscope"></i> 深度心理分析</h2>
+                        <div class="detailed-analysis" id="detailedAnalysis">
+                            <!-- 详细分析内容将通过JavaScript生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 个性化建议 -->
+                    <div class="report-section">
+                        <h2><span class="section-number">3</span><i class="fas fa-lightbulb"></i> 个性化发展建议</h2>
+                        <div class="suggestions-grid" id="suggestionsGrid">
+                            <!-- 建议内容将通过JavaScript生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 关系发展指导 -->
+                    <div class="report-section">
+                        <h2><span class="section-number">4</span><i class="fas fa-heart"></i> 亲密关系发展指导</h2>
+                        <div class="detailed-analysis" id="relationshipGuidance">
+                            <!-- 关系指导内容将通过JavaScript生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 报告尾注 -->
+                    <div class="report-footer">
+                        <h3><i class="fas fa-graduation-cap"></i> 专业声明</h3>
+                        <p>本报告基于ECR亲密关系经历量表的科学测评结果，采用国际标准的依恋理论框架进行分析。报告内容仅供心理健康教育和自我认知使用，不构成任何医学诊断或治疗建议。如需专业心理咨询服务，请联系合格的心理健康专业人士。</p>
+                        
+                        <div class="footer-meta">
+                            <div class="footer-meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>生成时间：<span id="reportDate"></span></span>
+                            </div>
+                            <div class="footer-meta-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>隐私保护：本地处理，不上传云端</span>
+                            </div>
+                            <div class="footer-meta-item">
+                                <i class="fas fa-certificate"></i>
+                                <span>理论基础：Brennan, Clark & Shaver (1998)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ECR量表题目数据
+        const ecrQuestions = [
+            // 依恋焦虑维度题目
+            { text: "我担心被抛弃。", dimension: "anxiety", reverse: false },
+            { text: "我非常担心我的人际关系。", dimension: "anxiety", reverse: false },
+            { text: "我担心恋爱伙伴不会像我关心他们那样关心我。", dimension: "anxiety", reverse: false },
+            { text: "我相当担心失去我的伴侣。", dimension: "anxiety", reverse: false },
+            { text: "我经常希望我的伴侣对我的感情像我对他们的感情一样强烈。", dimension: "anxiety", reverse: false },
+            { text: "我经常想要和恋爱伙伴完全融合，这有时会把他们吓跑。", dimension: "anxiety", reverse: false },
+            { text: "我担心独自一人。", dimension: "anxiety", reverse: false },
+            { text: "我需要得到大量来自伴侣的关爱确认。", dimension: "anxiety", reverse: false },
+            { text: "有时我感到我强迫伴侣表现出更多的感情和承诺。", dimension: "anxiety", reverse: false },
+            { text: "我不经常担心被抛弃。", dimension: "anxiety", reverse: true },
+            { text: "当我没有恋爱关系时，我感到有些焦虑和不安全。", dimension: "anxiety", reverse: false },
+            { text: "当我的伴侣不在身边时，我担心他们可能会爱上别人。", dimension: "anxiety", reverse: false },
+            { text: "当伴侣离开一会儿时，我有时感到想要他们。", dimension: "anxiety", reverse: false },
+            { text: "我不担心有人太接近我。", dimension: "anxiety", reverse: true },
+            { text: "如果无法让伴侣对我表现出兴趣，我会感到沮丧或愤怒。", dimension: "anxiety", reverse: false },
+            { text: "当我觉得伴侣不太需要我时，我感到不快。", dimension: "anxiety", reverse: false },
+            { text: "当伴侣赞同我时，我对自己感觉更好。", dimension: "anxiety", reverse: false },
+            { text: "我很少担心伴侣离开我。", dimension: "anxiety", reverse: true },
+
+            // 依恋回避维度题目
+            { text: "我更喜欢不向伴侣表露我内心深处的感受。", dimension: "avoidance", reverse: false },
+            { text: "我觉得很难依赖恋爱伙伴。", dimension: "avoidance", reverse: false },
+            { text: "我不喜欢向伴侣敞开心扉。", dimension: "avoidance", reverse: false },
+            { text: "我更喜欢不太亲密的恋爱关系。", dimension: "avoidance", reverse: false },
+            { text: "当恋爱伙伴想要我更加亲密时，我感到不舒服。", dimension: "avoidance", reverse: false },
+            { text: "我觉得很难让自己依赖恋爱伙伴。", dimension: "avoidance", reverse: false },
+            { text: "我不介意寻求伴侣的安慰、建议和帮助。", dimension: "avoidance", reverse: true },
+            { text: "我告诉伴侣几乎所有的事情。", dimension: "avoidance", reverse: true },
+            { text: "我和伴侣谈论我的问题和担忧。", dimension: "avoidance", reverse: true },
+            { text: "当我有需要时，我觉得向伴侣求助很容易。", dimension: "avoidance", reverse: true },
+            { text: "我觉得很难向伴侣表达我的需要。", dimension: "avoidance", reverse: false },
+            { text: "我很容易对伴侣产生情感依恋。", dimension: "avoidance", reverse: true },
+            { text: "我希望与伴侣非常亲密，但有时这让我感到不安。", dimension: "avoidance", reverse: false },
+            { text: "我很容易变得对恋爱伙伴很亲密。", dimension: "avoidance", reverse: true },
+            { text: "我觉得向伴侣求助很容易。", dimension: "avoidance", reverse: true },
+            { text: "我发现与伴侣亲近让我感到不舒服。", dimension: "avoidance", reverse: false },
+            { text: "我不介意依赖恋爱伙伴。", dimension: "avoidance", reverse: true },
+            { text: "我觉得亲密让我感到有些不安。", dimension: "avoidance", reverse: false }
+        ];
+
+        // 全局变量
+        let currentQuestion = 0;
+        let answers = [];
+        let testResults = null;
+        let autoAdvanceTimer = null; // 自动跳转计时器
+        
+        // 图表实例管理
+        let chartInstances = {
+            barChart: null
+        };
+
+        // 页面导航函数
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function showHome() {
+            showPage('homePage');
+        }
+
+        function showInfo() {
+            showPage('infoPage');
+        }
+
+        function startTest() {
+            // 清除可能存在的自动跳转计时器
+            if (autoAdvanceTimer) {
+                clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null;
+            }
+            
+            currentQuestion = 0;
+            answers = new Array(36).fill(null);
+            showPage('testPage');
+            updateQuestion();
+            generateOptions();
+        }
+
+        // 生成选项
+        function generateOptions() {
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= 7; i++) {
+                const option = document.createElement('div');
+                option.className = 'option';
+                option.onclick = () => selectOption(i);
+                
+                option.innerHTML = `
+                    <div class="option-circle">${i}</div>
+                `;
+                
+                container.appendChild(option);
+            }
+        }
+
+        // 选择选项
+        function selectOption(value) {
+            answers[currentQuestion] = value;
+            
+            // 清除之前的自动跳转计时器
+            if (autoAdvanceTimer) {
+                clearTimeout(autoAdvanceTimer);
+                autoAdvanceTimer = null;
+            }
+            
+            // 更新UI
+            document.querySelectorAll('.option').forEach((option, index) => {
+                option.classList.remove('selected');
+                if (index + 1 === value) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            // 更新按钮状态
+            if (currentQuestion === 35) {
+                // 最后一题：只启用提交按钮，不自动跳转
+                document.getElementById('submitBtn').disabled = false;
+            } else {
+                // 非最后一题：启用下一题按钮并设置自动跳转
+                document.getElementById('nextBtn').disabled = false;
+                
+                // 1秒后自动跳转到下一题
+                autoAdvanceTimer = setTimeout(() => {
+                    nextQuestion();
+                    autoAdvanceTimer = null;
+                }, 1000);
+            }
+        }
+
+        // 更新题目显示
+        function updateQuestion() {
+            document.getElementById('currentQuestionNumber').textContent = currentQuestion + 1;
+            document.getElementById('questionText').textContent = ecrQuestions[currentQuestion].text;
+            
+            // 更新进度条
+            const progress = ((currentQuestion + 1) / 36) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            
+            // 重置选项选择
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // 如果已有答案，显示之前的选择
+            if (answers[currentQuestion] !== null) {
+                const selectedOption = document.querySelectorAll('.option')[answers[currentQuestion] - 1];
+                if (selectedOption) {
+                    selectedOption.classList.add('selected');
+                }
+                if (currentQuestion === 35) {
+                    document.getElementById('submitBtn').disabled = false;
+                } else {
+                    document.getElementById('nextBtn').disabled = false;
+                }
+            } else {
+                if (currentQuestion === 35) {
+                    document.getElementById('submitBtn').disabled = true;
+                } else {
+                    document.getElementById('nextBtn').disabled = true;
+                }
+            }
+            
+            // 控制按钮显示
+            document.getElementById('prevBtn').style.display = currentQuestion > 0 ? 'inline-block' : 'none';
+            
+            if (currentQuestion === 35) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                document.getElementById('submitBtn').style.display = 'none';
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            if (currentQuestion < 35) {
+                currentQuestion++;
+                updateQuestion();
+            }
+        }
+
+        // 上一题
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                // 清除自动跳转计时器
+                if (autoAdvanceTimer) {
+                    clearTimeout(autoAdvanceTimer);
+                    autoAdvanceTimer = null;
+                }
+                
+                currentQuestion--;
+                updateQuestion();
+            }
+        }
+
+        // 计算分数和依恋类型
+        function calculateResults() {
+            let anxietySum = 0;
+            let avoidanceSum = 0;
+            
+            ecrQuestions.forEach((question, index) => {
+                let score = answers[index];
+                
+                // 处理反向计分题目
+                if (question.reverse) {
+                    score = 8 - score;
+                }
+                
+                if (question.dimension === 'anxiety') {
+                    anxietySum += score;
+                } else {
+                    avoidanceSum += score;
+                }
+            });
+            
+            // 计算平均分
+            const anxietyScore = anxietySum / 18;
+            const avoidanceScore = avoidanceSum / 18;
+            
+            // 确定依恋类型和详细信息
+            let attachmentType = '';
+            let typeDescription = '';
+            let keyFeatures = [];
+            let detailedAnalysis = [];
+            let suggestions = [];
+            let relationshipGuidance = [];
+            
+            if (anxietyScore < 4 && avoidanceScore < 4) {
+                attachmentType = '安全型依恋';
+                typeDescription = '在亲密关系中感到舒适和自信';
+                keyFeatures = [
+                    { icon: 'fas fa-heart', text: '情感表达自然流畅' },
+                    { icon: 'fas fa-balance-scale', text: '平衡独立性和亲密感' },
+                    { icon: 'fas fa-shield-alt', text: '关系中感到安全稳定' },
+                    { icon: 'fas fa-handshake', text: '愿意相互依赖支持' }
+                ];
+                
+                detailedAnalysis = [
+                    {
+                        title: '情感安全感',
+                        content: '您在亲密关系中展现出很好的情感安全感，不会过度担心被抛弃，也不会刻意回避亲密接触。这种平衡的状态有助于建立稳定健康的关系。'
+                    },
+                    {
+                        title: '沟通能力',
+                        content: '您能够自然地表达自己的情感和需求，同时也善于倾听和理解伴侣。这种开放的沟通方式是维持健康关系的重要基础。'
+                    },
+                    {
+                        title: '自我价值感',
+                        content: '您对自己和他人都有积极的看法，不会因为关系问题而过度质疑自己的价值，这种稳定的自我认知有助于关系的长久发展。'
+                    }
+                ];
+                
+                suggestions = [
+                    {
+                        title: '维持优势',
+                        items: [
+                            '继续保持开放诚实的沟通方式',
+                            '在关系中发挥稳定的积极作用',
+                            '保持个人兴趣和独立发展空间'
+                        ]
+                    },
+                    {
+                        title: '助人成长',
+                        items: [
+                            '帮助伴侣建立更好的安全感',
+                            '在朋友圈中分享积极的关系经验',
+                            '成为他人关系问题的支持者'
+                        ]
+                    }
+                ];
+                
+                relationshipGuidance = [
+                    {
+                        title: '关系发展策略',
+                        content: '作为安全型依恋者，您具备良好的关系基础。建议在保持现有优势的同时，注意照顾可能具有不安全依恋模式的伴侣，给予他们耐心和理解。'
+                    },
+                    {
+                        title: '冲突处理',
+                        content: '利用您的情感稳定性，在关系冲突中保持冷静和理性，通过有效沟通化解矛盾，避免让情绪主导决策。'
+                    }
+                ];
+                
+            } else if (anxietyScore >= 4 && avoidanceScore < 4) {
+                attachmentType = '焦虑型依恋';
+                typeDescription = '渴望亲密但担心被抛弃';
+                keyFeatures = [
+                    { icon: 'fas fa-heart-broken', text: '对被抛弃感到担忧' },
+                    { icon: 'fas fa-search', text: '寻求大量关爱确认' },
+                    { icon: 'fas fa-chart-line', text: '对关系变化敏感' },
+                    { icon: 'fas fa-users', text: '强烈渴望亲密连接' }
+                ];
+                
+                detailedAnalysis = [
+                    {
+                        title: '依恋焦虑特征',
+                        content: '您在亲密关系中可能会体验到较强的分离焦虑，担心被伴侣抛弃或不够被爱。这种焦虑源于对关系安全感的渴望。'
+                    },
+                    {
+                        title: '情感需求模式',
+                        content: '您倾向于寻求更多的关爱确认和安全感，可能会对伴侣的行为变化格外敏感，需要频繁的情感支持和reassurance。'
+                    },
+                    {
+                        title: '关系行为模式',
+                        content: '在关系中您可能表现得比较主动和投入，但有时也可能因为过度担心而产生一些控制行为或情绪波动。'
+                    }
+                ];
+                
+                suggestions = [
+                    {
+                        title: '情绪管理',
+                        items: [
+                            '学习自我安抚和情绪调节技巧',
+                            '练习正念冥想减少焦虑情绪',
+                            '建立个人兴趣分散注意力'
+                        ]
+                    },
+                    {
+                        title: '沟通改善',
+                        items: [
+                            '直接表达需求而非暗示',
+                            '学会识别和挑战负面思维',
+                            '与伴侣开诚布公讨论担忧'
+                        ]
+                    }
+                ];
+                
+                relationshipGuidance = [
+                    {
+                        title: '建立安全感',
+                        content: '与伴侣建立稳定的沟通模式，制定一些让您感到安心的日常习惯，比如定期的约会时间或睡前的亲密交流。'
+                    },
+                    {
+                        title: '处理分离焦虑',
+                        content: '当伴侣不在身边时，尝试用积极的活动填充时间，避免过度揣测或担心，学会相信关系的稳定性。'
+                    }
+                ];
+                
+            } else if (anxietyScore < 4 && avoidanceScore >= 4) {
+                attachmentType = '回避型依恋';
+                typeDescription = '重视独立性，避免过度亲密';
+                keyFeatures = [
+                    { icon: 'fas fa-user-shield', text: '维护个人独立空间' },
+                    { icon: 'fas fa-lock', text: '情感表达相对保守' },
+                    { icon: 'fas fa-mountain', text: '自我依赖性较强' },
+                    { icon: 'fas fa-step-backward', text: '对深度亲密感到不适' }
+                ];
+                
+                detailedAnalysis = [
+                    {
+                        title: '独立性倾向',
+                        content: '您高度重视个人独立性，倾向于在关系中保持一定的情感距离，不太习惯过度依赖他人或让他人依赖自己。'
+                    },
+                    {
+                        title: '情感表达方式',
+                        content: '您可能在表达深层情感方面感到困难，更习惯通过行动而非言语来表达关爱，对情感的直接表达可能感到不自在。'
+                    },
+                    {
+                        title: '亲密度管理',
+                        content: '虽然您能够维持关系，但可能会在关系变得过于亲密时感到压力，倾向于通过各种方式保持一定的心理距离。'
+                    }
+                ];
+                
+                suggestions = [
+                    {
+                        title: '情感开放',
+                        items: [
+                            '练习识别和命名自己的情感',
+                            '尝试向伴侣分享更多内心想法',
+                            '逐步接受他人的关爱和支持'
+                        ]
+                    },
+                    {
+                        title: '亲密技能',
+                        items: [
+                            '学习表达情感的不同方式',
+                            '认识到适度依赖的健康价值',
+                            '参加情感表达技能训练'
+                        ]
+                    }
+                ];
+                
+                relationshipGuidance = [
+                    {
+                        title: '逐步开放',
+                        content: '可以从小的情感分享开始，逐步增加与伴侣的情感交流深度，允许自己慢慢适应更深层的亲密连接。'
+                    },
+                    {
+                        title: '平衡独立与亲密',
+                        content: '寻找独立性和亲密感之间的平衡点，与伴侣协商彼此都舒适的相处模式，尊重彼此的需求。'
+                    }
+                ];
+                
+            } else {
+                attachmentType = '混乱型依恋';
+                typeDescription = '在渴望与恐惧之间摇摆';
+                keyFeatures = [
+                    { icon: 'fas fa-balance-scale-right', text: '情感需求矛盾复杂' },
+                    { icon: 'fas fa-question', text: '关系中感到不确定' },
+                    { icon: 'fas fa-heart-crack', text: '既渴望又害怕受伤' },
+                    { icon: 'fas fa-wave-square', text: '情绪波动相对较大' }
+                ];
+                
+                detailedAnalysis = [
+                    {
+                        title: '矛盾的依恋需求',
+                        content: '您同时体验着对亲密的渴望和对受伤的恐惧，这种矛盾可能源于过往复杂的关系经历，导致在关系中感到不安和困惑。'
+                    },
+                    {
+                        title: '情感调节挑战',
+                        content: '您可能在情感调节方面面临挑战，在寻求亲近和保持距离之间摇摆，这种不一致的模式可能影响关系的稳定性。'
+                    },
+                    {
+                        title: '关系模式复杂性',
+                        content: '您的关系模式较为复杂，可能需要更多的时间和专业支持来理解和改善自己的依恋模式。'
+                    }
+                ];
+                
+                suggestions = [
+                    {
+                        title: '专业支持',
+                        items: [
+                            '考虑寻求专业心理咨询帮助',
+                            '探索过往经历对现在的影响',
+                            '学习情绪调节和管理技巧'
+                        ]
+                    },
+                    {
+                        title: '自我关怀',
+                        items: [
+                            '给自己足够的耐心和时间',
+                            '建立稳定的日常生活规律',
+                            '寻找可信任的支持系统'
+                        ]
+                    }
+                ];
+                
+                relationshipGuidance = [
+                    {
+                        title: '建立安全环境',
+                        content: '与伴侣开诚布公地讨论您的复杂感受，寻求理解和支持，共同创造一个安全、可预测的关系环境。'
+                    },
+                    {
+                        title: '渐进式改善',
+                        content: '采用渐进式的方法改善关系模式，不急于求成，允许自己在专业指导下慢慢建立更安全的依恋模式。'
+                    }
+                ];
+            }
+            
+            return {
+                anxietyScore: anxietyScore.toFixed(1),
+                avoidanceScore: avoidanceScore.toFixed(1),
+                attachmentType,
+                typeDescription,
+                keyFeatures,
+                detailedAnalysis,
+                suggestions,
+                relationshipGuidance
+            };
+        }
+
+        // 获取分数等级
+        function getScoreLevel(score) {
+            if (score < 3) return { text: '较低水平', class: 'low' };
+            if (score < 5) return { text: '中等水平', class: 'medium' };
+            return { text: '较高水平', class: 'high' };
+        }
+
+        // 提交测试
+        function submitTest() {
+            testResults = calculateResults();
+            
+            // 更新简洁结果页
+            updateSummaryPage();
+            
+            showPage('resultPage');
+        }
+
+        // 更新简洁结果页
+        function updateSummaryPage() {
+            document.getElementById('attachmentTypeName').textContent = testResults.attachmentType;
+            document.getElementById('typeDescription').textContent = testResults.typeDescription;
+            
+            document.getElementById('anxietyScoreSummary').textContent = testResults.anxietyScore;
+            document.getElementById('avoidanceScoreSummary').textContent = testResults.avoidanceScore;
+            
+            const anxietyLevel = getScoreLevel(parseFloat(testResults.anxietyScore));
+            const avoidanceLevel = getScoreLevel(parseFloat(testResults.avoidanceScore));
+            
+            document.getElementById('anxietyLevel').textContent = anxietyLevel.text;
+            document.getElementById('anxietyLevel').className = `score-level ${anxietyLevel.class}`;
+            
+            document.getElementById('avoidanceLevel').textContent = avoidanceLevel.text;
+            document.getElementById('avoidanceLevel').className = `score-level ${avoidanceLevel.class}`;
+            
+            // 更新关键特征
+            const featuresList = document.getElementById('keyFeaturesList');
+            featuresList.innerHTML = '';
+            testResults.keyFeatures.forEach(feature => {
+                const featureItem = document.createElement('div');
+                featureItem.className = 'feature-item';
+                featureItem.innerHTML = `
+                    <i class="${feature.icon}"></i>
+                    <span>${feature.text}</span>
+                `;
+                featuresList.appendChild(featureItem);
+            });
+        }
+
+        // 销毁已存在的图表实例
+        function destroyExistingCharts() {
+            try {
+                if (chartInstances.barChart) {
+                    chartInstances.barChart.destroy();
+                    chartInstances.barChart = null;
+                }
+                console.log('图表实例已销毁');
+            } catch (error) {
+                console.warn('销毁图表时出现错误:', error);
+            }
+        }
+
+        // 支付状态管理
+        let paymentStatus = {
+            isPaid: false,
+            orderId: null,
+            checkingPayment: false
+        };
+
+        // 显示付费模态框
+        function showPaymentModal() {
+            document.getElementById('paymentModalOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭付费模态框
+        function closePaymentModal() {
+            document.getElementById('paymentModalOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // 生成支付二维码
+        function generatePaymentQR() {
+            try {
+                // 生成订单ID
+                const orderId = 'ECR_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                paymentStatus.orderId = orderId;
+
+                // 实际微信支付API调用示例
+                // 注意：这需要后端服务器支持，前端不能直接调用微信支付API
+                const paymentData = {
+                    orderId: orderId,
+                    amount: 1990, // 微信支付金额以分为单位
+                    description: 'ECR亲密关系测评详细报告',
+                    notifyUrl: 'https://your-domain.com/api/payment/notify',
+                    returnUrl: 'https://your-domain.com/payment/return',
+                    tradeType: 'NATIVE' // 扫码支付
+                };
+
+                // 调用后端API生成支付二维码
+                callWeChatPayAPI(paymentData);
+
+            } catch (error) {
+                console.error('生成支付二维码失败:', error);
+                showMessage('生成支付二维码失败，请重试', 'error');
+            }
+        }
+
+        // 调用微信支付API（需要后端支持）
+        async function callWeChatPayAPI(paymentData) {
+            try {
+                // 这里应该调用您的后端API来创建微信支付订单
+                // 示例API调用
+                const response = await fetch('/api/payment/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        // 显示真实的支付二维码
+                        displayRealQRCode(result.qrCodeUrl, paymentData);
+
+                        // 显示检查支付状态按钮
+                        document.getElementById('checkPaymentBtn').style.display = 'inline-block';
+
+                        // 更新支付状态显示
+                        updatePaymentStatus('waiting');
+
+                        // 开始轮询支付状态
+                        startPaymentPolling();
+
+                        showMessage('支付二维码已生成，请使用微信扫码支付', 'info');
+                    } else {
+                        throw new Error(result.message || '创建支付订单失败');
+                    }
+                } else {
+                    throw new Error('网络请求失败');
+                }
+            } catch (error) {
+                console.error('微信支付API调用失败:', error);
+                // 如果API调用失败，回退到模拟模式
+                console.log('回退到模拟支付模式');
+                generateMockQRCode(paymentData);
+
+                // 显示检查支付状态按钮
+                document.getElementById('checkPaymentBtn').style.display = 'inline-block';
+
+                // 更新支付状态显示
+                updatePaymentStatus('waiting');
+
+                // 开始轮询支付状态（模拟）
+                startPaymentPolling();
+
+                showMessage('支付二维码已生成（演示模式），请使用微信扫码支付', 'info');
+            }
+        }
+
+        // 显示真实的支付二维码
+        function displayRealQRCode(qrCodeUrl, paymentData) {
+            const qrContainer = document.getElementById('qrCodeContainer');
+
+            const qrCodeHTML = `
+                <div style="text-align: center;">
+                    <img src="${qrCodeUrl}" alt="微信支付二维码" class="qr-code-image" style="width: 180px; height: 180px; border: 2px solid #ddd; border-radius: 8px;">
+                    <p style="color: #666; font-size: 0.9em; margin: 10px 0 0 0;">订单号: ${paymentData.orderId}</p>
+                    <p style="color: #1aad19; font-size: 1em; margin: 5px 0 0 0; font-weight: 500;">¥${(paymentData.amount / 100).toFixed(2)}</p>
+                </div>
+            `;
+
+            qrContainer.innerHTML = qrCodeHTML;
+        }
+
+        // 生成模拟二维码
+        function generateMockQRCode(paymentData) {
+            const qrContainer = document.getElementById('qrCodeContainer');
+
+            // 创建二维码图片（这里使用一个模拟的二维码）
+            const qrCodeHTML = `
+                <div style="text-align: center;">
+                    <div style="width: 180px; height: 180px; background: #f0f0f0; border: 2px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <div style="text-align: center; color: #666;">
+                            <i class="fab fa-weixin" style="font-size: 3em; color: #1aad19; margin-bottom: 10px;"></i>
+                            <div style="font-size: 0.9em;">微信支付</div>
+                            <div style="font-size: 0.8em; margin-top: 5px;">¥19.9</div>
+                        </div>
+                    </div>
+                    <p style="color: #666; font-size: 0.9em; margin: 0;">订单号: ${paymentData.orderId}</p>
+                </div>
+            `;
+
+            qrContainer.innerHTML = qrCodeHTML;
+        }
+
+        // 更新支付状态显示
+        function updatePaymentStatus(status) {
+            const statusElement = document.getElementById('paymentStatus');
+            const statusText = statusElement.querySelector('.status-text');
+
+            // 清除所有状态类
+            statusElement.className = 'payment-status';
+
+            switch (status) {
+                case 'waiting':
+                    statusElement.classList.add('waiting');
+                    statusText.textContent = '等待支付...';
+                    break;
+                case 'checking':
+                    statusElement.classList.add('checking');
+                    statusText.textContent = '检查支付状态中...';
+                    break;
+                case 'success':
+                    statusElement.classList.add('success');
+                    statusText.textContent = '支付成功！';
+                    break;
+                case 'failed':
+                    statusElement.classList.add('failed');
+                    statusText.textContent = '支付失败，请重试';
+                    break;
+            }
+        }
+
+        // 开始支付状态轮询（模拟）
+        function startPaymentPolling() {
+            // 模拟支付过程，10秒后自动成功（仅用于演示）
+            setTimeout(() => {
+                if (!paymentStatus.isPaid) {
+                    // 模拟支付成功
+                    handlePaymentSuccess();
+                }
+            }, 10000);
+        }
+
+        // 检查支付状态
+        async function checkPaymentStatus() {
+            if (paymentStatus.checkingPayment || !paymentStatus.orderId) {
+                return;
+            }
+
+            paymentStatus.checkingPayment = true;
+            updatePaymentStatus('checking');
+
+            try {
+                // 调用后端API检查支付状态
+                const response = await fetch(`/api/payment/status/${paymentStatus.orderId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+
+                    if (result.success) {
+                        if (result.status === 'SUCCESS') {
+                            handlePaymentSuccess();
+                        } else if (result.status === 'FAILED') {
+                            updatePaymentStatus('failed');
+                            showMessage('支付失败，请重新尝试', 'error');
+                        } else {
+                            updatePaymentStatus('waiting');
+                            showMessage('支付尚未完成，请继续等待', 'info');
+                        }
+                    } else {
+                        throw new Error(result.message || '查询支付状态失败');
+                    }
+                } else {
+                    throw new Error('网络请求失败');
+                }
+            } catch (error) {
+                console.error('检查支付状态失败:', error);
+                // 如果API调用失败，回退到模拟模式
+                console.log('回退到模拟支付状态检查');
+
+                // 模拟随机支付结果（70%成功率）
+                const isSuccess = Math.random() > 0.3;
+
+                if (isSuccess) {
+                    handlePaymentSuccess();
+                } else {
+                    updatePaymentStatus('waiting');
+                    showMessage('支付尚未完成，请继续等待或重新扫码', 'info');
+                }
+            } finally {
+                paymentStatus.checkingPayment = false;
+            }
+        }
+
+        // 处理支付成功
+        function handlePaymentSuccess() {
+            paymentStatus.isPaid = true;
+            updatePaymentStatus('success');
+            showMessage('支付成功！正在为您生成详细报告...', 'success');
+
+            // 延迟1.5秒后关闭付费模态框并显示详细报告
+            setTimeout(() => {
+                closePaymentModal();
+                showDetailedReportAfterPayment();
+            }, 1500);
+        }
+
+        // 支付成功后显示详细报告
+        function showDetailedReportAfterPayment() {
+            try {
+                updateDetailedReport();
+                document.getElementById('modalOverlay').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                showMessage('详细报告已生成，感谢您的支持！', 'success');
+            } catch (error) {
+                console.error('显示详细报告时出现错误:', error);
+                showMessage('报告生成过程中出现问题，请联系客服', 'error');
+            }
+        }
+
+        // 显示详细报告（原函数，现在需要检查支付状态）
+        function showDetailedReport() {
+            if (!paymentStatus.isPaid) {
+                showPaymentModal();
+                return;
+            }
+
+            try {
+                updateDetailedReport();
+                document.getElementById('modalOverlay').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('显示详细报告时出现错误:', error);
+                // 即使更新失败，也要显示模态框
+                document.getElementById('modalOverlay').style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                showMessage('报告生成过程中出现问题，但您仍可以查看基本信息', 'warning');
+            }
+        }
+
+        // 关闭详细报告
+        function closeDetailedReport() {
+            try {
+                // 停止四象限动画
+                stopQuadrantAnimation();
+
+                // 清理图表实例
+                destroyExistingCharts();
+
+                // 隐藏模态框
+                document.getElementById('modalOverlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+
+                console.log('详细报告已关闭，状态已重置');
+            } catch (error) {
+                console.error('关闭详细报告时出现错误:', error);
+                // 确保模态框至少能够隐藏
+                document.getElementById('modalOverlay').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // 调试函数：检查模态框和图表状态
+        function checkModalState() {
+            const modal = document.getElementById('modalOverlay');
+            const modalDisplay = window.getComputedStyle(modal).display;
+            
+            console.log('=== 模态框状态检查 ===');
+            console.log('模态框显示状态:', modalDisplay);
+            console.log('图表实例状态:', {
+                barChart: chartInstances.barChart ? '存在' : '空'
+            });
+            console.log('body overflow:', document.body.style.overflow);
+            console.log('====================');
+            
+            return {
+                modalVisible: modalDisplay === 'block',
+                chartsExist: !!chartInstances.barChart,
+                bodyOverflow: document.body.style.overflow
+            };
+        }
+
+        // 创建Canvas四象限图
+        function createQuadrantChart() {
+            const canvas = document.getElementById('quadrantChart');
+            const ctx = canvas.getContext('2d');
+            const anxietyScore = parseFloat(testResults.anxietyScore);
+            const avoidanceScore = parseFloat(testResults.avoidanceScore);
+
+            // 获取canvas实际显示尺寸
+            const rect = canvas.getBoundingClientRect();
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+
+            // 设置字体
+            ctx.font = '14px PingFang SC, -apple-system, sans-serif';
+
+            // 绘制象限背景
+            const quadrants = [
+                { x: 0, y: 0, width: width/2, height: height/2, color: '#d4edda', label: '🛡️ 安全型', desc: '低焦虑 + 低回避' },
+                { x: width/2, y: 0, width: width/2, height: height/2, color: '#fff3cd', label: '💔 焦虑型', desc: '高焦虑 + 低回避' },
+                { x: 0, y: height/2, width: width/2, height: height/2, color: '#d1ecf1', label: '🚪 回避型', desc: '低焦虑 + 高回避' },
+                { x: width/2, y: height/2, width: width/2, height: height/2, color: '#e2d9f3', label: '🌪️ 混乱型', desc: '高焦虑 + 高回避' }
+            ];
+
+            // 绘制象限背景色
+            quadrants.forEach(quad => {
+                ctx.fillStyle = quad.color;
+                ctx.globalAlpha = 0.6;
+                ctx.fillRect(quad.x, quad.y, quad.width, quad.height);
+            });
+
+            // 重置透明度
+            ctx.globalAlpha = 1;
+
+            // 绘制坐标轴
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            // 垂直线
+            ctx.moveTo(width/2, 0);
+            ctx.lineTo(width/2, height);
+            // 水平线
+            ctx.moveTo(0, height/2);
+            ctx.lineTo(width, height/2);
+            ctx.stroke();
+
+            // 绘制象限标签
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px PingFang SC, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+
+            quadrants.forEach(quad => {
+                const centerX = quad.x + quad.width/2;
+                const centerY = quad.y + 30;
+                ctx.fillText(quad.label, centerX, centerY);
+
+                // 绘制描述文字
+                ctx.font = '12px PingFang SC, -apple-system, sans-serif';
+                ctx.fillStyle = '#666';
+                ctx.fillText(quad.desc, centerX, centerY + 20);
+
+                // 恢复标题字体
+                ctx.font = 'bold 16px PingFang SC, -apple-system, sans-serif';
+                ctx.fillStyle = '#2c3e50';
+            });
+
+            // 绘制坐标轴标签
+            ctx.font = '12px PingFang SC, -apple-system, sans-serif';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'right';
+            ctx.fillText('回避程度 →', width - 10, height/2 - 10);
+            ctx.textAlign = 'left';
+            ctx.fillText('↑ 焦虑程度', 10, 20);
+
+            // 绘制刻度
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.font = '10px PingFang SC, -apple-system, sans-serif';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+
+            // X轴刻度 (回避程度)
+            for (let i = 1; i <= 7; i++) {
+                const x = (i / 7) * width;
+                ctx.beginPath();
+                ctx.moveTo(x, height/2 - 5);
+                ctx.lineTo(x, height/2 + 5);
+                ctx.stroke();
+                ctx.fillText(i.toString(), x, height/2 + 18);
+            }
+
+            // Y轴刻度 (焦虑程度，注意Y轴是反向的)
+            for (let i = 1; i <= 7; i++) {
+                const y = height - (i / 7) * height;
+                ctx.beginPath();
+                ctx.moveTo(width/2 - 5, y);
+                ctx.lineTo(width/2 + 5, y);
+                ctx.stroke();
+                ctx.fillText(i.toString(), width/2 - 15, y + 3);
+            }
+
+            // 计算用户位置
+            const userX = (avoidanceScore / 7) * width;
+            const userY = height - (anxietyScore / 7) * height;
+
+            // 绘制用户位置的脉动效果
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.3)';
+            ctx.beginPath();
+            ctx.arc(userX, userY, 20, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 绘制用户位置主圆点
+            ctx.fillStyle = '#667eea';
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(userX, userY, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            // 绘制用户位置标签
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 12px PingFang SC, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('您的位置', userX, userY - 30);
+            ctx.font = '10px PingFang SC, -apple-system, sans-serif';
+            ctx.fillText(`焦虑: ${anxietyScore.toFixed(1)}`, userX, userY - 18);
+            ctx.fillText(`回避: ${avoidanceScore.toFixed(1)}`, userX, userY - 8);
+        }
+
+        // Canvas四象限动画效果
+        let quadrantAnimationId = null;
+        function startQuadrantAnimation() {
+            if (quadrantAnimationId) {
+                cancelAnimationFrame(quadrantAnimationId);
+            }
+
+            const canvas = document.getElementById('quadrantChart');
+            if (!canvas || !testResults) return;
+
+            const ctx = canvas.getContext('2d');
+            const anxietyScore = parseFloat(testResults.anxietyScore);
+            const avoidanceScore = parseFloat(testResults.avoidanceScore);
+            const width = canvas.width;
+            const height = canvas.height;
+
+            let pulseRadius = 20;
+            let growing = true;
+            let opacity = 0.3;
+
+            function animate() {
+                // 重绘整个四象限图
+                createQuadrantChart();
+
+                // 计算用户位置
+                const userX = (avoidanceScore / 7) * width;
+                const userY = height - (anxietyScore / 7) * height;
+
+                // 绘制动态脉动效果
+                ctx.fillStyle = `rgba(102, 126, 234, ${opacity * (1 - (pulseRadius - 20) / 15)})`;
+                ctx.beginPath();
+                ctx.arc(userX, userY, pulseRadius, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // 更新脉动参数
+                if (growing) {
+                    pulseRadius += 0.8;
+                    if (pulseRadius >= 35) growing = false;
+                } else {
+                    pulseRadius -= 0.8;
+                    if (pulseRadius <= 20) growing = true;
+                }
+
+                quadrantAnimationId = requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // 停止四象限动画
+        function stopQuadrantAnimation() {
+            if (quadrantAnimationId) {
+                cancelAnimationFrame(quadrantAnimationId);
+                quadrantAnimationId = null;
+            }
+        }
+
+        // 更新详细报告
+        function updateDetailedReport() {
+            // 生成报告编号
+            const now = new Date();
+            const reportNumber = now.getFullYear().toString() + 
+                                (now.getMonth() + 1).toString().padStart(2, '0') +
+                                now.getDate().toString().padStart(2, '0') +
+                                now.getHours().toString().padStart(2, '0') +
+                                now.getMinutes().toString().padStart(2, '0');
+            
+            // 设置报告编号和生成时间
+            document.getElementById('reportNumber').textContent = reportNumber;
+            document.getElementById('reportTimeHeader').textContent = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('reportDate').textContent = now.toLocaleString('zh-CN');
+            
+            // 创建图表
+            createCharts();
+            
+            // 更新详细分析
+            const detailedAnalysis = document.getElementById('detailedAnalysis');
+            detailedAnalysis.innerHTML = '';
+            testResults.detailedAnalysis.forEach(analysis => {
+                const analysisItem = document.createElement('div');
+                analysisItem.className = 'analysis-item';
+                analysisItem.innerHTML = `
+                    <h4><i class="fas fa-brain"></i> ${analysis.title}</h4>
+                    <p>${analysis.content}</p>
+                `;
+                detailedAnalysis.appendChild(analysisItem);
+            });
+            
+            // 更新建议
+            const suggestionsGrid = document.getElementById('suggestionsGrid');
+            suggestionsGrid.innerHTML = '';
+            const suggestionIcons = ['fas fa-lightbulb', 'fas fa-heart', 'fas fa-brain', 'fas fa-hands-helping'];
+            testResults.suggestions.forEach((suggestion, index) => {
+                const suggestionCard = document.createElement('div');
+                suggestionCard.className = 'suggestion-card';
+                const itemsList = suggestion.items.map(item => `<li>${item}</li>`).join('');
+                const iconClass = suggestionIcons[index % suggestionIcons.length];
+                suggestionCard.innerHTML = `
+                    <h4><div class="suggestion-icon"><i class="${iconClass}"></i></div> ${suggestion.title}</h4>
+                    <ul>${itemsList}</ul>
+                `;
+                suggestionsGrid.appendChild(suggestionCard);
+            });
+            
+            // 更新关系指导
+            const relationshipGuidance = document.getElementById('relationshipGuidance');
+            relationshipGuidance.innerHTML = '';
+            testResults.relationshipGuidance.forEach(guidance => {
+                const guidanceItem = document.createElement('div');
+                guidanceItem.className = 'analysis-item';
+                guidanceItem.innerHTML = `
+                    <h4><i class="fas fa-heart"></i> ${guidance.title}</h4>
+                    <p>${guidance.content}</p>
+                `;
+                relationshipGuidance.appendChild(guidanceItem);
+            });
+        }
+
+        // 更新四象限显示
+        function updateQuadrantDisplay() {
+            if (!testResults) return;
+            
+            // 更新用户分数显示
+            document.getElementById('userAnxietyDisplay').textContent = testResults.anxietyScore;
+            document.getElementById('userAvoidanceDisplay').textContent = testResults.avoidanceScore;
+            
+            // 清除所有象限的active状态
+            document.querySelectorAll('.quadrant').forEach(quadrant => {
+                quadrant.classList.remove('active');
+            });
+            
+            // 根据分数确定用户所在象限并高亮显示
+            const anxietyScore = parseFloat(testResults.anxietyScore);
+            const avoidanceScore = parseFloat(testResults.avoidanceScore);
+            
+            let userQuadrantType = '';
+            
+            if (anxietyScore < 4 && avoidanceScore < 4) {
+                userQuadrantType = 'secure';
+            } else if (anxietyScore >= 4 && avoidanceScore < 4) {
+                userQuadrantType = 'anxious';
+            } else if (anxietyScore < 4 && avoidanceScore >= 4) {
+                userQuadrantType = 'avoidant';
+            } else {
+                userQuadrantType = 'chaotic';
+            }
+            
+            // 高亮用户所在的象限
+            const userQuadrant = document.querySelector(`[data-type="${userQuadrantType}"]`);
+            if (userQuadrant) {
+                userQuadrant.classList.add('active');
+            }
+        }
+
+        // 创建图表
+        function createCharts() {
+            try {
+                // 先销毁已存在的图表实例
+                destroyExistingCharts();
+                
+                                // 条形图 - 更专业的配色和样式
+                const barCtx = document.getElementById('barChart').getContext('2d');
+                chartInstances.barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['依恋焦虑', '依恋回避'],
+                    datasets: [{
+                        label: '您的得分',
+                        data: [parseFloat(testResults.anxietyScore), parseFloat(testResults.avoidanceScore)],
+                        backgroundColor: [
+                            'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+                            'linear-gradient(135deg, #4dabf7 0%, #339af0 100%)'
+                        ],
+                        borderColor: ['#ff4757', '#3742fa'],
+                        borderWidth: 2,
+                        borderRadius: 12,
+                        borderSkipped: false,
+                    }, {
+                        label: '标准参考线',
+                        data: [4.0, 4.0],
+                        backgroundColor: ['rgba(108, 117, 125, 0.3)', 'rgba(108, 117, 125, 0.3)'],
+                        borderColor: ['rgb(108, 117, 125)', 'rgb(108, 117, 125)'],
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 7,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.08)',
+                                lineWidth: 1
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    family: 'PingFang SC, -apple-system, sans-serif'
+                                },
+                                color: '#495057'
+                            },
+                            title: {
+                                display: true,
+                                text: '得分 (1-7分)',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                },
+                                color: '#495057'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 13,
+                                    family: 'PingFang SC, -apple-system, sans-serif',
+                                    weight: 'bold'
+                                },
+                                color: '#343a40'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12,
+                                    family: 'PingFang SC, -apple-system, sans-serif'
+                                },
+                                color: '#495057',
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+            
+            // 创建Canvas四象限图
+            createQuadrantChart();
+
+            // 启动四象限动画效果
+            setTimeout(() => {
+                startQuadrantAnimation();
+            }, 1000);
+
+            // 更新四象限显示
+            updateQuadrantDisplay();
+            
+            } catch (error) {
+                console.error('创建图表时出现错误:', error);
+                showMessage('图表生成失败，但不影响报告查看', 'warning');
+            }
+        }
+
+        // 重新测试
+        function restartTest() {
+            closeDetailedReport();
+            startTest();
+        }
+
+        // 显示消息提示
+        function showMessage(message, type = 'info') {
+            // 移除现有的提示
+            const existingToast = document.querySelector('.message-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // 创建新的提示
+            const toast = document.createElement('div');
+            toast.className = `message-toast ${type}`;
+            toast.textContent = message;
+            
+            // 添加到页面
+            document.body.appendChild(toast);
+            
+            // 触发显示动画
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 生成文件名
+        function generateFileName() {
+            const now = new Date();
+            const timestamp = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(/[\/\s:]/g, '');
+            
+            return `ECR心理测评报告_${timestamp}.png`;
+        }
+
+        // 移动端下载模态框
+        function showMobileDownloadModal(imageDataUrl, fileName) {
+            // 创建模态框
+            const mobileModal = document.createElement('div');
+            mobileModal.className = 'mobile-download-modal';
+            mobileModal.innerHTML = `
+                <div class="mobile-download-content">
+                    <div class="mobile-download-header">
+                        <h3>保存报告图片</h3>
+                        <button onclick="closeMobileDownloadModal()" class="mobile-close-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="mobile-download-body">
+                        <img src="${imageDataUrl}" alt="ECR心理测评报告" class="download-preview-image">
+                        <p class="download-instruction">
+                            <i class="fas fa-hand-pointer"></i>
+                            长按上方图片选择"保存图片"即可下载报告
+                        </p>
+                        <p class="download-filename">文件名：${fileName}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(mobileModal);
+            
+            // 显示动画
+            setTimeout(() => {
+                mobileModal.classList.add('show');
+            }, 10);
+        }
+
+        // 关闭移动端下载模态框
+        function closeMobileDownloadModal() {
+            const modal = document.querySelector('.mobile-download-modal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
+        }
+
+        // 下载报告图片
+        async function downloadReport() {
+            const downloadBtn = document.querySelector('.download-btn');
+            const modalBody = document.querySelector('.modal-body');
+            
+            if (!modalBody) {
+                showMessage('报告内容未找到，请重新生成报告', 'error');
+                return;
+            }
+
+            try {
+                // 添加下载中状态
+                downloadBtn.classList.add('downloading');
+                downloadBtn.innerHTML = '<i class="fas fa-spinner"></i>';
+                
+                // 等待图表完全渲染
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // 配置html2canvas选项
+                const canvas = await html2canvas(modalBody, {
+                    scale: 2, // 提高图片清晰度
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    width: modalBody.scrollWidth,
+                    height: modalBody.scrollHeight,
+                    onclone: function(clonedDoc) {
+                        // 确保克隆文档中的图表正确显示
+                        const clonedBody = clonedDoc.querySelector('.modal-body');
+                        if (clonedBody) {
+                            clonedBody.style.maxHeight = 'none';
+                            clonedBody.style.overflowY = 'visible';
+                        }
+                    }
+                });
+                
+                // 转换为blob并下载
+                canvas.toBlob(function(blob) {
+                    const fileName = generateFileName();
+                    
+                    // 检测移动设备和浏览器兼容性
+                    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                    const supportsDownload = document.createElement('a').download !== undefined;
+                    
+                    // 优先使用标准下载（桌面端和部分移动端）
+                    if (supportsDownload && !isMobile) {
+                        // 桌面端标准下载
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        
+                        showMessage('报告下载成功！', 'success');
+                    } else {
+                        // 移动端或不支持download属性的浏览器使用分享/保存方案
+                        if (isIOS || !navigator.share) {
+                            // iOS设备或不支持Web Share API，显示图片让用户长按保存
+                            showMobileDownloadModal(canvas.toDataURL('image/png', 0.9), fileName);
+                        } else {
+                            // 支持Web Share API的移动设备
+                            navigator.share({
+                                title: 'ECR心理测评报告',
+                                text: '我的心理测评报告',
+                                files: [new File([blob], fileName, { type: 'image/png' })]
+                            }).then(() => {
+                                showMessage('报告分享成功！', 'success');
+                            }).catch(() => {
+                                // 分享失败，回退到显示图片
+                                showMobileDownloadModal(canvas.toDataURL('image/png', 0.9), fileName);
+                            });
+                        }
+                    }
+                }, 'image/png', 0.9);
+                
+            } catch (error) {
+                console.error('下载报告失败:', error);
+                showMessage('下载失败，请重试或检查浏览器设置', 'error');
+            } finally {
+                // 恢复按钮状态
+                downloadBtn.classList.remove('downloading');
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
+            }
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDetailedReport();
+            }
+        });
+
+        // 调试函数：生成模拟数据并直接跳转到报告页面
+        function goToDebugReport() {
+            // 生成模拟的测试答案数据
+            // 这里模拟一个安全型依恋的答案模式
+            answers = [
+                // 依恋焦虑维度题目的模拟答案 (较低分数表示低焦虑)
+                2, 3, 2, 2, 3, 2, 3, 2, 2, 6, 3, 2, 3, 6, 2, 3, 3, 6,
+                // 依恋回避维度题目的模拟答案 (较低分数表示低回避，注意反向计分)
+                3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 3, 5, 3, 5, 5, 3, 5, 3
+            ];
+
+            // 计算测试结果
+            testResults = calculateResults();
+
+            // 更新简洁结果页
+            updateSummaryPage();
+
+            // 调试模式：绕过支付直接设置为已支付状态
+            paymentStatus.isPaid = true;
+
+            // 跳转到结果页面
+            showPage('resultPage');
+
+            // 显示调试信息
+            showMessage('调试模式：已生成模拟测试数据并绕过支付', 'info');
+        }
+
+        // 调试函数：模拟支付成功
+        function debugPaymentSuccess() {
+            if (document.getElementById('paymentModalOverlay').style.display === 'block') {
+                handlePaymentSuccess();
+                showMessage('调试模式：模拟支付成功', 'success');
+            } else {
+                showMessage('请先打开支付页面', 'error');
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            showHome();
+        });
+    </script>
+</body>
+</html>
