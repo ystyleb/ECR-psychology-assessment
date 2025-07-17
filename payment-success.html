@@ -186,6 +186,9 @@
             <a href="index.html" class="btn btn-outline">
                 <i class="fas fa-home"></i> 返回首页
             </a>
+            <button class="btn btn-outline" onclick="debugInfo()" style="font-size: 0.9em;">
+                <i class="fas fa-bug"></i> 调试信息
+            </button>
         </div>
     </div>
 
@@ -209,14 +212,44 @@
             // 获取URL参数
             const urlParams = new URLSearchParams(window.location.search);
             const sessionId = urlParams.get('session_id');
-            
+
+            console.log('支付成功页面 - 准备跳转');
+            console.log('当前URL:', window.location.href);
+            console.log('session_id:', sessionId);
+            console.log('localStorage pendingResults:', localStorage.getItem('pendingResults'));
+            console.log('localStorage ecrBackupResults:', localStorage.getItem('ecrBackupResults'));
+
             if (sessionId) {
                 // 跳转到主页面，主页面会检测支付成功状态
-                window.location.href = `index.html?session_id=${sessionId}`;
+                const targetUrl = `index.html?session_id=${sessionId}`;
+                console.log('跳转到:', targetUrl);
+                window.location.href = targetUrl;
             } else {
                 // 如果没有session_id，直接跳转到主页
+                console.log('没有session_id，跳转到首页');
                 window.location.href = 'index.html';
             }
+        }
+
+        // 调试信息函数
+        function debugInfo() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+
+            const info = `
+调试信息：
+- 当前URL: ${window.location.href}
+- session_id: ${sessionId || '无'}
+- localStorage pendingResults: ${localStorage.getItem('pendingResults') ? '有数据' : '无数据'}
+- localStorage ecrBackupResults: ${localStorage.getItem('ecrBackupResults') ? '有数据' : '无数据'}
+            `;
+
+            alert(info);
+            console.log('=== 支付成功页面调试信息 ===');
+            console.log('当前URL:', window.location.href);
+            console.log('session_id:', sessionId);
+            console.log('localStorage pendingResults:', localStorage.getItem('pendingResults'));
+            console.log('localStorage ecrBackupResults:', localStorage.getItem('ecrBackupResults'));
         }
 
         // 页面加载时的处理
@@ -224,10 +257,13 @@
             // 检查是否有session_id参数
             const urlParams = new URLSearchParams(window.location.search);
             const sessionId = urlParams.get('session_id');
-            
+
+            console.log('支付成功页面加载完成');
+            console.log('session_id:', sessionId);
+
             if (!sessionId) {
                 // 如果没有session_id，显示错误信息
-                document.querySelector('.success-message').innerHTML = 
+                document.querySelector('.success-message').innerHTML =
                     '支付信息验证中，如果长时间未跳转，请手动返回首页查看报告。';
             }
         });

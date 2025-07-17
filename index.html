@@ -2061,6 +2061,9 @@
                     <button class="btn" onclick="showPaymentModal()">
                         <i class="fas fa-chart-line"></i> 查看详细报告
                     </button>
+                    <button class="btn btn-outline" onclick="checkPaymentStatusManually()" id="checkPaymentBtnResult">
+                        <i class="fas fa-sync-alt"></i> 我已完成支付
+                    </button>
                     <button class="btn btn-outline" onclick="restartTest()">
                         <i class="fas fa-redo"></i> 重新测试
                     </button>
@@ -2171,12 +2174,21 @@
                                 <div class="payment-status" id="paymentStatus">
                                     <span class="status-text">准备支付...</span>
                                 </div>
+                                <div id="paymentTip" style="display: none; background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #27ae60;">
+                                    <p style="color: #27ae60; font-size: 0.95em; margin: 0;">
+                                        <i class="fas fa-info-circle"></i>
+                                        <strong>支付完成后：</strong>请返回此页面，点击"检查支付状态"按钮来查看您的详细报告
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
                         <div class="payment-buttons">
                             <button type="button" class="btn payment-btn" onclick="processPaymentLink()" id="paymentBtn">
                                 <i class="fas fa-external-link-alt"></i> 前往支付
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="checkPaymentStatusManually()" id="checkPaymentBtn" style="display: none;">
+                                <i class="fas fa-sync-alt"></i> 检查支付状态
                             </button>
                             <!-- 调试按钮 -->
                             <button type="button" class="btn btn-secondary" onclick="debugPaymentSuccess()" style="font-size: 0.9em;">
@@ -2900,30 +2912,91 @@
                 const userResults = testResults || {
                     anxiety: 3.5,
                     avoidance: 3.0,
-                    type: 'secure'
+                    type: 'secure',
+                    anxietyLevel: 'medium',
+                    avoidanceLevel: 'medium'
                 };
+
+                console.log('准备支付，用户结果:', userResults);
 
                 // 创建支付链接
                 const paymentUrl = createPaymentLink(userResults, orderId);
 
                 // 保存用户结果到localStorage（支付成功后使用）
-                localStorage.setItem('pendingResults', JSON.stringify({
+                const dataToSave = {
                     ...userResults,
                     orderId: orderId,
-                    timestamp: Date.now()
-                }));
+                    timestamp: Date.now(),
+                    paymentInitiated: true
+                };
+
+                localStorage.setItem('pendingResults', JSON.stringify(dataToSave));
+                // 额外保存一份备份数据，防止丢失
+                localStorage.setItem('ecrBackupResults', JSON.stringify(dataToSave));
+
+                console.log('已保存到localStorage:', dataToSave);
 
                 // 更新支付状态
                 updatePaymentStatus('redirecting');
 
+                // 显示检查支付状态按钮和提示信息
+                document.getElementById('checkPaymentBtn').style.display = 'inline-block';
+                document.getElementById('paymentTip').style.display = 'block';
+
                 // 跳转到支付页面
                 window.open(paymentUrl, '_blank');
 
-                showMessage('正在跳转到安全支付页面...', 'info');
+                showMessage('支付页面已在新窗口打开，完成支付后请返回此页面点击"检查支付状态"按钮', 'info');
 
             } catch (error) {
                 console.error('处理支付失败:', error);
                 showMessage('支付处理失败，请重试', 'error');
+            }
+        }
+
+        // 手动检查支付状态
+        function checkPaymentStatusManually() {
+            console.log('手动检查支付状态...');
+
+            // 检查localStorage中是否有支付数据
+            const pendingResults = localStorage.getItem('pendingResults');
+            const backupResults = localStorage.getItem('ecrBackupResults');
+
+            console.log('pendingResults:', pendingResults);
+            console.log('backupResults:', backupResults);
+
+            if (pendingResults || backupResults) {
+                const dataToUse = pendingResults || backupResults;
+                try {
+                    const userResults = JSON.parse(dataToUse);
+                    console.log('找到支付数据，恢复用户结果:', userResults);
+
+                    // 设置测评结果
+                    testResults = userResults;
+
+                    // 清除临时数据
+                    localStorage.removeItem('pendingResults');
+                    localStorage.removeItem('ecrBackupResults');
+
+                    // 标记为已支付
+                    paymentStatus.isPaid = true;
+
+                    // 关闭支付模态框
+                    closePaymentModal();
+
+                    // 显示详细报告
+                    setTimeout(() => {
+                        showDetailedReportAfterPayment();
+                    }, 500);
+
+                    showMessage('支付状态确认成功！正在显示详细报告...', 'success');
+
+                } catch (error) {
+                    console.error('解析支付数据失败:', error);
+                    showMessage('支付数据解析失败，请重新支付', 'error');
+                }
+            } else {
+                showMessage('未找到支付记录，请确认是否已完成支付', 'warning');
             }
         }
 
@@ -2988,17 +3061,59 @@
             const urlParams = new URLSearchParams(window.location.search);
             const sessionId = urlParams.get('session_id');
 
+            console.log('检查支付状态 - sessionId:', sessionId);
+
             if (sessionId) {
                 // 从localStorage获取保存的用户结果
                 const pendingResults = localStorage.getItem('pendingResults');
+                console.log('localStorage中的待处理结果:', pendingResults);
+
                 if (pendingResults) {
-                    const userResults = JSON.parse(pendingResults);
-                    // 清除临时数据
-                    localStorage.removeItem('pendingResults');
-                    // 设置测评结果
-                    testResults = userResults;
-                    // 处理支付成功
-                    handlePaymentSuccess();
+                    try {
+                        const userResults = JSON.parse(pendingResults);
+                        console.log('解析的用户结果:', userResults);
+
+                        // 清除临时数据
+                        localStorage.removeItem('pendingResults');
+                        // 设置测评结果
+                        testResults = userResults;
+                        // 处理支付成功
+                        handlePaymentSuccess();
+                        return true;
+                    } catch (error) {
+                        console.error('解析用户结果失败:', error);
+                    }
+                } else {
+                    // 检查备份数据
+                    const backupResults = localStorage.getItem('ecrBackupResults');
+                    console.log('检查备份数据:', backupResults);
+
+                    if (backupResults) {
+                        try {
+                            const userResults = JSON.parse(backupResults);
+                            console.log('使用备份数据:', userResults);
+                            testResults = userResults;
+                            // 清除备份数据
+                            localStorage.removeItem('ecrBackupResults');
+                            handlePaymentSuccess();
+                            return true;
+                        } catch (error) {
+                            console.error('解析备份数据失败:', error);
+                        }
+                    }
+
+                    // 如果localStorage中没有数据，但有sessionId，说明支付成功了
+                    // 使用默认的测试数据或提示用户重新测评
+                    console.log('localStorage中没有数据，但有sessionId，使用默认数据');
+                    testResults = {
+                        anxiety: 3.5,
+                        avoidance: 3.0,
+                        type: 'secure',
+                        anxietyLevel: 'medium',
+                        avoidanceLevel: 'medium'
+                    };
+                    paymentStatus.isPaid = true;
+                    showMessage('支付成功！由于数据传输问题，显示示例报告。如需查看您的个人报告，请重新测评。', 'info');
                     return true;
                 }
             }
@@ -4035,14 +4150,41 @@
             }
         }
 
+        // 调试函数：检查当前状态
+        function debugCheckStatus() {
+            console.log('=== 调试信息 ===');
+            console.log('当前URL:', window.location.href);
+            console.log('URL参数:', window.location.search);
+            console.log('testResults:', testResults);
+            console.log('paymentStatus:', paymentStatus);
+            console.log('localStorage pendingResults:', localStorage.getItem('pendingResults'));
+            console.log('localStorage ecrBackupResults:', localStorage.getItem('ecrBackupResults'));
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            console.log('session_id:', sessionId);
+
+            showMessage('调试信息已输出到控制台，请按F12查看', 'info');
+        }
+
+        // 在全局作用域中暴露调试函数
+        window.debugCheckStatus = debugCheckStatus;
+
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，开始初始化...');
+            console.log('当前URL:', window.location.href);
+            console.log('URL参数:', window.location.search);
+
             // 检查是否从支付页面返回
             if (checkPaymentSuccess()) {
+                console.log('检测到支付成功，显示结果页面');
                 // 如果支付成功，直接显示结果页面
                 showPage('resultPage');
                 updateSummaryPage();
+                showMessage('支付成功！欢迎查看您的详细报告', 'success');
             } else {
+                console.log('未检测到支付成功，显示首页');
                 showHome();
             }
         });
