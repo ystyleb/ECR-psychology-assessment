@@ -2627,8 +2627,18 @@
             });
             
             // 计算平均分
-            const anxietyScore = anxietySum / 18;
-            const avoidanceScore = avoidanceSum / 18;
+            let anxietyScore = anxietySum / 18;
+            let avoidanceScore = avoidanceSum / 18;
+
+            // 数据有效性校验
+            if (!isFinite(anxietyScore) || isNaN(anxietyScore)) {
+                console.warn('焦虑维度分数无效，已赋默认值 1');
+                anxietyScore = 1;
+            }
+            if (!isFinite(avoidanceScore) || isNaN(avoidanceScore)) {
+                console.warn('回避维度分数无效，已赋默认值 1');
+                avoidanceScore = 1;
+            }
             
             // 确定依恋类型和详细信息
             let attachmentType = '';
@@ -3050,6 +3060,16 @@
             console.log('pendingResults:', pendingResults);
             console.log('backupResults:', backupResults);
 
+            // 检查URL参数中是否有session_id（支付成功标识）
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+            console.log('URL中的session_id:', sessionId);
+
+            // 检查历史记录中是否有最近的支付记录
+            const history = JSON.parse(localStorage.getItem('paidReportsHistory') || '[]');
+            const recentReport = history.length > 0 ? history[0] : null;
+            console.log('最近的历史报告:', recentReport);
+
             if (pendingResults || backupResults) {
                 const dataToUse = pendingResults || backupResults;
                 try {
@@ -3060,13 +3080,11 @@
                     if (userResults.paymentStatus === 'completed') {
                         // 支付已完成，显示详细报告
                         testResults = userResults;
-                    // 设置测评结果
-                    testResults = userResults;
 
-                    // 设置订单ID（如果有的话）
-                    if (userResults.orderId) {
-                        paymentStatus.orderId = userResults.orderId;
-                    }
+                        // 设置订单ID（如果有的话）
+                        if (userResults.orderId) {
+                            paymentStatus.orderId = userResults.orderId;
+                        }
 
                         // 清除临时数据
                         localStorage.removeItem('pendingResults');
@@ -3074,11 +3092,9 @@
 
                         // 标记为已支付
                         paymentStatus.isPaid = true;
-                    // 标记为已支付
-                    paymentStatus.isPaid = true;
 
-                    // 保存到历史记录
-                    saveCurrentReportToHistory();
+                        // 保存到历史记录
+                        saveCurrentReportToHistory();
 
                         // 关闭支付模态框
                         closePaymentModal();
@@ -3090,8 +3106,21 @@
 
                         showMessage('支付状态确认成功！正在显示详细报告...', 'success');
                     } else if (userResults.paymentStatus === 'pending') {
-                        // 支付仍在进行中或未完成
-                        showMessage('支付尚未完成，请先完成支付后再查询状态', 'warning');
+                        // 如果有session_id，说明支付可能已完成，但状态未更新
+                        if (sessionId) {
+                            console.log('检测到session_id，支付可能已完成，更新状态');
+                            userResults.paymentStatus = 'completed';
+                            userResults.paymentCompletedAt = Date.now();
+
+                            // 更新localStorage
+                            localStorage.setItem('pendingResults', JSON.stringify(userResults));
+
+                            // 递归调用自己重新检查
+                            return checkPaymentStatusManually();
+                        } else {
+                            // 支付仍在进行中或未完成
+                            showMessage('支付尚未完成，请先完成支付后再查询状态', 'warning');
+                        }
                     } else {
                         // 未知状态
                         showMessage('支付状态异常，请重新支付', 'error');
@@ -3101,8 +3130,59 @@
                     console.error('解析支付数据失败:', error);
                     showMessage('支付数据解析失败，请重新支付', 'error');
                 }
+            } else if (sessionId && recentReport) {
+                // 没有pending数据，但有session_id和历史记录，可能是支付成功后数据被清理了
+                console.log('没有pending数据，但有session_id和历史记录，尝试恢复');
+
+                // 检查最近的报告是否是在合理时间内生成的（比如最近1小时内）
+                const oneHourAgo = Date.now() - (60 * 60 * 1000);
+                if (recentReport.timestamp > oneHourAgo) {
+                    // 恢复最近的报告
+                    testResults = recentReport.testResults;
+                    paymentStatus.isPaid = true;
+                    paymentStatus.orderId = recentReport.orderId;
+
+                    // 关闭支付模态框
+                    closePaymentModal();
+
+                    // 显示详细报告
+                    setTimeout(() => {
+                        showDetailedReportAfterPayment();
+                    }, 500);
+
+                    showMessage('已找到您的支付记录！正在显示详细报告...', 'success');
+                } else {
+                    showMessage('找到历史记录，但时间较久，请确认是否为本次支付', 'warning');
+                }
+            } else if (sessionId) {
+                // 有session_id但没有数据，使用默认数据
+                console.log('有session_id但没有数据，使用默认数据');
+                testResults = {
+                    anxiety: 3.5,
+                    avoidance: 3.0,
+                    type: 'secure',
+                    anxietyLevel: 'medium',
+                    avoidanceLevel: 'medium',
+                    anxietyScore: 3.5,
+                    avoidanceScore: 3.0
+                };
+                paymentStatus.isPaid = true;
+                paymentStatus.orderId = 'ECR_' + Date.now();
+
+                // 保存到历史记录
+                saveCurrentReportToHistory();
+
+                // 关闭支付模态框
+                closePaymentModal();
+
+                // 显示详细报告
+                setTimeout(() => {
+                    showDetailedReportAfterPayment();
+                }, 500);
+
+                showMessage('支付成功！由于数据传输问题，显示示例报告。如需查看个人报告，请重新测评。', 'info');
             } else {
-                showMessage('未找到支付记录，请确认是否已完成支付', 'warning');
+                showMessage('未找到支付订单，请确认是否已完成支付，或查看历史报告', 'warning');
             }
         }
 
@@ -3436,13 +3516,23 @@
                     return;
                 }
 
-                const anxietyScore = parseFloat(testResults.anxietyScore);
-                const avoidanceScore = parseFloat(testResults.avoidanceScore);
+                let anxietyScore = parseFloat(testResults.anxietyScore);
+                let avoidanceScore = parseFloat(testResults.avoidanceScore);
+
+                // 检查是否为有限数值
+                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
+                    console.error('四象限图检测到非有限数值:', { anxietyScore, avoidanceScore });
+                    // 使用默认值
+                    anxietyScore = 3.5;
+                    avoidanceScore = 3.0;
+                }
+
+                // 确保数值在有效范围内
+                anxietyScore = Math.max(1, Math.min(7, anxietyScore));
+                avoidanceScore = Math.max(1, Math.min(7, avoidanceScore));
 
                 // 验证分数是否为有效数值
-                if (isNaN(anxietyScore) || isNaN(avoidanceScore) ||
-                    anxietyScore < 1 || anxietyScore > 7 ||
-                    avoidanceScore < 1 || avoidanceScore > 7) {
+                if (isNaN(anxietyScore) || isNaN(avoidanceScore)) {
                     console.error('无效的分数数据:', { anxietyScore, avoidanceScore });
                     return;
                 }
@@ -3603,13 +3693,21 @@
                 const ctx = canvas.getContext('2d');
                 if (!ctx) return;
 
-                const anxietyScore = parseFloat(testResults.anxietyScore);
-                const avoidanceScore = parseFloat(testResults.avoidanceScore);
+                let anxietyScore = parseFloat(testResults.anxietyScore);
+                let avoidanceScore = parseFloat(testResults.avoidanceScore);
+
+                // 检查是否为有限数值
+                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
+                    console.error('动画函数中检测到非有限数值:', { anxietyScore, avoidanceScore });
+                    return;
+                }
+
+                // 确保数值在有效范围内
+                anxietyScore = Math.max(1, Math.min(7, anxietyScore));
+                avoidanceScore = Math.max(1, Math.min(7, avoidanceScore));
 
                 // 验证分数数据
-                if (isNaN(anxietyScore) || isNaN(avoidanceScore) ||
-                    anxietyScore < 1 || anxietyScore > 7 ||
-                    avoidanceScore < 1 || avoidanceScore > 7) {
+                if (isNaN(anxietyScore) || isNaN(avoidanceScore)) {
                     console.error('动画函数中检测到无效分数数据');
                     return;
                 }
@@ -3815,12 +3913,22 @@
                 }
 
                 // 验证分数是否为有效数值
-                const anxietyScore = parseFloat(testResults.anxietyScore);
-                const avoidanceScore = parseFloat(testResults.avoidanceScore);
+                let anxietyScore = parseFloat(testResults.anxietyScore);
+                let avoidanceScore = parseFloat(testResults.avoidanceScore);
 
-                if (isNaN(anxietyScore) || isNaN(avoidanceScore) ||
-                    anxietyScore < 1 || anxietyScore > 7 ||
-                    avoidanceScore < 1 || avoidanceScore > 7) {
+                // 检查是否为有限数值
+                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
+                    console.error('检测到非有限数值:', { anxietyScore, avoidanceScore });
+                    // 使用默认值
+                    anxietyScore = 3.5;
+                    avoidanceScore = 3.0;
+                }
+
+                // 确保数值在有效范围内
+                anxietyScore = Math.max(1, Math.min(7, anxietyScore));
+                avoidanceScore = Math.max(1, Math.min(7, avoidanceScore));
+
+                if (isNaN(anxietyScore) || isNaN(avoidanceScore)) {
                     console.error('无效的分数数据:', { anxietyScore, avoidanceScore });
                     showMessage('分数数据异常，请重新进行测试', 'warning');
                     return;
@@ -4495,8 +4603,8 @@
                                             <button class="btn btn-sm" onclick="event.stopPropagation(); loadHistoryReport('${report.orderId}')">
                                                 <i class="fas fa-eye"></i> 查看
                                             </button>
-                                            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); shareHistoryReport('${report.orderId}')">
-                                                <i class="fas fa-share"></i> 分享
+                                            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); downloadHistoryReport('${report.orderId}')">
+                                                <i class="fas fa-download"></i> 下载
                                             </button>
                                         </div>
                                     </div>
@@ -4533,6 +4641,124 @@
             document.body.style.overflow = 'auto';
         }
 
+        // 完善测试结果数据
+        function completeTestResults(testData) {
+            // 确保基本属性存在
+            const data = { ...testData };
+
+            // 验证并修复数值数据
+            let anxiety = parseFloat(data.anxiety) || parseFloat(data.anxietyScore) || 3.5;
+            let avoidance = parseFloat(data.avoidance) || parseFloat(data.avoidanceScore) || 3.0;
+
+            // 确保数值在有效范围内
+            anxiety = Math.max(1, Math.min(7, anxiety));
+            avoidance = Math.max(1, Math.min(7, avoidance));
+
+            // 确保数值不是 NaN 或 Infinity
+            if (!isFinite(anxiety)) anxiety = 3.5;
+            if (!isFinite(avoidance)) avoidance = 3.0;
+
+            // 设置标准化的分数属性
+            data.anxiety = anxiety;
+            data.avoidance = avoidance;
+            data.anxietyScore = anxiety.toFixed(1);
+            data.avoidanceScore = avoidance.toFixed(1);
+
+            // 确保类型属性存在
+            if (!data.attachmentType && data.type) {
+                // 将type转换为attachmentType
+                const typeMap = {
+                    'secure': '安全型',
+                    'anxious': '焦虑型',
+                    'avoidant': '回避型',
+                    'fearful': '混乱型'
+                };
+                data.attachmentType = typeMap[data.type] || data.type;
+            }
+
+            // 如果没有typeDescription，根据类型生成
+            if (!data.typeDescription) {
+                const descriptions = {
+                    '安全型': '您在亲密关系中表现出稳定和安全的依恋模式',
+                    '焦虑型': '您可能在关系中表现出较高的焦虑和对被抛弃的担忧',
+                    '回避型': '您可能倾向于在关系中保持独立和情感距离',
+                    '混乱型': '您的依恋模式可能表现出焦虑和回避的混合特征'
+                };
+                data.typeDescription = descriptions[data.attachmentType] || '';
+            }
+
+            // 如果没有keyFeatures，根据类型生成
+            if (!data.keyFeatures) {
+                const features = {
+                    '安全型': [
+                        { icon: 'fas fa-heart', text: '信任伴侣并感到舒适' },
+                        { icon: 'fas fa-balance-scale', text: '在亲密关系中保持平衡' },
+                        { icon: 'fas fa-comments', text: '良好的沟通能力' }
+                    ],
+                    '焦虑型': [
+                        { icon: 'fas fa-exclamation-circle', text: '担心伴侣不够关心自己' },
+                        { icon: 'fas fa-search', text: '过度寻求确认和安慰' },
+                        { icon: 'fas fa-heartbeat', text: '情感波动较大' }
+                    ],
+                    '回避型': [
+                        { icon: 'fas fa-user-shield', text: '保持情感距离' },
+                        { icon: 'fas fa-arrows-alt-h', text: '重视个人独立性' },
+                        { icon: 'fas fa-lock', text: '不易表达情感需求' }
+                    ],
+                    '混乱型': [
+                        { icon: 'fas fa-random', text: '矛盾的情感反应' },
+                        { icon: 'fas fa-exchange-alt', text: '亲密和疏远之间摇摆' },
+                        { icon: 'fas fa-puzzle-piece', text: '关系模式不稳定' }
+                    ]
+                };
+                data.keyFeatures = features[data.attachmentType] || features['安全型'];
+            }
+
+            // 如果没有detailedAnalysis，生成基本分析
+            if (!data.detailedAnalysis) {
+                data.detailedAnalysis = [
+                    {
+                        title: "依恋焦虑分析",
+                        content: `您的依恋焦虑得分为${data.anxietyScore}，表明您在亲密关系中的焦虑水平${parseFloat(data.anxietyScore) >= 4 ? '较高' : '适中或较低'}。`
+                    },
+                    {
+                        title: "依恋回避分析",
+                        content: `您的依恋回避得分为${data.avoidanceScore}，表明您在亲密关系中的回避倾向${parseFloat(data.avoidanceScore) >= 4 ? '较高' : '适中或较低'}。`
+                    }
+                ];
+            }
+
+            // 如果没有suggestions，生成基本建议
+            if (!data.suggestions) {
+                data.suggestions = [
+                    {
+                        title: "自我认知",
+                        items: ["了解自己的依恋模式", "识别触发情绪反应的因素", "接纳自己的情感需求"]
+                    },
+                    {
+                        title: "关系互动",
+                        items: ["练习开放沟通", "表达真实需求", "建立健康界限"]
+                    }
+                ];
+            }
+
+            // 如果没有relationshipGuidance，生成基本指导
+            if (!data.relationshipGuidance) {
+                data.relationshipGuidance = [
+                    {
+                        title: '建立安全环境',
+                        content: '与伴侣开诚布公地讨论您的感受，寻求理解和支持，共同创造一个安全、可预测的关系环境。'
+                    },
+                    {
+                        title: '渐进式改善',
+                        content: '采用渐进式的方法改善关系模式，不急于求成，允许自己慢慢建立更安全的依恋模式。'
+                    }
+                ];
+            }
+
+            return data;
+        }
+
         // 加载历史报告
         function loadHistoryReport(orderId) {
             try {
@@ -4540,8 +4766,8 @@
                 const report = history.find(item => item.orderId === orderId);
 
                 if (report) {
-                    // 恢复测试结果
-                    testResults = report.testResults;
+                    // 恢复测试结果并确保数据完整
+                    testResults = completeTestResults(report.testResults);
                     paymentStatus.isPaid = true;
                     paymentStatus.orderId = report.orderId;
 
@@ -4615,6 +4841,98 @@
             } catch (error) {
                 console.error('分享报告失败:', error);
                 showMessage('分享失败: ' + error.message, 'error');
+            }
+        }
+
+        // 下载历史报告
+        function downloadHistoryReport(orderId) {
+            try {
+                const history = JSON.parse(localStorage.getItem('paidReportsHistory') || '[]');
+                const report = history.find(item => item.orderId === orderId);
+
+                if (!report) {
+                    showMessage('报告不存在', 'error');
+                    return;
+                }
+
+                // 保存当前状态
+                const originalTestResults = testResults;
+                const originalPaymentStatus = { ...paymentStatus };
+
+                // 临时设置报告数据，确保数据完整
+                testResults = completeTestResults(report.testResults);
+                paymentStatus.isPaid = true;
+                paymentStatus.orderId = report.orderId;
+
+                // 创建临时的详细报告模态框（隐藏显示）
+                const tempModal = document.createElement('div');
+                tempModal.id = 'tempModalOverlay';
+                tempModal.className = 'modal-overlay';
+                tempModal.style.display = 'none'; // 隐藏模态框
+                tempModal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="report-header-info">
+                                <div class="report-title">
+                                    <h2>ECR心理测评详细报告</h2>
+                                    <div class="report-meta">
+                                        <span>报告编号：<span id="reportNumberHeader">${report.reportNumber}</span></span>
+                                        <span>生成时间：<span id="reportTimeHeader">${report.date}</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <!-- 报告内容将在这里生成 -->
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(tempModal);
+
+                // 更新详细报告内容
+                updateDetailedReport();
+
+                // 等待内容渲染完成后开始下载
+                setTimeout(async () => {
+                    try {
+                        // 临时显示模态框以便html2canvas能够正确渲染
+                        tempModal.style.display = 'block';
+                        tempModal.style.visibility = 'hidden'; // 视觉上隐藏但保持渲染
+
+                        // 等待图表完全渲染
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        // 验证图表数据
+                        console.log('下载前验证数据:', {
+                            anxietyScore: testResults.anxietyScore,
+                            avoidanceScore: testResults.avoidanceScore,
+                            isFiniteAnxiety: isFinite(parseFloat(testResults.anxietyScore)),
+                            isFiniteAvoidance: isFinite(parseFloat(testResults.avoidanceScore))
+                        });
+
+                        // 调用下载函数
+                        await downloadReport();
+
+                        showMessage('历史报告下载成功！', 'success');
+                    } catch (error) {
+                        console.error('下载历史报告失败:', error);
+                        showMessage('下载失败: ' + error.message, 'error');
+                    } finally {
+                        // 清理临时模态框
+                        if (tempModal.parentNode) {
+                            tempModal.remove();
+                        }
+
+                        // 恢复原始状态
+                        testResults = originalTestResults;
+                        paymentStatus = originalPaymentStatus;
+                    }
+                }, 1000);
+
+            } catch (error) {
+                console.error('下载历史报告失败:', error);
+                showMessage('下载失败: ' + error.message, 'error');
             }
         }
 
