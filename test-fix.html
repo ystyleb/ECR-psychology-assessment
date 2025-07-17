@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试报告下载功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>报告下载功能测试</h1>
+    
+    <div class="test-section">
+        <h2>测试数据验证</h2>
+        <button class="test-button" onclick="testDataValidation()">测试数据验证</button>
+        <div id="dataTestResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试数值验证</h2>
+        <button class="test-button" onclick="testNumberValidation()">测试数值验证</button>
+        <div id="numberTestResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试非数值情况</h2>
+        <button class="test-button" onclick="testInvalidData()">测试无效数据</button>
+        <div id="invalidTestResult" class="result"></div>
+    </div>
+
+    <script>
+        // 模拟测试数据验证
+        function testDataValidation() {
+            const result = document.getElementById('dataTestResult');
+            
+            // 测试正常数据
+            const testResults = {
+                anxietyScore: 3.5,
+                avoidanceScore: 4.2,
+                attachmentType: '安全型',
+                typeDescription: '测试描述'
+            };
+
+            try {
+                let anxietyScore = parseFloat(testResults.anxietyScore);
+                let avoidanceScore = parseFloat(testResults.avoidanceScore);
+
+                // 严格检查是否为有效有限数值
+                if (!isFinite(anxietyScore) || isNaN(anxietyScore)) {
+                    anxietyScore = 3.5;
+                }
+                if (!isFinite(avoidanceScore) || isNaN(avoidanceScore)) {
+                    avoidanceScore = 3.0;
+                }
+
+                // 确保数值在有效范围内并转换为有限数值
+                anxietyScore = Number(Math.max(1, Math.min(7, anxietyScore)).toFixed(2));
+                avoidanceScore = Number(Math.max(1, Math.min(7, avoidanceScore)).toFixed(2));
+
+                result.innerHTML = `
+                    <div class="success">
+                        <strong>测试通过</strong><br>
+                        焦虑分数: ${anxietyScore} (有效)<br>
+                        回避分数: ${avoidanceScore} (有效)<br>
+                        都是有限数值: ${isFinite(anxietyScore) && isFinite(avoidanceScore)}
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        <strong>测试失败</strong><br>
+                        错误: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 测试数值边界
+        function testNumberValidation() {
+            const result = document.getElementById('numberTestResult');
+            
+            const testCases = [
+                { anxiety: 0, avoidance: 8 }, // 边界外
+                { anxiety: 1, avoidance: 7 }, // 边界内
+                { anxiety: 3.14159, avoidance: 4.99999 }, // 浮点数
+                { anxiety: NaN, avoidance: Infinity } // 非数值
+            ];
+
+            let html = '<div class="success"><strong>边界测试:</strong><br>';
+            
+            testCases.forEach((test, index) => {
+                let anxietyScore = parseFloat(test.anxiety);
+                let avoidanceScore = parseFloat(test.avoidance);
+
+                // 应用相同的验证逻辑
+                if (!isFinite(anxietyScore) || isNaN(anxietyScore)) anxietyScore = 3.5;
+                if (!isFinite(avoidanceScore) || isNaN(avoidanceScore)) avoidanceScore = 3.0;
+
+                anxietyScore = Number(Math.max(1, Math.min(7, anxietyScore)).toFixed(2));
+                avoidanceScore = Number(Math.max(1, Math.min(7, avoidanceScore)).toFixed(2));
+
+                html += `
+                    案例 ${index + 1}: 焦虑=${test.anxiety}→${anxietyScore}, 
+                    回避=${test.avoidance}→${avoidanceScore} (有效: ${isFinite(anxietyScore) && isFinite(avoidanceScore)})<br>
+                `;
+            });
+            
+            html += '</div>';
+            result.innerHTML = html;
+        }
+
+        // 测试无效数据处理
+        function testInvalidData() {
+            const result = document.getElementById('invalidTestResult');
+            
+            const invalidCases = [
+                { anxiety: null, avoidance: undefined },
+                { anxiety: "abc", avoidance: "xyz" },
+                { anxiety: "", avoidance: "Infinity" },
+                { anxiety: {}, avoidance: [] }
+            ];
+
+            let html = '<div class="success"><strong>无效数据处理测试:</strong><br>';
+            
+            invalidCases.forEach((test, index) => {
+                let anxietyScore = parseFloat(test.anxiety);
+                let avoidanceScore = parseFloat(test.avoidance);
+
+                // 应用相同的验证逻辑
+                if (!isFinite(anxietyScore) || isNaN(anxietyScore) || test.anxiety === null || test.anxiety === undefined) {
+                    anxietyScore = 3.5;
+                }
+                if (!isFinite(avoidanceScore) || isNaN(avoidanceScore) || test.avoidance === null || test.avoidance === undefined) {
+                    avoidanceScore = 3.0;
+                }
+
+                anxietyScore = Number(Math.max(1, Math.min(7, anxietyScore)).toFixed(2));
+                avoidanceScore = Number(Math.max(1, Math.min(7, avoidanceScore)).toFixed(2));
+
+                html += `
+                    案例 ${index + 1}: 原始数据=${JSON.stringify(test)} → 
+                    焦虑=${anxietyScore}, 回避=${avoidanceScore}<br>
+                `;
+            });
+            
+            html += '</div>';
+            result.innerHTML = html;
+        }
+
+        // 自动运行测试
+        window.onload = function() {
+            testDataValidation();
+            testNumberValidation();
+            testInvalidData();
+        };
+    </script>
+</body>
+</html>

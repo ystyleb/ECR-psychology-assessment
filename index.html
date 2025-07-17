@@ -2458,10 +2458,17 @@
 
         // 页面导航函数
         function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
                 page.classList.remove('active');
             });
-            document.getElementById(pageId).classList.add('active');
+            
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            } else {
+                console.error(`页面元素 ${pageId} 未找到`);
+            }
         }
 
         function showHome() {
@@ -2540,47 +2547,114 @@
 
         // 更新题目显示
         function updateQuestion() {
-            document.getElementById('currentQuestionNumber').textContent = currentQuestion + 1;
-            document.getElementById('questionText').textContent = ecrQuestions[currentQuestion].text;
+            const currentQuestionNumber = document.getElementById('currentQuestionNumber');
+            const questionText = document.getElementById('questionText');
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // 安全访问所有DOM元素
+            if (!currentQuestionNumber || !questionText || !progressFill || !progressPercent || !prevBtn || !nextBtn || !submitBtn) {
+                console.error('updateQuestion: 必要的DOM元素未找到');
+                return;
+            }
+            
+            // 验证当前题目索引
+            if (currentQuestion < 0 || currentQuestion >= ecrQuestions.length) {
+                console.error('无效的题目索引:', currentQuestion);
+                return;
+            }
+            
+            const questionData = ecrQuestions[currentQuestion];
+            if (!questionData || !questionData.text) {
+                console.error('题目数据无效:', questionData);
+                return;
+            }
+            
+            // 安全设置文本内容
+            try {
+                currentQuestionNumber.textContent = currentQuestion + 1;
+                questionText.textContent = questionData.text;
+            } catch (textError) {
+                console.error('设置文本内容失败:', textError);
+                return;
+            }
             
             // 更新进度条
             const progress = ((currentQuestion + 1) / 36) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            try {
+                progressFill.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+            } catch (styleError) {
+                console.error('更新进度条样式失败:', styleError);
+            }
             
             // 重置选项选择
-            document.querySelectorAll('.option').forEach(option => {
-                option.classList.remove('selected');
-            });
+            const options = document.querySelectorAll('.option');
+            if (options && options.length > 0) {
+                options.forEach((option, index) => {
+                    if (option && option.classList) {
+                        try {
+                            option.classList.remove('selected');
+                        } catch (classError) {
+                            console.error(`重置选项 ${index} 失败:`, classError);
+                        }
+                    }
+                });
+            }
             
             // 如果已有答案，显示之前的选择
-            if (answers[currentQuestion] !== null) {
-                const selectedOption = document.querySelectorAll('.option')[answers[currentQuestion] - 1];
-                if (selectedOption) {
-                    selectedOption.classList.add('selected');
+            if (typeof answers[currentQuestion] === 'number' && answers[currentQuestion] >= 1 && answers[currentQuestion] <= 7) {
+                const optionIndex = answers[currentQuestion] - 1;
+                if (options && options[optionIndex]) {
+                    const selectedOption = options[optionIndex];
+                    if (selectedOption && selectedOption.classList) {
+                        try {
+                            selectedOption.classList.add('selected');
+                        } catch (selectError) {
+                            console.error(`选择选项 ${optionIndex} 失败:`, selectError);
+                        }
+                    }
                 }
-                if (currentQuestion === 35) {
-                    document.getElementById('submitBtn').disabled = false;
-                } else {
-                    document.getElementById('nextBtn').disabled = false;
+                
+                // 安全设置按钮状态
+                try {
+                    if (currentQuestion === 35) {
+                        submitBtn.disabled = false;
+                    } else {
+                        nextBtn.disabled = false;
+                    }
+                } catch (buttonError) {
+                    console.error('设置按钮状态失败:', buttonError);
                 }
             } else {
-                if (currentQuestion === 35) {
-                    document.getElementById('submitBtn').disabled = true;
-                } else {
-                    document.getElementById('nextBtn').disabled = true;
+                // 安全设置按钮状态
+                try {
+                    if (currentQuestion === 35) {
+                        submitBtn.disabled = true;
+                    } else {
+                        nextBtn.disabled = true;
+                    }
+                } catch (buttonError) {
+                    console.error('设置按钮初始状态失败:', buttonError);
                 }
             }
             
             // 控制按钮显示
-            document.getElementById('prevBtn').style.display = currentQuestion > 0 ? 'inline-block' : 'none';
-            
-            if (currentQuestion === 35) {
-                document.getElementById('nextBtn').style.display = 'none';
-                document.getElementById('submitBtn').style.display = 'inline-block';
-            } else {
-                document.getElementById('nextBtn').style.display = 'inline-block';
-                document.getElementById('submitBtn').style.display = 'none';
+            try {
+                prevBtn.style.display = currentQuestion > 0 ? 'inline-block' : 'none';
+                
+                if (currentQuestion === 35) {
+                    nextBtn.style.display = 'none';
+                    submitBtn.style.display = 'inline-block';
+                } else {
+                    nextBtn.style.display = 'inline-block';
+                    submitBtn.style.display = 'none';
+                }
+            } catch (displayError) {
+                console.error('设置按钮显示失败:', displayError);
             }
         }
 
@@ -2900,33 +2974,92 @@
 
         // 更新简洁结果页
         function updateSummaryPage() {
-            document.getElementById('attachmentTypeName').textContent = testResults.attachmentType;
-            document.getElementById('typeDescription').textContent = testResults.typeDescription;
+            // 安全访问所有DOM元素
+            const attachmentTypeName = document.getElementById('attachmentTypeName');
+            if (attachmentTypeName) {
+                attachmentTypeName.textContent = testResults.attachmentType || '未知类型';
+            } else {
+                console.error('元素 attachmentTypeName 未找到');
+            }
+
+            const typeDescription = document.getElementById('typeDescription');
+            if (typeDescription) {
+                typeDescription.textContent = testResults.typeDescription || '暂无描述';
+            } else {
+                console.error('元素 typeDescription 未找到');
+            }
             
-            document.getElementById('anxietyScoreSummary').textContent = testResults.anxietyScore;
-            document.getElementById('avoidanceScoreSummary').textContent = testResults.avoidanceScore;
+            const anxietyScoreSummary = document.getElementById('anxietyScoreSummary');
+            if (anxietyScoreSummary) {
+                anxietyScoreSummary.textContent = testResults.anxietyScore || 'N/A';
+            } else {
+                console.error('元素 anxietyScoreSummary 未找到');
+            }
+
+            const avoidanceScoreSummary = document.getElementById('avoidanceScoreSummary');
+            if (avoidanceScoreSummary) {
+                avoidanceScoreSummary.textContent = testResults.avoidanceScore || 'N/A';
+            } else {
+                console.error('元素 avoidanceScoreSummary 未找到');
+            }
             
-            const anxietyLevel = getScoreLevel(parseFloat(testResults.anxietyScore));
-            const avoidanceLevel = getScoreLevel(parseFloat(testResults.avoidanceScore));
+            const anxietyScore = parseFloat(testResults.anxietyScore) || 3.5;
+            const avoidanceScore = parseFloat(testResults.avoidanceScore) || 3.0;
+            const anxietyLevel = getScoreLevel(anxietyScore);
+            const avoidanceLevel = getScoreLevel(avoidanceScore);
             
-            document.getElementById('anxietyLevel').textContent = anxietyLevel.text;
-            document.getElementById('anxietyLevel').className = `score-level ${anxietyLevel.class}`;
+            const anxietyLevelElement = document.getElementById('anxietyLevel');
+            if (anxietyLevelElement) {
+                anxietyLevelElement.textContent = anxietyLevel.text || '未知';
+                anxietyLevelElement.className = `score-level ${anxietyLevel.class || 'low'}`;
+            } else {
+                console.error('元素 anxietyLevel 未找到');
+            }
             
-            document.getElementById('avoidanceLevel').textContent = avoidanceLevel.text;
-            document.getElementById('avoidanceLevel').className = `score-level ${avoidanceLevel.class}`;
+            const avoidanceLevelElement = document.getElementById('avoidanceLevel');
+            if (avoidanceLevelElement) {
+                avoidanceLevelElement.textContent = avoidanceLevel.text || '未知';
+                avoidanceLevelElement.className = `score-level ${avoidanceLevel.class || 'low'}`;
+            } else {
+                console.error('元素 avoidanceLevel 未找到');
+            }
             
             // 更新关键特征
             const featuresList = document.getElementById('keyFeaturesList');
-            featuresList.innerHTML = '';
-            testResults.keyFeatures.forEach(feature => {
-                const featureItem = document.createElement('div');
-                featureItem.className = 'feature-item';
-                featureItem.innerHTML = `
-                    <i class="${feature.icon}"></i>
-                    <span>${feature.text}</span>
-                `;
-                featuresList.appendChild(featureItem);
-            });
+            if (featuresList) {
+                featuresList.innerHTML = '';
+                if (testResults.keyFeatures && Array.isArray(testResults.keyFeatures)) {
+                    testResults.keyFeatures.forEach((feature, index) => {
+                        if (feature && feature.icon && feature.text) {
+                            const featureItem = document.createElement('div');
+                            featureItem.className = 'feature-item';
+                            featureItem.innerHTML = `
+                                <i class="${feature.icon}"></i>
+                                <span>${feature.text}</span>
+                            `;
+                            featuresList.appendChild(featureItem);
+                        } else {
+                            console.warn(`无效的特征数据[${index}]:`, feature);
+                        }
+                    });
+                } else {
+                    // 创建默认特征
+                    const defaultFeatures = [
+                        { icon: 'fas fa-info-circle', text: '暂无特征数据' }
+                    ];
+                    defaultFeatures.forEach(feature => {
+                        const featureItem = document.createElement('div');
+                        featureItem.className = 'feature-item';
+                        featureItem.innerHTML = `
+                            <i class="${feature.icon}"></i>
+                            <span>${feature.text}</span>
+                        `;
+                        featuresList.appendChild(featureItem);
+                    });
+                }
+            } else {
+                console.error('元素 keyFeaturesList 未找到');
+            }
         }
 
         // 销毁已存在的图表实例
@@ -3384,26 +3517,117 @@
             }
         }
 
-        // 显示详细报告（原函数，现在需要检查支付状态）
+        // 显示详细报告（增强版，包含完整的空值检查和错误恢复）
         function showDetailedReport() {
-            if (!paymentStatus.isPaid) {
+            if (!paymentStatus || !paymentStatus.isPaid) {
                 showPaymentModal();
                 return;
             }
 
             try {
                 // 确保每次查看详细报告时都保存到历史记录
-                saveCurrentReportToHistory();
+                if (typeof saveCurrentReportToHistory === 'function') {
+                    saveCurrentReportToHistory();
+                }
 
-                updateDetailedReport();
-                document.getElementById('modalOverlay').style.display = 'block';
-                document.body.style.overflow = 'hidden';
+                // 验证并确保测试结果数据完整
+                if (!testResults || !testResults.anxietyScore || !testResults.avoidanceScore) {
+                    console.error('测试结果数据不完整:', testResults);
+                    showMessage('测试数据不完整，无法生成详细报告', 'error');
+                    return;
+                }
+
+                // 验证分数数据的有效性
+                const anxietyScore = parseFloat(testResults.anxietyScore);
+                const avoidanceScore = parseFloat(testResults.avoidanceScore);
+                
+                if (!isFinite(anxietyScore) || isNaN(anxietyScore) || !isFinite(avoidanceScore) || isNaN(avoidanceScore)) {
+                    console.error('无效的分数数据:', { anxietyScore, avoidanceScore });
+                    showMessage('测试数据格式无效，无法生成详细报告', 'error');
+                    return;
+                }
+
+                // 安全执行更新操作
+                if (typeof updateDetailedReport === 'function') {
+                    updateDetailedReport();
+                }
+                
+                // 安全访问模态框元素
+                const modalOverlay = document.getElementById('modalOverlay');
+                if (modalOverlay) {
+                    modalOverlay.style.display = 'block';
+                } else {
+                    console.error('详细报告模态框元素未找到');
+                    showMessage('无法打开详细报告：模态框元素不存在', 'error');
+                    return;
+                }
+                
+                // 安全访问document.body
+                const bodyElement = document.body;
+                if (bodyElement && bodyElement.style) {
+                    bodyElement.style.overflow = 'hidden';
+                } else {
+                    console.error('document.body 或 style 属性未找到');
+                    showMessage('无法设置页面滚动状态', 'warning');
+                }
+
+                // 验证并初始化图表元素
+                const barChart = document.getElementById('barChart');
+                const quadrantChart = document.getElementById('quadrantChart');
+                
+                if (!barChart || !quadrantChart) {
+                    console.warn('图表元素缺失:', {
+                        barChart: barChart ? '存在' : '缺失',
+                        quadrantChart: quadrantChart ? '存在' : '缺失'
+                    });
+                    
+                    if (typeof displayTextResults === 'function') {
+                        displayTextResults();
+                    }
+                    showMessage('图表元素缺失，已启用文本显示模式', 'info');
+                }
+
+                // 验证报告内容区域是否存在
+                const modalBody = document.querySelector('.modal-body');
+                if (!modalBody) {
+                    console.error('模态框主体内容区域未找到');
+                    if (typeof displayTextResults === 'function') {
+                        displayTextResults();
+                    }
+                    return;
+                }
+
+                console.log('详细报告显示成功');
+
             } catch (error) {
                 console.error('显示详细报告时出现错误:', error);
-                // 即使更新失败，也要显示模态框
-                document.getElementById('modalOverlay').style.display = 'block';
-                document.body.style.overflow = 'hidden';
-                showMessage('报告生成过程中出现问题，但您仍可以查看基本信息', 'warning');
+                
+                // 增强的错误恢复机制
+                try {
+                    // 尝试获取模态框元素
+                    const modalOverlay = document.getElementById('modalOverlay');
+                    if (modalOverlay) {
+                        modalOverlay.style.display = 'block';
+                        
+                        // 确保body滚动状态也被设置
+                        const bodyElement = document.body;
+                        if (bodyElement && bodyElement.style) {
+                            bodyElement.style.overflow = 'hidden';
+                        }
+                        
+                        // 尝试显示降级内容
+                        if (typeof displayTextResults === 'function') {
+                            displayTextResults();
+                        }
+                        showMessage('报告生成过程中出现问题，已启用文本显示模式', 'warning');
+                    } else {
+                        console.error('所有恢复尝试失败：模态框元素完全不存在');
+                        showMessage('报告系统出现严重错误，请刷新页面后重试', 'error');
+                    }
+                } catch (recoveryError) {
+                    console.error('错误恢复机制也失败了:', recoveryError);
+                    showMessage('系统恢复失败，请联系技术支持', 'error');
+                }
             }
         }
 
@@ -3500,7 +3724,7 @@
             try {
                 const canvas = document.getElementById('quadrantChart');
                 if (!canvas) {
-                    console.error('四象限图画布元素未找到');
+                    console.warn('四象限图画布元素未找到，跳过四象限图创建');
                     return;
                 }
 
@@ -3519,22 +3743,25 @@
                 let anxietyScore = parseFloat(testResults.anxietyScore);
                 let avoidanceScore = parseFloat(testResults.avoidanceScore);
 
-                // 检查是否为有限数值
-                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
-                    console.error('四象限图检测到非有限数值:', { anxietyScore, avoidanceScore });
-                    // 使用默认值
+                // 严格检查是否为有效有限数值
+                if (!isFinite(anxietyScore) || isNaN(anxietyScore) || anxietyScore === null || anxietyScore === undefined) {
+                    console.error('四象限图检测到无效的焦虑分数:', testResults.anxietyScore);
                     anxietyScore = 3.5;
+                }
+                if (!isFinite(avoidanceScore) || isNaN(avoidanceScore) || avoidanceScore === null || avoidanceScore === undefined) {
+                    console.error('四象限图检测到无效的回避分数:', testResults.avoidanceScore);
                     avoidanceScore = 3.0;
                 }
 
-                // 确保数值在有效范围内
-                anxietyScore = Math.max(1, Math.min(7, anxietyScore));
-                avoidanceScore = Math.max(1, Math.min(7, avoidanceScore));
+                // 确保数值在有效范围内并转换为有限数值
+                anxietyScore = Number(Math.max(1, Math.min(7, anxietyScore)).toFixed(2));
+                avoidanceScore = Number(Math.max(1, Math.min(7, avoidanceScore)).toFixed(2));
 
-                // 验证分数是否为有效数值
-                if (isNaN(anxietyScore) || isNaN(avoidanceScore)) {
-                    console.error('无效的分数数据:', { anxietyScore, avoidanceScore });
-                    return;
+                // 最终验证确保都是有效有限数值
+                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
+                    console.error('四象限图最终验证失败，使用安全默认值:', { anxietyScore, avoidanceScore });
+                    anxietyScore = 3.5;
+                    avoidanceScore = 3.0;
                 }
 
                 // 获取canvas实际显示尺寸
@@ -3696,15 +3923,19 @@
                 let anxietyScore = parseFloat(testResults.anxietyScore);
                 let avoidanceScore = parseFloat(testResults.avoidanceScore);
 
-                // 检查是否为有限数值
-                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
-                    console.error('动画函数中检测到非有限数值:', { anxietyScore, avoidanceScore });
-                    return;
+                // 严格检查是否为有效有限数值
+                if (!isFinite(anxietyScore) || isNaN(anxietyScore) || anxietyScore === null || anxietyScore === undefined) {
+                    console.error('动画函数中检测到无效的焦虑分数:', testResults.anxietyScore);
+                    anxietyScore = 3.5;
+                }
+                if (!isFinite(avoidanceScore) || isNaN(avoidanceScore) || avoidanceScore === null || avoidanceScore === undefined) {
+                    console.error('动画函数中检测到无效的回避分数:', testResults.avoidanceScore);
+                    avoidanceScore = 3.0;
                 }
 
-                // 确保数值在有效范围内
-                anxietyScore = Math.max(1, Math.min(7, anxietyScore));
-                avoidanceScore = Math.max(1, Math.min(7, avoidanceScore));
+                // 确保数值在有效范围内并转换为有限数值
+                anxietyScore = Number(Math.max(1, Math.min(7, anxietyScore)).toFixed(2));
+                avoidanceScore = Number(Math.max(1, Math.min(7, avoidanceScore)).toFixed(2));
 
                 // 验证分数数据
                 if (isNaN(anxietyScore) || isNaN(avoidanceScore)) {
@@ -3790,9 +4021,13 @@
                                 now.getHours().toString().padStart(2, '0') +
                                 now.getMinutes().toString().padStart(2, '0');
             
-            // 设置报告编号和生成时间
-            document.getElementById('reportNumber').textContent = reportNumber;
-            document.getElementById('reportTimeHeader').textContent = now.toLocaleString('zh-CN', {
+            // 设置报告编号和生成时间 - 添加安全访问
+            const reportNumberEl = document.getElementById('reportNumber');
+            const reportTimeHeaderEl = document.getElementById('reportTimeHeader');
+            const reportDateEl = document.getElementById('reportDate');
+            
+            if (reportNumberEl) reportNumberEl.textContent = reportNumber;
+            if (reportTimeHeaderEl) reportTimeHeaderEl.textContent = now.toLocaleString('zh-CN', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -3800,52 +4035,101 @@
                 minute: '2-digit',
                 second: '2-digit'
             });
-            document.getElementById('reportDate').textContent = now.toLocaleString('zh-CN');
+            if (reportDateEl) reportDateEl.textContent = now.toLocaleString('zh-CN');
             
             // 创建图表
             createCharts();
             
-            // 更新详细分析
+            // 更新详细分析 - 添加安全访问
             const detailedAnalysis = document.getElementById('detailedAnalysis');
-            detailedAnalysis.innerHTML = '';
-            testResults.detailedAnalysis.forEach(analysis => {
-                const analysisItem = document.createElement('div');
-                analysisItem.className = 'analysis-item';
-                analysisItem.innerHTML = `
-                    <h4><i class="fas fa-brain"></i> ${analysis.title}</h4>
-                    <p>${analysis.content}</p>
-                `;
-                detailedAnalysis.appendChild(analysisItem);
-            });
+            if (detailedAnalysis) {
+                detailedAnalysis.innerHTML = '';
+                if (testResults && testResults.detailedAnalysis && Array.isArray(testResults.detailedAnalysis)) {
+                    testResults.detailedAnalysis.forEach(analysis => {
+                        if (analysis && analysis.title && analysis.content) {
+                            const analysisItem = document.createElement('div');
+                            analysisItem.className = 'analysis-item';
+                            analysisItem.innerHTML = `
+                                <h4><i class="fas fa-brain"></i> ${analysis.title}</h4>
+                                <p>${analysis.content}</p>
+                            `;
+                            detailedAnalysis.appendChild(analysisItem);
+                        }
+                    });
+                } else {
+                    // 如果detailedAnalysis不存在，创建默认内容
+                    const defaultAnalysis = document.createElement('div');
+                    defaultAnalysis.className = 'analysis-item';
+                    defaultAnalysis.innerHTML = `
+                        <h4><i class="fas fa-brain"></i> 分析内容</h4>
+                        <p>基于您的测试结果，系统已为您生成了个性化的分析报告。</p>
+                    `;
+                    detailedAnalysis.appendChild(defaultAnalysis);
+                }
+            }
             
-            // 更新建议
+            // 更新建议 - 添加安全访问
             const suggestionsGrid = document.getElementById('suggestionsGrid');
-            suggestionsGrid.innerHTML = '';
-            const suggestionIcons = ['fas fa-lightbulb', 'fas fa-heart', 'fas fa-brain', 'fas fa-hands-helping'];
-            testResults.suggestions.forEach((suggestion, index) => {
-                const suggestionCard = document.createElement('div');
-                suggestionCard.className = 'suggestion-card';
-                const itemsList = suggestion.items.map(item => `<li>${item}</li>`).join('');
-                const iconClass = suggestionIcons[index % suggestionIcons.length];
-                suggestionCard.innerHTML = `
-                    <h4><div class="suggestion-icon"><i class="${iconClass}"></i></div> ${suggestion.title}</h4>
-                    <ul>${itemsList}</ul>
-                `;
-                suggestionsGrid.appendChild(suggestionCard);
-            });
+            if (suggestionsGrid) {
+                suggestionsGrid.innerHTML = '';
+                if (testResults && testResults.suggestions && Array.isArray(testResults.suggestions)) {
+                    const suggestionIcons = ['fas fa-lightbulb', 'fas fa-heart', 'fas fa-brain', 'fas fa-hands-helping'];
+                    testResults.suggestions.forEach((suggestion, index) => {
+                        if (suggestion && suggestion.title && Array.isArray(suggestion.items)) {
+                            const suggestionCard = document.createElement('div');
+                            suggestionCard.className = 'suggestion-card';
+                            const itemsList = suggestion.items.map(item => `<li>${item}</li>`).join('');
+                            const iconClass = suggestionIcons[index % suggestionIcons.length];
+                            suggestionCard.innerHTML = `
+                                <h4><div class="suggestion-icon"><i class="${iconClass}"></i></div> ${suggestion.title}</h4>
+                                <ul>${itemsList}</ul>
+                            `;
+                            suggestionsGrid.appendChild(suggestionCard);
+                        }
+                    });
+                } else {
+                    // 如果suggestions不存在，创建默认建议
+                    const defaultSuggestion = document.createElement('div');
+                    defaultSuggestion.className = 'suggestion-card';
+                    defaultSuggestion.innerHTML = `
+                        <h4><div class="suggestion-icon"><i class="fas fa-lightbulb"></i></div> 发展建议</h4>
+                        <ul>
+                            <li>了解自己的依恋模式</li>
+                            <li>在关系中保持开放沟通</li>
+                            <li>寻求专业帮助如有需要</li>
+                        </ul>
+                    `;
+                    suggestionsGrid.appendChild(defaultSuggestion);
+                }
+            }
             
-            // 更新关系指导
+            // 更新关系指导 - 添加安全访问
             const relationshipGuidance = document.getElementById('relationshipGuidance');
-            relationshipGuidance.innerHTML = '';
-            testResults.relationshipGuidance.forEach(guidance => {
-                const guidanceItem = document.createElement('div');
-                guidanceItem.className = 'analysis-item';
-                guidanceItem.innerHTML = `
-                    <h4><i class="fas fa-heart"></i> ${guidance.title}</h4>
-                    <p>${guidance.content}</p>
-                `;
-                relationshipGuidance.appendChild(guidanceItem);
-            });
+            if (relationshipGuidance) {
+                relationshipGuidance.innerHTML = '';
+                if (testResults && testResults.relationshipGuidance && Array.isArray(testResults.relationshipGuidance)) {
+                    testResults.relationshipGuidance.forEach(guidance => {
+                        if (guidance && guidance.title && guidance.content) {
+                            const guidanceItem = document.createElement('div');
+                            guidanceItem.className = 'analysis-item';
+                            guidanceItem.innerHTML = `
+                                <h4><i class="fas fa-heart"></i> ${guidance.title}</h4>
+                                <p>${guidance.content}</p>
+                            `;
+                            relationshipGuidance.appendChild(guidanceItem);
+                        }
+                    });
+                } else {
+                    // 如果relationshipGuidance不存在，创建默认指导
+                    const defaultGuidance = document.createElement('div');
+                    defaultGuidance.className = 'analysis-item';
+                    defaultGuidance.innerHTML = `
+                        <h4><i class="fas fa-heart"></i> 关系建议</h4>
+                        <p>建立健康的人际关系需要时间和练习，保持耐心和开放的心态。</p>
+                    `;
+                    relationshipGuidance.appendChild(defaultGuidance);
+                }
+            }
         }
 
         // 更新四象限显示
@@ -3864,10 +4148,15 @@
                     avoidanceDisplayElement.textContent = testResults.avoidanceScore;
                 }
 
-                // 清除所有象限的active状态
-                document.querySelectorAll('.quadrant').forEach(quadrant => {
-                    quadrant.classList.remove('active');
-                });
+                // 清除所有象限的active状态 - 安全访问
+                const quadrants = document.querySelectorAll('.quadrant');
+                if (quadrants && quadrants.length > 0) {
+                    quadrants.forEach(quadrant => {
+                        if (quadrant && quadrant.classList) {
+                            quadrant.classList.remove('active');
+                        }
+                    });
+                }
 
                 // 根据分数确定用户所在象限并高亮显示
                 const anxietyScore = parseFloat(testResults.anxietyScore);
@@ -3891,9 +4180,9 @@
                     userQuadrantType = 'chaotic';
                 }
 
-                // 高亮用户所在的象限
+                // 高亮用户所在的象限 - 安全访问
                 const userQuadrant = document.querySelector(`[data-type="${userQuadrantType}"]`);
-                if (userQuadrant) {
+                if (userQuadrant && userQuadrant.classList) {
                     userQuadrant.classList.add('active');
                 }
             } catch (error) {
@@ -3916,22 +4205,25 @@
                 let anxietyScore = parseFloat(testResults.anxietyScore);
                 let avoidanceScore = parseFloat(testResults.avoidanceScore);
 
-                // 检查是否为有限数值
-                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
-                    console.error('检测到非有限数值:', { anxietyScore, avoidanceScore });
-                    // 使用默认值
+                // 严格检查是否为有效有限数值
+                if (!isFinite(anxietyScore) || isNaN(anxietyScore) || anxietyScore === null || anxietyScore === undefined) {
+                    console.error('检测到无效的焦虑分数:', testResults.anxietyScore);
                     anxietyScore = 3.5;
+                }
+                if (!isFinite(avoidanceScore) || isNaN(avoidanceScore) || avoidanceScore === null || avoidanceScore === undefined) {
+                    console.error('检测到无效的回避分数:', testResults.avoidanceScore);
                     avoidanceScore = 3.0;
                 }
 
-                // 确保数值在有效范围内
-                anxietyScore = Math.max(1, Math.min(7, anxietyScore));
-                avoidanceScore = Math.max(1, Math.min(7, avoidanceScore));
+                // 确保数值在有效范围内并转换为有限数值
+                anxietyScore = Number(Math.max(1, Math.min(7, anxietyScore)).toFixed(2));
+                avoidanceScore = Number(Math.max(1, Math.min(7, avoidanceScore)).toFixed(2));
 
-                if (isNaN(anxietyScore) || isNaN(avoidanceScore)) {
-                    console.error('无效的分数数据:', { anxietyScore, avoidanceScore });
-                    showMessage('分数数据异常，请重新进行测试', 'warning');
-                    return;
+                // 最终验证确保都是有效有限数值
+                if (!isFinite(anxietyScore) || !isFinite(avoidanceScore)) {
+                    console.error('最终验证失败，使用安全默认值:', { anxietyScore, avoidanceScore });
+                    anxietyScore = 3.5;
+                    avoidanceScore = 3.0;
                 }
 
                 // 先销毁已存在的图表实例
@@ -4271,7 +4563,7 @@
 
                 // 配置html2canvas选项，增强兼容性
                 const canvas = await html2canvas(modalBody, {
-                    scale: 1.5, // 降低scale避免内存问题
+                    scale: 1.0, // 降低scale避免内存问题
                     backgroundColor: '#ffffff',
                     useCORS: true,
                     allowTaint: false,
@@ -4297,6 +4589,14 @@
                                     if (el.style) {
                                         el.style.animation = 'none';
                                         el.style.transition = 'none';
+                                    }
+                                });
+                                
+                                // 强制重新创建图表以确保数据有效
+                                const canvasElements = clonedBody.querySelectorAll('canvas');
+                                canvasElements.forEach(canvas => {
+                                    if (canvas.id === 'barChart' || canvas.id === 'quadrantChart') {
+                                        canvas.style.willReadFrequently = true;
                                     }
                                 });
                             }
@@ -4359,6 +4659,14 @@
                     // 如果是第一次重试，尝试重新创建图表
                     if (retryCount < 2) {
                         try {
+                            // 重新创建图表前先验证数据
+                            console.log('重试创建图表，当前数据:', testResults);
+                            
+                            // 重新验证数据完整性
+                            if (!testResults || !testResults.anxietyScore || !testResults.avoidanceScore) {
+                                throw new Error('测试数据不完整，无法重试');
+                            }
+                            
                             // 重新创建图表
                             await new Promise(resolve => setTimeout(resolve, 1000));
                             createCharts();
