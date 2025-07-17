@@ -219,6 +219,34 @@
             console.log('localStorage pendingResults:', localStorage.getItem('pendingResults'));
             console.log('localStorage ecrBackupResults:', localStorage.getItem('ecrBackupResults'));
 
+            // 更新localStorage中的支付状态为已完成
+            const pendingResults = localStorage.getItem('pendingResults');
+            const backupResults = localStorage.getItem('ecrBackupResults');
+
+            if (pendingResults) {
+                try {
+                    const data = JSON.parse(pendingResults);
+                    data.paymentStatus = 'completed';
+                    data.paymentCompletedAt = Date.now();
+                    localStorage.setItem('pendingResults', JSON.stringify(data));
+                    console.log('已更新pendingResults支付状态为completed');
+                } catch (error) {
+                    console.error('更新pendingResults支付状态失败:', error);
+                }
+            }
+
+            if (backupResults) {
+                try {
+                    const data = JSON.parse(backupResults);
+                    data.paymentStatus = 'completed';
+                    data.paymentCompletedAt = Date.now();
+                    localStorage.setItem('ecrBackupResults', JSON.stringify(data));
+                    console.log('已更新ecrBackupResults支付状态为completed');
+                } catch (error) {
+                    console.error('更新ecrBackupResults支付状态失败:', error);
+                }
+            }
+
             if (sessionId) {
                 // 跳转到主页面，主页面会检测支付成功状态
                 const targetUrl = `index.html?session_id=${sessionId}`;
