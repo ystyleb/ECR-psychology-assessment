@@ -2985,7 +2985,8 @@
                     ...userResults,
                     orderId: orderId,
                     timestamp: Date.now(),
-                    paymentInitiated: true
+                    paymentInitiated: true,
+                    paymentStatus: 'pending'  // 添加支付状态标记
                 };
 
                 localStorage.setItem('pendingResults', JSON.stringify(dataToSave));
@@ -3012,9 +3013,35 @@
             }
         }
 
+        // 清理过期的pending支付数据
+        function cleanupExpiredPaymentData() {
+            const PAYMENT_TIMEOUT = 30 * 60 * 1000; // 30分钟超时
+
+            ['pendingResults', 'ecrBackupResults'].forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (parsed.paymentStatus === 'pending' &&
+                            parsed.timestamp &&
+                            (Date.now() - parsed.timestamp) > PAYMENT_TIMEOUT) {
+                            localStorage.removeItem(key);
+                            console.log(`已清理过期的${key}数据`);
+                        }
+                    } catch (error) {
+                        console.error(`清理${key}数据时出错:`, error);
+                        localStorage.removeItem(key); // 清理损坏的数据
+                    }
+                }
+            });
+        }
+
         // 手动检查支付状态
         function checkPaymentStatusManually() {
             console.log('手动检查支付状态...');
+
+            // 先清理过期数据
+            cleanupExpiredPaymentData();
 
             // 检查localStorage中是否有支付数据
             const pendingResults = localStorage.getItem('pendingResults');
@@ -3029,6 +3056,10 @@
                     const userResults = JSON.parse(dataToUse);
                     console.log('找到支付数据，恢复用户结果:', userResults);
 
+                    // 检查支付状态
+                    if (userResults.paymentStatus === 'completed') {
+                        // 支付已完成，显示详细报告
+                        testResults = userResults;
                     // 设置测评结果
                     testResults = userResults;
 
@@ -3037,25 +3068,34 @@
                         paymentStatus.orderId = userResults.orderId;
                     }
 
-                    // 清除临时数据
-                    localStorage.removeItem('pendingResults');
-                    localStorage.removeItem('ecrBackupResults');
+                        // 清除临时数据
+                        localStorage.removeItem('pendingResults');
+                        localStorage.removeItem('ecrBackupResults');
 
+                        // 标记为已支付
+                        paymentStatus.isPaid = true;
                     // 标记为已支付
                     paymentStatus.isPaid = true;
 
                     // 保存到历史记录
                     saveCurrentReportToHistory();
 
-                    // 关闭支付模态框
-                    closePaymentModal();
+                        // 关闭支付模态框
+                        closePaymentModal();
 
-                    // 显示详细报告
-                    setTimeout(() => {
-                        showDetailedReportAfterPayment();
-                    }, 500);
+                        // 显示详细报告
+                        setTimeout(() => {
+                            showDetailedReportAfterPayment();
+                        }, 500);
 
-                    showMessage('支付状态确认成功！正在显示详细报告...', 'success');
+                        showMessage('支付状态确认成功！正在显示详细报告...', 'success');
+                    } else if (userResults.paymentStatus === 'pending') {
+                        // 支付仍在进行中或未完成
+                        showMessage('支付尚未完成，请先完成支付后再查询状态', 'warning');
+                    } else {
+                        // 未知状态
+                        showMessage('支付状态异常，请重新支付', 'error');
+                    }
 
                 } catch (error) {
                     console.error('解析支付数据失败:', error);
@@ -4360,6 +4400,9 @@
             console.log('页面加载完成，开始初始化...');
             console.log('当前URL:', window.location.href);
             console.log('URL参数:', window.location.search);
+
+            // 清理过期的支付数据
+            cleanupExpiredPaymentData();
 
             // 检查是否通过报告链接访问
             if (checkReportLink()) {
