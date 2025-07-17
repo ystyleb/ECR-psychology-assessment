@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试历史报告功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-outline {
+            background: transparent;
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+        .btn-outline:hover {
+            background: #007bff;
+            color: white;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>历史报告功能测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 模拟支付成功并保存报告</h2>
+        <p>点击下面的按钮模拟一次支付成功，系统会自动保存报告到历史记录中。</p>
+        <button class="btn" onclick="simulatePaymentSuccess()">模拟支付成功</button>
+        <div id="simulateResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 查看历史报告列表</h2>
+        <p>查看当前保存的所有历史报告。</p>
+        <button class="btn btn-outline" onclick="showHistoryList()">查看历史报告</button>
+        <div id="historyResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 生成报告链接</h2>
+        <p>为最新的报告生成一个可分享的链接。</p>
+        <button class="btn btn-outline" onclick="generateReportLink()">生成报告链接</button>
+        <div id="linkResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 清除历史记录</h2>
+        <p>清除所有保存的历史报告（用于测试）。</p>
+        <button class="btn" style="background: #dc3545;" onclick="clearHistory()">清除历史记录</button>
+        <div id="clearResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        // 模拟支付成功
+        function simulatePaymentSuccess() {
+            try {
+                // 模拟测试结果数据
+                const mockTestResults = {
+                    anxiety: 4.2,
+                    avoidance: 3.1,
+                    type: 'anxious',
+                    anxietyLevel: 'high',
+                    avoidanceLevel: 'medium',
+                    anxietyScore: 4.2,
+                    avoidanceScore: 3.1,
+                    detailedAnalysis: [
+                        {
+                            title: "依恋焦虑分析",
+                            content: "您在亲密关系中表现出较高的焦虑水平..."
+                        }
+                    ]
+                };
+
+                // 生成报告数据
+                const reportData = {
+                    orderId: 'ECR_' + Date.now() + '_TEST',
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleString('zh-CN'),
+                    testResults: mockTestResults,
+                    reportNumber: generateReportNumber(),
+                    isPaid: true
+                };
+
+                // 保存到localStorage
+                const existingHistory = JSON.parse(localStorage.getItem('paidReportsHistory') || '[]');
+                existingHistory.unshift(reportData);
+                localStorage.setItem('paidReportsHistory', JSON.stringify(existingHistory));
+
+                // 显示结果
+                const resultDiv = document.getElementById('simulateResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h4>✅ 支付成功模拟完成</h4>
+                    <p><strong>订单号：</strong>${reportData.orderId}</p>
+                    <p><strong>报告编号：</strong>${reportData.reportNumber}</p>
+                    <p><strong>生成时间：</strong>${reportData.date}</p>
+                `;
+
+            } catch (error) {
+                console.error('模拟支付失败:', error);
+                alert('模拟支付失败: ' + error.message);
+            }
+        }
+
+        // 生成报告编号
+        function generateReportNumber() {
+            const now = new Date();
+            return now.getFullYear().toString() + 
+                   (now.getMonth() + 1).toString().padStart(2, '0') +
+                   now.getDate().toString().padStart(2, '0') +
+                   now.getHours().toString().padStart(2, '0') +
+                   now.getMinutes().toString().padStart(2, '0');
+        }
+
+        // 显示历史报告列表
+        function showHistoryList() {
+            try {
+                const history = JSON.parse(localStorage.getItem('paidReportsHistory') || '[]');
+                const resultDiv = document.getElementById('historyResult');
+                resultDiv.style.display = 'block';
+
+                if (history.length === 0) {
+                    resultDiv.innerHTML = '<p>暂无历史报告记录</p>';
+                    return;
+                }
+
+                let html = '<h4>📋 历史报告列表</h4>';
+                history.forEach((report, index) => {
+                    html += `
+                        <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                            <p><strong>报告 #${report.reportNumber}</strong></p>
+                            <p>订单号: ${report.orderId}</p>
+                            <p>生成时间: ${report.date}</p>
+                            <p>依恋类型: ${report.testResults.type}</p>
+                        </div>
+                    `;
+                });
+
+                resultDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error('显示历史报告失败:', error);
+                alert('显示历史报告失败: ' + error.message);
+            }
+        }
+
+        // UTF-8 安全的 Base64 编码函数
+        function safeBase64Encode(str) {
+            try {
+                return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                }));
+            } catch (error) {
+                console.error('Base64编码失败:', error);
+                throw new Error('编码失败');
+            }
+        }
+
+        // 生成报告链接
+        function generateReportLink() {
+            try {
+                const history = JSON.parse(localStorage.getItem('paidReportsHistory') || '[]');
+
+                if (history.length === 0) {
+                    alert('没有可用的报告');
+                    return;
+                }
+
+                const latestReport = history[0];
+                const encodedData = safeBase64Encode(JSON.stringify(latestReport));
+                const reportUrl = `${window.location.origin}/index.html?report=${encodedData}`;
+
+                const resultDiv = document.getElementById('linkResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h4>🔗 报告链接已生成</h4>
+                    <p><strong>报告编号：</strong>${latestReport.reportNumber}</p>
+                    <p><strong>链接：</strong></p>
+                    <textarea style="width: 100%; height: 100px; font-family: monospace; font-size: 12px;">${reportUrl}</textarea>
+                    <br><br>
+                    <button class="btn btn-outline" onclick="copyToClipboard('${reportUrl}')">复制链接</button>
+                    <button class="btn btn-outline" onclick="testReportLink('${reportUrl}')">测试链接</button>
+                `;
+
+            } catch (error) {
+                console.error('生成报告链接失败:', error);
+                alert('生成报告链接失败: ' + error.message);
+            }
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('链接已复制到剪贴板！');
+            }).catch(() => {
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        // 测试报告链接
+        function testReportLink(url) {
+            window.open(url, '_blank');
+        }
+
+        // 清除历史记录
+        function clearHistory() {
+            if (confirm('确定要清除所有历史报告记录吗？')) {
+                localStorage.removeItem('paidReportsHistory');
+                
+                const resultDiv = document.getElementById('clearResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<p>✅ 历史记录已清除</p>';
+                
+                // 清除其他结果显示
+                document.getElementById('historyResult').style.display = 'none';
+                document.getElementById('linkResult').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
