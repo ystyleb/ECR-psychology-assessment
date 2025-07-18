@@ -242,8 +242,10 @@
                 resultDiv.innerHTML = '<p>✅ 历史记录已清除</p>';
                 
                 // 清除其他结果显示
-                document.getElementById('historyResult').style.display = 'none';
-                document.getElementById('linkResult').style.display = 'none';
+                const historyResult = document.getElementById('historyResult');
+                if (historyResult) historyResult.style.display = 'none';
+                const linkResult = document.getElementById('linkResult');
+                if (linkResult) linkResult.style.display = 'none';
             }
         }
     </script>

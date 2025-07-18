@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ECR亲密关系经历量表 - 专业心理测评</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 新增 dom-to-image-more CDN，放在所有自定义JS之前 -->
+    <script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@2.9.0/dist/dom-to-image-more.min.js"></script>
+    <!-- 兼容兜底：引入dom-to-image原版CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- Stripe Payment Links - 无需引入Stripe.js -->
     <style>
@@ -2334,7 +2337,7 @@
                             <div class="chart-card">
                                 <h3>维度得分对比</h3>
                                 <div class="chart-wrapper">
-                                    <canvas id="barChart"></canvas>
+                                    <svg id="svgBarChart" width="100%" height="220" viewBox="0 0 400 220" role="img" aria-label="依恋维度得分条形图"></svg>
                                 </div>
                             </div>
                             <div class="chart-card">
@@ -2345,7 +2348,7 @@
                                         <div class="axis-label axis-y">依恋焦虑程度 →</div>
                                     </div>
                                     <div class="chart-wrapper">
-                                        <canvas id="quadrantChart" width="400" height="300"></canvas>
+                                        <svg id="svgQuadrantChart" width="100%" height="300" viewBox="0 0 400 300" role="img" aria-label="依恋类型四象限分布图"></svg>
                                     </div>
                                 </div>
                             </div>
@@ -2451,11 +2454,6 @@
         let testResults = null;
         let autoAdvanceTimer = null; // 自动跳转计时器
         
-        // 图表实例管理
-        let chartInstances = {
-            barChart: null
-        };
-
         // 页面导航函数
         function showPage(pageId) {
             const pages = document.querySelectorAll('.page');
@@ -2532,10 +2530,12 @@
             // 更新按钮状态
             if (currentQuestion === 35) {
                 // 最后一题：只启用提交按钮，不自动跳转
-                document.getElementById('submitBtn').disabled = false;
+                const submitBtn = document.getElementById('submitBtn');
+                if (submitBtn) submitBtn.disabled = false;
             } else {
                 // 非最后一题：启用下一题按钮并设置自动跳转
-                document.getElementById('nextBtn').disabled = false;
+                const nextBtn = document.getElementById('nextBtn');
+                if (nextBtn) nextBtn.disabled = false;
                 
                 // 1秒后自动跳转到下一题
                 autoAdvanceTimer = setTimeout(() => {
@@ -2622,9 +2622,9 @@
                 // 安全设置按钮状态
                 try {
                     if (currentQuestion === 35) {
-                        submitBtn.disabled = false;
+                        if (submitBtn) submitBtn.disabled = false;
                     } else {
-                        nextBtn.disabled = false;
+                        if (nextBtn) nextBtn.disabled = false;
                     }
                 } catch (buttonError) {
                     console.error('设置按钮状态失败:', buttonError);
@@ -2633,9 +2633,9 @@
                 // 安全设置按钮状态
                 try {
                     if (currentQuestion === 35) {
-                        submitBtn.disabled = true;
+                        if (submitBtn) submitBtn.disabled = true;
                     } else {
-                        nextBtn.disabled = true;
+                        if (nextBtn) nextBtn.disabled = true;
                     }
                 } catch (buttonError) {
                     console.error('设置按钮初始状态失败:', buttonError);
@@ -2644,14 +2644,14 @@
             
             // 控制按钮显示
             try {
-                prevBtn.style.display = currentQuestion > 0 ? 'inline-block' : 'none';
+                if (prevBtn) prevBtn.style.display = currentQuestion > 0 ? 'inline-block' : 'none';
                 
                 if (currentQuestion === 35) {
-                    nextBtn.style.display = 'none';
-                    submitBtn.style.display = 'inline-block';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                    if (submitBtn) submitBtn.style.display = 'inline-block';
                 } else {
-                    nextBtn.style.display = 'inline-block';
-                    submitBtn.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'inline-block';
+                    if (submitBtn) submitBtn.style.display = 'none';
                 }
             } catch (displayError) {
                 console.error('设置按钮显示失败:', displayError);
@@ -3092,13 +3092,15 @@
 
         // 显示付费模态框
         function showPaymentModal() {
-            document.getElementById('paymentModalOverlay').style.display = 'block';
+            const paymentModalOverlay = document.getElementById('paymentModalOverlay');
+            if (paymentModalOverlay) paymentModalOverlay.style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
 
         // 关闭付费模态框
         function closePaymentModal() {
-            document.getElementById('paymentModalOverlay').style.display = 'none';
+            const paymentModalOverlay = document.getElementById('paymentModalOverlay');
+            if (paymentModalOverlay) paymentModalOverlay.style.display = 'none';
             document.body.style.overflow = 'auto';
         }
 
@@ -3142,8 +3144,10 @@
                 updatePaymentStatus('redirecting');
 
                 // 显示检查支付状态按钮和提示信息
-                document.getElementById('checkPaymentBtn').style.display = 'inline-block';
-                document.getElementById('paymentTip').style.display = 'block';
+                const checkPaymentBtn = document.getElementById('checkPaymentBtn');
+                if (checkPaymentBtn) checkPaymentBtn.style.display = 'inline-block';
+                const paymentTip = document.getElementById('paymentTip');
+                if (paymentTip) paymentTip.style.display = 'block';
 
                 // 跳转到支付页面
                 window.open(paymentUrl, '_blank');
@@ -3511,7 +3515,8 @@
         function showDetailedReportAfterPayment() {
             try {
                 updateDetailedReport();
-                document.getElementById('modalOverlay').style.display = 'block';
+                const modalOverlay = document.getElementById('modalOverlay');
+                if (modalOverlay) modalOverlay.style.display = 'block';
                 document.body.style.overflow = 'hidden';
                 showMessage('详细报告已生成，感谢您的支持！', 'success');
             } catch (error) {
@@ -3575,8 +3580,8 @@
                 }
 
                 // 验证并初始化图表元素
-                const barChart = document.getElementById('barChart');
-                const quadrantChart = document.getElementById('quadrantChart');
+                const barChart = document.getElementById('svgBarChart');
+                const quadrantChart = document.getElementById('svgQuadrantChart');
                 
                 if (!barChart || !quadrantChart) {
                     console.warn('图表元素缺失:', {
@@ -3683,21 +3688,18 @@
         // 关闭详细报告
         function closeDetailedReport() {
             try {
-                // 停止四象限动画
-                stopQuadrantAnimation();
-
-                // 清理图表实例
-                destroyExistingCharts();
-
+                // 已移除旧动画和图表清理调用
                 // 隐藏模态框
-                document.getElementById('modalOverlay').style.display = 'none';
+                const modalOverlay = document.getElementById('modalOverlay');
+                if (modalOverlay) modalOverlay.style.display = 'none';
                 document.body.style.overflow = 'auto';
 
                 console.log('详细报告已关闭，状态已重置');
             } catch (error) {
                 console.error('关闭详细报告时出现错误:', error);
                 // 确保模态框至少能够隐藏
-                document.getElementById('modalOverlay').style.display = 'none';
+                const modalOverlay = document.getElementById('modalOverlay');
+                if (modalOverlay) modalOverlay.style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
         }
@@ -3725,7 +3727,7 @@
         // 创建Canvas四象限图
         function createQuadrantChart() {
             try {
-                const canvas = document.getElementById('quadrantChart');
+                const canvas = document.getElementById('svgQuadrantChart');
                 if (!canvas) {
                     console.warn('四象限图画布元素未找到，跳过四象限图创建');
                     return;
@@ -3917,7 +3919,7 @@
                     cancelAnimationFrame(quadrantAnimationId);
                 }
 
-                const canvas = document.getElementById('quadrantChart');
+                const canvas = document.getElementById('svgQuadrantChart');
                 if (!canvas || !testResults) return;
 
                 const ctx = canvas.getContext('2d');
@@ -4233,7 +4235,7 @@
                 destroyExistingCharts();
 
                 // 条形图 - 更专业的配色和样式
-                const barCanvas = document.getElementById('barChart');
+                const barCanvas = document.getElementById('svgBarChart');
                 if (!barCanvas) {
                     console.error('找不到条形图画布元素');
                     return;
@@ -4531,197 +4533,103 @@
         }
 
         // 下载报告图片
-        async function downloadReport(retryCount = 0) {
+        async function downloadReport() {
             const downloadBtn = document.querySelector('.download-btn');
             const modalBody = document.querySelector('.modal-body');
+
+            // 检查domtoimage全局变量
+            let dom2img = null;
+            if (typeof window.domtoimage !== 'undefined') {
+                dom2img = window.domtoimage;
+            } else if (typeof window.domToImage !== 'undefined') {
+                dom2img = window.domToImage;
+            } else {
+                showMessage('报告下载依赖库加载失败，请刷新页面或检查网络', 'error');
+                console.error('domtoimage is not defined');
+                return;
+            }
 
             if (!modalBody) {
                 showMessage('报告内容未找到，请重新生成报告', 'error');
                 return;
             }
-
-            // 验证测试结果数据
             if (!testResults || !testResults.anxietyScore || !testResults.avoidanceScore) {
                 showMessage('测试数据不完整，无法生成报告', 'error');
                 return;
             }
-
             try {
-                // 添加下载中状态
                 if (downloadBtn) {
                     downloadBtn.classList.add('downloading');
                     downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 }
-
-                // 等待图表完全渲染，增加等待时间
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                // 验证图表是否正确渲染
-                const barChart = document.getElementById('barChart');
-                const quadrantChart = document.getElementById('quadrantChart');
-
-                if (!barChart || !quadrantChart) {
-                    throw new Error('图表元素未找到');
-                }
-
-                // 配置html2canvas选项，增强兼容性
-                const canvas = await html2canvas(modalBody, {
-                    scale: 1.0, // 降低scale避免内存问题
-                    backgroundColor: '#ffffff',
-                    useCORS: true,
-                    allowTaint: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    width: modalBody.scrollWidth,
-                    height: modalBody.scrollHeight,
-                    ignoreElements: function(element) {
-                        // 忽略可能导致问题的元素
-                        return element.classList && element.classList.contains('fa-spinner');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                // 使用 dom-to-image 截图
+                const blob = await dom2img.toBlob(modalBody, {
+                    bgcolor: '#ffffff',
+                    style: {
+                        'box-shadow': 'none',
+                        'background': '#fff',
+                        'overflow': 'visible'
                     },
-                    onclone: function(clonedDoc) {
-                        try {
-                            // 确保克隆文档中的图表正确显示
-                            const clonedBody = clonedDoc.querySelector('.modal-body');
-                            if (clonedBody) {
-                                clonedBody.style.maxHeight = 'none';
-                                clonedBody.style.overflowY = 'visible';
-
-                                // 移除可能导致渲染问题的动画
-                                const animatedElements = clonedBody.querySelectorAll('*');
-                                animatedElements.forEach(el => {
-                                    if (el.style) {
-                                        el.style.animation = 'none';
-                                        el.style.transition = 'none';
-                                    }
-                                });
-                                
-                                // 强制重新创建图表以确保数据有效
-                                const canvasElements = clonedBody.querySelectorAll('canvas');
-                                canvasElements.forEach(canvas => {
-                                    if (canvas.id === 'barChart' || canvas.id === 'quadrantChart') {
-                                        canvas.style.willReadFrequently = true;
-                                    }
-                                });
-                            }
-                        } catch (cloneError) {
-                            console.warn('克隆文档处理时出现警告:', cloneError);
-                        }
-                    }
+                    filter: (node) => {
+                        if (node.classList && node.classList.contains('fa-spinner')) return false;
+                        return true;
+                    },
+                    cacheBust: true
                 });
-                
-                // 转换为blob并下载
-                canvas.toBlob(function(blob) {
-                    const fileName = generateFileName();
-                    
-                    // 检测移动设备和浏览器兼容性
-                    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                    const supportsDownload = document.createElement('a').download !== undefined;
-                    
-                    // 优先使用标准下载（桌面端和部分移动端）
-                    if (supportsDownload && !isMobile) {
-                        // 桌面端标准下载
-                        const url = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = fileName;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        URL.revokeObjectURL(url);
-                        
-                        showMessage('报告下载成功！', 'success');
+                // 新增blob类型校验
+                if (!(blob instanceof Blob)) {
+                    console.error('dom-to-image 返回的不是有效Blob:', blob);
+                    showMessage('报告图片生成失败，已自动降级为文本报告，请手动截图或打印保存', 'error');
+                    displayTextResults();
+                    return;
+                }
+                const fileName = generateFileName();
+                const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const supportsDownload = document.createElement('a').download !== undefined;
+                if (supportsDownload && !isMobile) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    showMessage('报告下载成功！', 'success');
+                } else {
+                    if (isIOS || !navigator.share) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            showMobileDownloadModal(e.target.result, fileName);
+                        };
+                        reader.readAsDataURL(blob);
                     } else {
-                        // 移动端或不支持download属性的浏览器使用分享/保存方案
-                        if (isIOS || !navigator.share) {
-                            // iOS设备或不支持Web Share API，显示图片让用户长按保存
-                            showMobileDownloadModal(canvas.toDataURL('image/png', 0.9), fileName);
-                        } else {
-                            // 支持Web Share API的移动设备
-                            navigator.share({
-                                title: 'ECR心理测评报告',
-                                text: '我的心理测评报告',
-                                files: [new File([blob], fileName, { type: 'image/png' })]
-                            }).then(() => {
-                                showMessage('报告分享成功！', 'success');
-                            }).catch(() => {
-                                // 分享失败，回退到显示图片
-                                showMobileDownloadModal(canvas.toDataURL('image/png', 0.9), fileName);
-                            });
-                        }
+                        navigator.share({
+                            title: 'ECR心理测评报告',
+                            text: '我的心理测评报告',
+                            files: [new File([blob], fileName, { type: 'image/png' })]
+                        }).then(() => {
+                            showMessage('报告分享成功！', 'success');
+                        }).catch(() => {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                showMobileDownloadModal(e.target.result, fileName);
+                            };
+                            reader.readAsDataURL(blob);
+                        });
                     }
-                }, 'image/png', 0.9);
-
+                }
             } catch (error) {
-                console.error('下载报告失败:', error);
-
-                // 检查是否是渐变相关错误
-                if (error.message && error.message.includes('addColorStop')) {
-                    console.log('检测到渐变错误，尝试重新渲染图表');
-
-                    // 如果是第一次重试，尝试重新创建图表
-                    if (retryCount < 2) {
-                        try {
-                            // 重新创建图表前先验证数据
-                            console.log('重试创建图表，当前数据:', testResults);
-                            
-                            // 重新验证数据完整性
-                            if (!testResults || !testResults.anxietyScore || !testResults.avoidanceScore) {
-                                throw new Error('测试数据不完整，无法重试');
-                            }
-                            
-                            // 重新创建图表
-                            await new Promise(resolve => setTimeout(resolve, 1000));
-                            createCharts();
-                            await new Promise(resolve => setTimeout(resolve, 2000));
-
-                            // 递归重试
-                            return downloadReport(retryCount + 1);
-                        } catch (retryError) {
-                            console.error('重试创建图表失败:', retryError);
-                        }
-                    }
+                console.error('下载报告失败(dom-to-image):', error);
+                showMessage('报告下载遇到问题，已自动降级为文本报告，请手动截图或打印保存', 'error');
+                try {
+                    displayTextResults();
+                } catch (fallbackError) {
+                    console.error('降级文本报告也失败:', fallbackError);
                 }
-
-                // 如果重试次数未超限，尝试简单重试
-                if (retryCount < 1) {
-                    showMessage(`下载失败，正在重试... (${retryCount + 1}/2)`, 'warning');
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    return downloadReport(retryCount + 1);
-                }
-
-                // 所有重试都失败，提供降级方案
-                showMessage('下载功能遇到问题，请尝试截图保存', 'error');
-
-                // 提供手动截图提示
-                const fallbackMessage = document.createElement('div');
-                fallbackMessage.className = 'download-fallback-message';
-                fallbackMessage.innerHTML = `
-                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px; color: #856404;">
-                        <h4 style="margin: 0 0 10px 0;"><i class="fas fa-exclamation-triangle"></i> 下载功能暂时不可用</h4>
-                        <p style="margin: 0 0 10px 0;">您可以尝试以下方法保存报告：</p>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            <li>使用浏览器的打印功能（Ctrl+P 或 Cmd+P）</li>
-                            <li>使用截图工具截取报告内容</li>
-                            <li>刷新页面后重新尝试下载</li>
-                        </ul>
-                    </div>
-                `;
-
-                const modalBody = document.querySelector('.modal-body');
-                if (modalBody) {
-                    modalBody.insertBefore(fallbackMessage, modalBody.firstChild);
-
-                    // 5秒后自动移除提示
-                    setTimeout(() => {
-                        if (fallbackMessage.parentNode) {
-                            fallbackMessage.remove();
-                        }
-                    }, 10000);
-                }
-
             } finally {
-                // 恢复按钮状态
                 if (downloadBtn) {
                     downloadBtn.classList.remove('downloading');
                     downloadBtn.innerHTML = '<i class="fas fa-download"></i>';
@@ -4765,7 +4673,8 @@
 
         // 调试函数：模拟支付成功
         function debugPaymentSuccess() {
-            if (document.getElementById('paymentModalOverlay').style.display === 'block') {
+            const paymentModalOverlay = document.getElementById('paymentModalOverlay');
+            if (paymentModalOverlay && paymentModalOverlay.style.display === 'block') {
                 handlePaymentSuccess();
                 showMessage('调试模式：模拟支付成功', 'success');
             } else {
@@ -5353,6 +5262,134 @@
         - 测评结果通过 localStorage 临时存储
         - 支付链接中包含加密的用户数据
         */
+
+        // 在合适位置添加SVG条形图渲染函数
+        function renderSVGBarChart(anxietyScore, avoidanceScore) {
+            const svg = document.getElementById('svgBarChart');
+            if (!svg) return;
+            // 清空SVG内容
+            svg.innerHTML = '';
+
+            // 图表参数
+            const width = 400;
+            const height = 220;
+            const margin = { top: 30, right: 30, bottom: 50, left: 60 };
+            const barWidth = 80;
+            const barGap = 80;
+            const maxScore = 7;
+            const refLine = 4;
+            const colors = ['#ff6b6b', '#4dabf7'];
+            const labels = ['依恋焦虑', '依恋回避'];
+            const scores = [anxietyScore, avoidanceScore];
+
+            // 计算条形高度
+            function getBarHeight(score) {
+                return ((score / maxScore) * (height - margin.top - margin.bottom));
+            }
+
+            // 参考线Y坐标
+            const refY = margin.top + (height - margin.top - margin.bottom) * (1 - refLine / maxScore);
+
+            // 绘制参考线
+            svg.innerHTML += `<line x1="${margin.left - 10}" y1="${refY}" x2="${width - margin.right + 10}" y2="${refY}" stroke="#aaa" stroke-dasharray="4,2" stroke-width="2" />`;
+            svg.innerHTML += `<text x="${width - margin.right + 12}" y="${refY + 5}" font-size="12" fill="#888">参考线 4分</text>`;
+
+            // 绘制Y轴刻度
+            for (let i = 1; i <= maxScore; i++) {
+                const y = margin.top + (height - margin.top - margin.bottom) * (1 - i / maxScore);
+                svg.innerHTML += `<text x="${margin.left - 15}" y="${y + 5}" font-size="12" fill="#666">${i}</text>`;
+                svg.innerHTML += `<line x1="${margin.left - 8}" y1="${y}" x2="${margin.left - 2}" y2="${y}" stroke="#bbb" />`;
+            }
+
+            // 绘制X轴标签和条形
+            scores.forEach((score, idx) => {
+                const x = margin.left + idx * (barWidth + barGap);
+                const barH = getBarHeight(score);
+                const y = margin.top + (height - margin.top - margin.bottom) - barH;
+                // 条形
+                svg.innerHTML += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" fill="${colors[idx]}" rx="12" />`;
+                // 分数
+                svg.innerHTML += `<text x="${x + barWidth / 2}" y="${y - 10}" font-size="16" fill="${colors[idx]}" font-weight="bold" text-anchor="middle">${score.toFixed(1)}</text>`;
+                // 标签
+                svg.innerHTML += `<text x="${x + barWidth / 2}" y="${height - margin.bottom + 28}" font-size="15" fill="#333" text-anchor="middle">${labels[idx]}</text>`;
+            });
+
+            // Y轴
+            svg.innerHTML += `<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#333" stroke-width="2" />`;
+            // X轴
+            svg.innerHTML += `<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#333" stroke-width="2" />`;
+
+            // 标题
+            svg.innerHTML += `<text x="${width / 2}" y="${margin.top - 10}" font-size="16" fill="#222" text-anchor="middle" font-weight="bold">依恋维度得分</text>`;
+        }
+
+        // SVG四象限图渲染函数
+        function renderSVGQuadrantChart(anxietyScore, avoidanceScore) {
+            const svg = document.getElementById('svgQuadrantChart');
+            if (!svg) return;
+            svg.innerHTML = '';
+
+            // 图表参数
+            const width = 400;
+            const height = 300;
+            const margin = { top: 30, right: 30, bottom: 40, left: 40 };
+            const quadW = (width - margin.left - margin.right) / 2;
+            const quadH = (height - margin.top - margin.bottom) / 2;
+            const colors = ['#d4edda', '#fff3cd', '#d1ecf1', '#e2d9f3'];
+            const labels = [
+                { label: '安全型', desc: '低焦虑+低回避', emoji: '🛡️' },
+                { label: '焦虑型', desc: '高焦虑+低回避', emoji: '💔' },
+                { label: '回避型', desc: '低焦虑+高回避', emoji: '🚪' },
+                { label: '混乱型', desc: '高焦虑+高回避', emoji: '🌪️' }
+            ];
+            // 象限背景
+            for (let i = 0; i < 2; i++) {
+                for (let j = 0; j < 2; j++) {
+                    const idx = i * 2 + j;
+                    const x = margin.left + j * quadW;
+                    const y = margin.top + i * quadH;
+                    svg.innerHTML += `<rect x="${x}" y="${y}" width="${quadW}" height="${quadH}" fill="${colors[idx]}" opacity="0.7" rx="10" />`;
+                    // 象限标签
+                    svg.innerHTML += `<text x="${x + quadW/2}" y="${y + 28}" font-size="16" fill="#2c3e50" text-anchor="middle" font-weight="bold">${labels[idx].emoji} ${labels[idx].label}</text>`;
+                    svg.innerHTML += `<text x="${x + quadW/2}" y="${y + 48}" font-size="12" fill="#666" text-anchor="middle">${labels[idx].desc}</text>`;
+                }
+            }
+            // 坐标轴
+            const centerX = margin.left + quadW;
+            const centerY = margin.top + quadH;
+            svg.innerHTML += `<line x1="${centerX}" y1="${margin.top}" x2="${centerX}" y2="${height - margin.bottom}" stroke="#666" stroke-width="2" />`;
+            svg.innerHTML += `<line x1="${margin.left}" y1="${centerY}" x2="${width - margin.right}" y2="${centerY}" stroke="#666" stroke-width="2" />`;
+            // 坐标轴标签
+            svg.innerHTML += `<text x="${width - margin.right - 5}" y="${centerY - 10}" font-size="13" fill="#666" text-anchor="end">回避程度 →</text>`;
+            svg.innerHTML += `<text x="${margin.left + 5}" y="${margin.top + 15}" font-size="13" fill="#666" text-anchor="start">↑ 焦虑程度</text>`;
+            // 刻度
+            for (let i = 1; i <= 7; i++) {
+                // X轴
+                const x = margin.left + ((i - 1) / 6) * (width - margin.left - margin.right);
+                svg.innerHTML += `<line x1="${x}" y1="${centerY - 5}" x2="${x}" y2="${centerY + 5}" stroke="#999" />`;
+                svg.innerHTML += `<text x="${x}" y="${centerY + 22}" font-size="11" fill="#999" text-anchor="middle">${i}</text>`;
+                // Y轴
+                const y = margin.top + ((7 - i) / 6) * (height - margin.top - margin.bottom);
+                svg.innerHTML += `<line x1="${centerX - 5}" y1="${y}" x2="${centerX + 5}" y2="${y}" stroke="#999" />`;
+                svg.innerHTML += `<text x="${centerX - 15}" y="${y + 4}" font-size="11" fill="#999" text-anchor="end">${i}</text>`;
+            }
+            // 用户点坐标
+            const userX = margin.left + ((avoidanceScore - 1) / 6) * (width - margin.left - margin.right);
+            const userY = margin.top + ((7 - anxietyScore) / 6) * (height - margin.top - margin.bottom);
+            // 脉冲动画圆
+            svg.innerHTML += `<circle cx="${userX}" cy="${userY}" r="18" fill="#667eea" opacity="0.18">
+                <animate attributeName="r" values="18;28;18" dur="1.5s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.18;0.08;0.18" dur="1.5s" repeatCount="indefinite" />
+            </circle>`;
+            // 主圆点
+            svg.innerHTML += `<circle cx="${userX}" cy="${userY}" r="9" fill="#667eea" stroke="#fff" stroke-width="3" />`;
+            // 用户标签
+            svg.innerHTML += `<text x="${userX}" y="${userY - 22}" font-size="12" fill="#2c3e50" text-anchor="middle">您的位置</text>`;
+            svg.innerHTML += `<text x="${userX}" y="${userY - 8}" font-size="10" fill="#666" text-anchor="middle">焦虑: ${anxietyScore.toFixed(1)}</text>`;
+            svg.innerHTML += `<text x="${userX}" y="${userY + 6}" font-size="10" fill="#666" text-anchor="middle">回避: ${avoidanceScore.toFixed(1)}</text>`;
+            // 标题
+            svg.innerHTML += `<text x="${width / 2}" y="${margin.top - 10}" font-size="16" fill="#222" text-anchor="middle" font-weight="bold">依恋类型四象限分布</text>`;
+        }
     </script>
 </body>
 </html>
