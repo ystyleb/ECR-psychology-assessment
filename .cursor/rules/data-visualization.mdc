@@ -1,0 +1,363 @@
+# 心理测评数据可视化规则
+
+## Chart.js集成和配置
+
+### 基础设置
+当前项目使用Chart.js进行ECR测评结果的可视化展示，主要展示依恋焦虑和依恋回避两个维度的散点图。
+
+**Chart.js引用：**
+```html
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+```
+
+### 散点图配置
+**ECR依恋类型散点图：**
+```javascript
+// 标准配置模板
+const chartConfig = {
+    type: 'scatter',
+    data: {
+        datasets: [
+            {
+                label: '您的测评结果',
+                data: [{x: avoidanceScore, y: anxietyScore}],
+                backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                borderColor: 'rgb(231, 76, 60)',
+                pointRadius: 12,
+                pointHoverRadius: 15
+            },
+            // 四种依恋类型参考点
+            {
+                label: '安全型区域',
+                data: [{x: 2, y: 2}],
+                backgroundColor: 'rgba(46, 204, 113, 0.6)',
+                borderColor: 'rgb(46, 204, 113)',
+                pointRadius: 8
+            }
+            // 其他类型...
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: '依恋回避 →'
+                },
+                min: 1,
+                max: 7
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: '依恋焦虑 →'
+                },
+                min: 1,
+                max: 7
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+};
+```
+
+## 心理测评数据表示原则
+
+### 数据准确性
+**强制要求：**
+- 分数计算必须精确到小数点后1位
+- 坐标轴范围严格按照心理学标准（1-7分）
+- 四种依恋类型的参考点位置基于学术研究
+- 不得为了美观而修改科学数据
+
+### 颜色编码标准
+**依恋类型颜色方案：**
+```css
+:root {
+    /* 用户结果 - 使用醒目的红色 */
+    --user-result: rgb(231, 76, 60);
+    
+    /* 四种依恋类型 */
+    --secure-type: rgb(46, 204, 113);      /* 安全型 - 绿色 */
+    --anxious-type: rgb(255, 193, 7);      /* 焦虑型 - 黄色 */
+    --avoidant-type: rgb(52, 152, 219);    /* 回避型 - 蓝色 */
+    --disorganized-type: rgb(155, 89, 182); /* 混乱型 - 紫色 */
+}
+```
+
+### 图表辅助信息
+**必须包含的元素：**
+- 坐标轴标题（中文）
+- 图例说明
+- 用户结果的突出显示
+- 四种依恋类型的参考区域
+- 分数范围的说明
+
+## 响应式图表设计
+
+### 移动端适配
+**小屏幕优化：**
+```javascript
+const isMobile = window.innerWidth < 768;
+
+const mobileConfig = {
+    ...baseConfig,
+    options: {
+        ...baseConfig.options,
+        // 移动端字体调整
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    fontSize: isMobile ? 12 : 14
+                }
+            }
+        },
+        // 触摸交互优化
+        interaction: {
+            intersect: false,
+            mode: 'nearest'
+        }
+    }
+};
+```
+
+### 图表尺寸控制
+**容器设计：**
+```css
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    
+    /* 保持纵横比 */
+    aspect-ratio: 1 / 1;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+}
+```
+
+## 数据展示最佳实践
+
+### 渐进式披露
+**信息层次设计：**
+1. **概览图表**：整体的依恋类型散点图
+2. **详细分数**：具体的焦虑和回避维度分数
+3. **类型解释**：当前结果所属的依恋类型说明
+4. **发展建议**：基于结果的个性化建议
+
+### 动画和交互
+**用户体验增强：**
+```javascript
+// 图表加载动画
+const chart = new Chart(ctx, {
+    ...config,
+    options: {
+        ...config.options,
+        animation: {
+            duration: 1000,
+            easing: 'easeInOutQuart'
+        }
+    }
+});
+
+// 数据点悬停效果
+chart.options.onHover = (event, elements) => {
+    if (elements.length > 0) {
+        // 显示详细信息
+        showTooltip(elements[0]);
+    }
+};
+```
+
+## 数据隐私和安全
+
+### 客户端处理
+**隐私保护原则：**
+- 所有图表渲染在客户端完成
+- 不向外部服务发送用户数据
+- 测评结果仅临时存储在浏览器内存中
+- 不使用需要数据上传的图表服务
+
+### 数据生命周期
+**内存管理：**
+```javascript
+// 清理图表实例
+function cleanupChart() {
+    if (window.currentChart) {
+        window.currentChart.destroy();
+        window.currentChart = null;
+    }
+}
+
+// 重新测试时清理数据
+function resetAssessment() {
+    cleanupChart();
+    // 清除相关数据
+    sessionStorage.removeItem('assessmentData');
+}
+```
+
+## 错误处理和边界情况
+
+### 数据验证
+**输入验证：**
+```javascript
+function validateScores(anxietyScore, avoidanceScore) {
+    const errors = [];
+    
+    if (anxietyScore < 1 || anxietyScore > 7) {
+        errors.push('焦虑维度分数超出有效范围');
+    }
+    
+    if (avoidanceScore < 1 || avoidanceScore > 7) {
+        errors.push('回避维度分数超出有效范围');
+    }
+    
+    if (isNaN(anxietyScore) || isNaN(avoidanceScore)) {
+        errors.push('分数必须为有效数字');
+    }
+    
+    return errors;
+}
+```
+
+### 图表加载失败处理
+**降级方案：**
+```javascript
+function renderChart(anxietyScore, avoidanceScore) {
+    try {
+        // 尝试渲染Chart.js图表
+        renderScatterChart(anxietyScore, avoidanceScore);
+    } catch (error) {
+        console.error('图表渲染失败:', error);
+        
+        // 降级到文本显示
+        renderTextResults(anxietyScore, avoidanceScore);
+        
+        // 显示用户友好的错误信息
+        showMessage('图表加载遇到问题，以文字形式显示结果');
+    }
+}
+
+function renderTextResults(anxietyScore, avoidanceScore) {
+    const resultsContainer = document.getElementById('chart-container');
+    resultsContainer.innerHTML = `
+        <div class="text-results">
+            <h3>您的测评结果</h3>
+            <p><strong>依恋焦虑：</strong>${anxietyScore.toFixed(1)}分</p>
+            <p><strong>依恋回避：</strong>${avoidanceScore.toFixed(1)}分</p>
+            <p><strong>依恋类型：</strong>${determineAttachmentType(anxietyScore, avoidanceScore)}</p>
+        </div>
+    `;
+}
+```
+
+## 性能优化
+
+### 图表渲染优化
+**性能最佳实践：**
+- 避免频繁重绘图表
+- 合理设置动画持续时间
+- 在数据变化时使用update()而非重新创建
+- 适当的防抖处理窗口大小变化
+
+### 资源加载
+**Chart.js加载策略：**
+```html
+<!-- 异步加载，避免阻塞页面渲染 -->
+<script>
+    function loadChartJS() {
+        return new Promise((resolve, reject) => {
+            if (window.Chart) {
+                resolve();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+    
+    // 在需要时再加载
+    async function showResults() {
+        try {
+            await loadChartJS();
+            renderChart();
+        } catch (error) {
+            console.error('Chart.js加载失败:', error);
+            renderTextResults();
+        }
+    }
+</script>
+```
+
+## 可访问性支持
+
+### 屏幕阅读器支持
+**无障碍图表：**
+```html
+<!-- 为图表提供文本描述 -->
+<div class="chart-container" role="img" aria-labelledby="chart-title" aria-describedby="chart-description">
+    <h3 id="chart-title">ECR依恋类型分析图</h3>
+    <p id="chart-description">
+        这是一个散点图，显示您在依恋焦虑（Y轴，范围1-7）和依恋回避（X轴，范围1-7）两个维度上的得分。
+        您的得分为：焦虑维度 {anxietyScore} 分，回避维度 {avoidanceScore} 分。
+    </p>
+    <canvas id="attachmentChart"></canvas>
+</div>
+
+<!-- 提供数据表格作为替代 -->
+<table class="sr-only">
+    <caption>ECR测评结果数据</caption>
+    <tr>
+        <th>维度</th>
+        <th>得分</th>
+        <th>说明</th>
+    </tr>
+    <tr>
+        <td>依恋焦虑</td>
+        <td>{anxietyScore}</td>
+        <td>较低表示在亲密关系中较少担心被抛弃</td>
+    </tr>
+    <tr>
+        <td>依恋回避</td>
+        <td>{avoidanceScore}</td>
+        <td>较低表示在亲密关系中较愿意依赖他人</td>
+    </tr>
+</table>
+```
+
+## 质量保证和测试
+
+### 图表测试清单
+**必须验证项：**
+- [ ] 数据点位置准确性
+- [ ] 坐标轴标签和范围正确性
+- [ ] 颜色对比度符合可访问性要求
+- [ ] 响应式布局在各设备上正常
+- [ ] 图表加载失败时的降级方案
+- [ ] 屏幕阅读器的文本描述完整性
+
+### 跨浏览器兼容性
+**测试环境：**
+- Chrome/Edge（Chromium）
+- Firefox
+- Safari（macOS/iOS）
+- 移动端浏览器
+- 不同屏幕尺寸和分辨率
+

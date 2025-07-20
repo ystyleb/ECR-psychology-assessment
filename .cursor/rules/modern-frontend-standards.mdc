@@ -1,0 +1,695 @@
+# 现代化前端开发规范
+
+## 技术栈概览
+
+### 核心工具
+- **Vite 5.0+**: 现代化构建工具
+- **Vue 3.4+**: 渐进式JavaScript框架
+- **TypeScript 5.3+**: 类型安全的JavaScript超集
+- **Tailwind CSS 3.4+**: 实用优先的CSS框架
+- **ESLint + Prettier**: 代码质量和格式化
+
+### 开发工具
+- **Husky + lint-staged**: Git钩子管理
+- **Vue TSC**: TypeScript类型检查
+- **PostCSS**: CSS后处理器
+- **Autoprefixer**: CSS前缀自动添加
+
+## Vite 构建配置
+
+### 基础配置
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
+
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  server: {
+    port: 5173,
+    open: true,
+    cors: true
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router', 'pinia'],
+          utils: ['@vueuse/core'],
+          charts: ['chart.js', 'vue-chartjs']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  },
+  optimizeDeps: {
+    include: ['vue', 'vue-router', 'pinia', '@vueuse/core']
+  }
+})
+```
+
+### 环境变量配置
+```typescript
+// env.d.ts
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_APP_TITLE: string
+  readonly VITE_API_BASE_URL: string
+  readonly VITE_STRIPE_PUBLISHABLE_KEY: string
+  readonly VITE_SENTRY_DSN: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+```
+
+### 开发服务器配置
+```typescript
+// vite.config.ts 扩展
+export default defineConfig({
+  server: {
+    port: 5173,
+    host: true,
+    open: true,
+    cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
+})
+```
+
+## Tailwind CSS 配置
+
+### 基础配置
+```javascript
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff',
+          500: '#3b82f6',
+          600: '#2563eb',
+          700: '#1d4ed8',
+          900: '#1e3a8a',
+        },
+        secondary: {
+          50: '#f8fafc',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          900: '#0f172a',
+        }
+      },
+      fontFamily: {
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'PingFang SC',
+          'Hiragino Sans GB',
+          'Microsoft YaHei',
+          'Helvetica Neue',
+          'Helvetica',
+          'Arial',
+          'sans-serif'
+        ]
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'bounce-gentle': 'bounceGentle 2s infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        bounceGentle: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
+        }
+      }
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+  ],
+}
+```
+
+### 自定义组件类
+```css
+/* src/assets/styles/components.css */
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 
+           transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-secondary-100 text-secondary-700 rounded-lg 
+           hover:bg-secondary-200 focus:outline-none focus:ring-2 
+           focus:ring-secondary-500 focus:ring-offset-2 transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md 
+           focus:outline-none focus:ring-2 focus:ring-primary-500 
+           focus:border-transparent transition-colors duration-200;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .form-error {
+    @apply text-red-600 text-sm mt-1;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600;
+  }
+}
+```
+
+### 响应式设计
+```css
+/* src/assets/styles/responsive.css */
+@layer utilities {
+  .container-responsive {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  .spacing-responsive {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+}
+```
+
+## ESLint 和 Prettier 配置
+
+### ESLint 配置
+```javascript
+// .eslintrc.cjs
+/* eslint-env node */
+require('@rushstack/eslint-patch/modern-module-resolution')
+
+module.exports = {
+  root: true,
+  extends: [
+    'plugin:vue/vue3-essential',
+    'eslint:recommended',
+    '@vue/eslint-config-typescript',
+    '@vue/eslint-config-prettier/skip-formatting'
+  ],
+  parserOptions: {
+    ecmaVersion: 'latest'
+  },
+  rules: {
+    // Vue 规则
+    'vue/component-name-in-template-casing': ['error', 'PascalCase'],
+    'vue/component-definition-name-casing': ['error', 'PascalCase'],
+    'vue/component-options-name-casing': ['error', 'PascalCase'],
+    'vue/custom-event-name-casing': ['error', 'camelCase'],
+    'vue/define-macros-order': ['error', {
+      order: ['defineProps', 'defineEmits']
+    }],
+    'vue/html-comment-content-spacing': ['error', 'always'],
+    'vue/no-unused-refs': 'error',
+    'vue/padding-line-between-blocks': ['error', 'always'],
+    'vue/prefer-separate-static-class': 'error',
+
+    // TypeScript 规则
+    '@typescript-eslint/no-unused-vars': ['error', { 
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_'
+    }],
+    '@typescript-eslint/explicit-function-return-type': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/prefer-const': 'error',
+
+    // 通用规则
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'prefer-const': 'error',
+    'no-var': 'error'
+  }
+}
+```
+
+### Prettier 配置
+```json
+// .prettierrc.json
+{
+  "semi": false,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 80,
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "vueIndentScriptAndStyle": true
+}
+```
+
+### Git 钩子配置
+```json
+// package.json
+{
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss,html,json,md}": [
+      "prettier --write"
+    ]
+  }
+}
+```
+
+## 性能优化规范
+
+### 代码分割
+```typescript
+// 路由懒加载
+const routes = [
+  {
+    path: '/assessment',
+    name: 'Assessment',
+    component: () => import('@/views/AssessmentView.vue')
+  },
+  {
+    path: '/report/:id',
+    name: 'Report',
+    component: () => import('@/views/ReportView.vue')
+  }
+]
+
+// 组件懒加载
+const LazyComponent = defineAsyncComponent(() => 
+  import('@/components/LazyComponent.vue')
+)
+```
+
+### 图片优化
+```vue
+<template>
+  <!-- 使用现代图片格式 -->
+  <picture>
+    <source srcset="/image.webp" type="image/webp">
+    <source srcset="/image.jpg" type="image/jpeg">
+    <img src="/image.jpg" alt="描述" loading="lazy">
+  </picture>
+
+  <!-- 响应式图片 -->
+  <img 
+    src="/image-800w.jpg"
+    srcset="/image-400w.jpg 400w, /image-800w.jpg 800w, /image-1200w.jpg 1200w"
+    sizes="(max-width: 600px) 400px, (max-width: 1200px) 800px, 1200px"
+    alt="响应式图片"
+  >
+</template>
+```
+
+### 缓存策略
+```typescript
+// 服务工作者缓存
+const CACHE_NAME = 'ecr-assessment-v1'
+const CACHE_URLS = [
+  '/',
+  '/index.html',
+  '/src/main.ts',
+  '/src/App.vue'
+]
+
+// 安装时缓存资源
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(CACHE_URLS))
+  )
+})
+
+// 网络优先，缓存回退
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request)
+      .catch(() => caches.match(event.request))
+  )
+})
+```
+
+## 响应式设计规范
+
+### 断点系统
+```css
+/* 使用Tailwind的响应式断点 */
+/* sm: 640px 及以上 */
+/* md: 768px 及以上 */
+/* lg: 1024px 及以上 */
+/* xl: 1280px 及以上 */
+/* 2xl: 1536px 及以上 */
+
+.responsive-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.responsive-text {
+  @apply text-sm sm:text-base lg:text-lg xl:text-xl;
+}
+
+.responsive-spacing {
+  @apply p-4 sm:p-6 lg:p-8 xl:p-10;
+}
+```
+
+### 移动优先设计
+```vue
+<template>
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- 移动端单列布局 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- 内容区域 -->
+      <div class="space-y-4">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold">
+          心理测评系统
+        </h1>
+        <p class="text-sm sm:text-base lg:text-lg text-gray-600">
+          专业的依恋类型评估工具
+        </p>
+      </div>
+      
+      <!-- 图片区域 -->
+      <div class="hidden lg:block">
+        <img src="/hero-image.jpg" alt="测评系统" class="rounded-lg">
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+## 可访问性规范
+
+### ARIA 属性
+```vue
+<template>
+  <!-- 按钮可访问性 -->
+  <button 
+    aria-label="开始心理测评"
+    aria-describedby="assessment-description"
+    @click="startAssessment"
+  >
+    开始测评
+  </button>
+  
+  <!-- 表单可访问性 -->
+  <form role="form" aria-labelledby="form-title">
+    <h2 id="form-title">个人信息</h2>
+    
+    <label for="name-input" class="form-label">姓名</label>
+    <input 
+      id="name-input"
+      type="text"
+      aria-required="true"
+      aria-describedby="name-error"
+      :aria-invalid="hasNameError"
+    >
+    <div id="name-error" class="form-error" v-if="hasNameError">
+      请输入有效的姓名
+    </div>
+  </form>
+  
+  <!-- 状态通知 -->
+  <div aria-live="polite" aria-atomic="true">
+    <p v-if="loading">正在加载测评内容...</p>
+    <p v-if="error">加载失败，请重试</p>
+  </div>
+</template>
+```
+
+### 键盘导航
+```vue
+<template>
+  <div class="rating-options" role="radiogroup" aria-labelledby="question-text">
+    <div 
+      v-for="score in 7" 
+      :key="score"
+      class="rating-option"
+      :class="{ active: selectedScore === score }"
+      role="radio"
+      :aria-checked="selectedScore === score"
+      tabindex="0"
+      @click="selectScore(score)"
+      @keydown.enter="selectScore(score)"
+      @keydown.space.prevent="selectScore(score)"
+    >
+      <span class="score">{{ score }}</span>
+      <span class="label">{{ getScoreLabel(score) }}</span>
+    </div>
+  </div>
+</template>
+```
+
+## 错误处理规范
+
+### 全局错误处理
+```typescript
+// 全局错误处理器
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Vue Error:', err)
+  console.error('Component:', instance)
+  console.error('Info:', info)
+  
+  // 发送错误到监控服务
+  if (import.meta.env.PROD) {
+    // Sentry或其他错误监控服务
+    captureException(err)
+  }
+}
+
+// 未捕获的Promise错误
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled Promise Rejection:', event.reason)
+  event.preventDefault()
+})
+```
+
+### 组件错误边界
+```vue
+<template>
+  <div>
+    <ErrorBoundary v-if="hasError" :error="error" @retry="handleRetry" />
+    <slot v-else />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onErrorCaptured } from 'vue'
+
+const hasError = ref(false)
+const error = ref<Error | null>(null)
+
+onErrorCaptured((err, instance, info) => {
+  hasError.value = true
+  error.value = err
+  return false // 阻止错误继续传播
+})
+
+const handleRetry = () => {
+  hasError.value = false
+  error.value = null
+}
+</script>
+```
+
+## 测试规范
+
+### 单元测试
+```typescript
+// tests/components/QuestionCard.test.ts
+import { mount } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import QuestionCard from '@/components/QuestionCard.vue'
+
+describe('QuestionCard', () => {
+  it('renders question text correctly', () => {
+    const wrapper = mount(QuestionCard, {
+      props: {
+        question: {
+          id: '1',
+          text: '测试问题',
+          dimension: 'anxiety',
+          reverseScored: false,
+          category: 'test'
+        },
+        currentStep: 0,
+        totalSteps: 36
+      }
+    })
+    
+    expect(wrapper.find('.question-text').text()).toBe('测试问题')
+  })
+
+  it('emits submit event with correct score', async () => {
+    const wrapper = mount(QuestionCard, {
+      props: {
+        question: mockQuestion,
+        currentStep: 0,
+        totalSteps: 36
+      }
+    })
+    
+    await wrapper.find('.rating-option').trigger('click')
+    await wrapper.find('.btn-primary').trigger('click')
+    
+    expect(wrapper.emitted('submit')).toBeTruthy()
+    expect(wrapper.emitted('submit')?.[0]).toEqual([1])
+  })
+})
+```
+
+### 集成测试
+```typescript
+// tests/integration/assessment-flow.test.ts
+import { mount } from '@vue/test-utils'
+import { createTestingPinia } from '@pinia/testing'
+import AssessmentView from '@/views/AssessmentView.vue'
+
+describe('Assessment Flow', () => {
+  it('completes full assessment flow', async () => {
+    const wrapper = mount(AssessmentView, {
+      global: {
+        plugins: [createTestingPinia()]
+      }
+    })
+    
+    // 开始测评
+    await wrapper.find('[data-test="start-assessment"]').trigger('click')
+    
+    // 回答所有问题
+    for (let i = 0; i < 36; i++) {
+      await wrapper.find('.rating-option').trigger('click')
+      await wrapper.find('.btn-primary').trigger('click')
+    }
+    
+    // 验证完成
+    expect(wrapper.find('.assessment-complete')).toBeTruthy()
+  })
+})
+```
+
+## 部署配置
+
+### Vercel 配置
+```json
+// vercel.json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 环境变量管理
+```bash
+# .env.example
+VITE_APP_TITLE=ECR心理测评系统
+VITE_API_BASE_URL=http://localhost:3000
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
+VITE_SENTRY_DSN=your_sentry_dsn
+```
+
+## 最佳实践总结
+
+1. **性能优先**：使用代码分割、懒加载、缓存策略
+2. **响应式设计**：移动优先，渐进增强
+3. **可访问性**：支持键盘导航、屏幕阅读器
+4. **类型安全**：严格使用TypeScript
+5. **代码质量**：ESLint + Prettier + Husky
+6. **错误处理**：全局错误捕获和用户友好提示
+7. **测试覆盖**：单元测试 + 集成测试
+8. **安全部署**：环境变量、CSP、HTTPS
+description:
+globs:
+alwaysApply: false
+---

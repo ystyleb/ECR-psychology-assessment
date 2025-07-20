@@ -1,0 +1,676 @@
+# ECR心理测评系统业务规则
+
+## 项目概述
+ECR（Experiences in Close Relationships）亲密关系经历量表是一个专业的心理测评工具，用于评估个体在亲密关系中的依恋模式。本系统提供科学、安全、用户友好的在线测评服务。
+
+## 核心业务概念
+
+### 依恋理论基础
+- **安全型依恋**：能够建立健康、平衡的亲密关系
+- **焦虑型依恋**：担心被抛弃，过度依赖伴侣
+- **回避型依恋**：避免亲密关系，保持情感距离
+- **混乱型依恋**：依恋模式不稳定，行为矛盾
+
+### ECR量表结构
+- **焦虑维度**：测量对亲密关系的焦虑程度
+- **回避维度**：测量对亲密关系的回避程度
+- **题目数量**：36个标准化题目
+- **评分方式**：7点李克特量表（1-7分）
+
+## 数据模型设计
+
+### 核心类型定义
+```typescript
+// types/assessment.ts
+
+// 题目类型
+interface Question {
+  id: string
+  text: string
+  dimension: 'anxiety' | 'avoidance'
+  reverseScored: boolean
+  category: string
+}
+
+// 答案类型
+interface Answer {
+  questionId: string
+  score: number // 1-7分
+  timestamp: Date
+}
+
+// 测评结果
+interface AssessmentResult {
+  id: string
+  userId?: string
+  answers: Answer[]
+  scores: {
+    anxiety: number
+    avoidance: number
+  }
+  attachmentType: 'secure' | 'anxious' | 'avoidant' | 'disorganized'
+  completedAt: Date
+  duration: number // 完成时间（分钟）
+}
+
+// 用户信息
+interface User {
+  id: string
+  name?: string
+  email?: string
+  createdAt: Date
+  lastAssessmentAt?: Date
+}
+```
+
+### 评分算法
+```typescript
+// services/calculationService.ts
+
+export class CalculationService {
+  // 计算维度得分
+  calculateDimensionScore(
+    answers: Answer[],
+    questions: Question[],
+    dimension: 'anxiety' | 'avoidance'
+  ): number {
+    const dimensionQuestions = questions.filter(q => q.dimension === dimension)
+    const dimensionAnswers = answers.filter(a => 
+      dimensionQuestions.some(q => q.id === a.questionId)
+    )
+
+    let totalScore = 0
+    let validAnswers = 0
+
+    dimensionAnswers.forEach(answer => {
+      const question = dimensionQuestions.find(q => q.id === answer.questionId)
+      if (question) {
+        // 反向计分处理
+        const score = question.reverseScored ? (8 - answer.score) : answer.score
+        totalScore += score
+        validAnswers++
+      }
+    })
+
+    return validAnswers > 0 ? totalScore / validAnswers : 0
+  }
+
+  // 确定依恋类型
+  determineAttachmentType(anxietyScore: number, avoidanceScore: number): string {
+    // 基于ECR量表标准划分
+    if (anxietyScore <= 3.5 && avoidanceScore <= 3.5) {
+      return 'secure'
+    } else if (anxietyScore > 3.5 && avoidanceScore <= 3.5) {
+      return 'anxious'
+    } else if (anxietyScore <= 3.5 && avoidanceScore > 3.5) {
+      return 'avoidant'
+    } else {
+      return 'disorganized'
+    }
+  }
+
+  // 生成标准化分数
+  generateStandardizedScores(rawScores: { anxiety: number; avoidance: number }) {
+    // 基于常模数据计算标准化分数
+    return {
+      anxiety: this.standardizeScore(rawScores.anxiety, 'anxiety'),
+      avoidance: this.standardizeScore(rawScores.avoidance, 'avoidance')
+    }
+  }
+
+  private standardizeScore(score: number, dimension: string): number {
+    // 标准化算法（基于ECR量表常模）
+    const norms = {
+      anxiety: { mean: 3.5, sd: 1.2 },
+      avoidance: { mean: 3.2, sd: 1.1 }
+    }
+    
+    const norm = norms[dimension as keyof typeof norms]
+    return ((score - norm.mean) / norm.sd) * 10 + 50
+  }
+}
+```
+
+## 业务逻辑规范
+
+### 测评流程控制
+```typescript
+// stores/assessment.ts
+
+export const useAssessmentStore = defineStore('assessment', () => {
+  // 状态管理
+  const state = reactive({
+    currentStep: 0,
+    totalSteps: 36,
+    answers: [] as Answer[],
+    currentQuestion: null as Question | null,
+    isCompleted: false,
+    canGoBack: true,
+    canSkip: false
+  })
+
+  // 业务逻辑
+  const startAssessment = () => {
+    state.currentStep = 0
+    state.answers = []
+    state.isCompleted = false
+    loadQuestion(0)
+  }
+
+  const submitAnswer = (score: number) => {
+    if (!state.currentQuestion) return
+
+    const answer: Answer = {
+      questionId: state.currentQuestion.id,
+      score,
+      timestamp: new Date()
+    }
+
+    state.answers.push(answer)
+    
+    if (state.currentStep < state.totalSteps - 1) {
+      nextQuestion()
+    } else {
+      completeAssessment()
+    }
+  }
+
+  const nextQuestion = () => {
+    if (state.currentStep < state.totalSteps - 1) {
+      state.currentStep++
+      loadQuestion(state.currentStep)
+    }
+  }
+
+  const previousQuestion = () => {
+    if (state.currentStep > 0 && state.canGoBack) {
+      state.currentStep--
+      loadQuestion(state.currentStep)
+    }
+  }
+
+  const completeAssessment = async () => {
+    state.isCompleted = true
+    
+    // 计算结果
+    const result = await calculateResults()
+    
+    // 保存结果
+    await saveAssessmentResult(result)
+    
+    // 导航到报告页面
+    router.push(`/report/${result.id}`)
+  }
+
+  return {
+    ...toRefs(state),
+    startAssessment,
+    submitAnswer,
+    nextQuestion,
+    previousQuestion,
+    completeAssessment
+  }
+})
+```
+
+### 数据验证规则
+```typescript
+// utils/validation.ts
+
+export const validateAnswer = (score: number): boolean => {
+  return score >= 1 && score <= 7 && Number.isInteger(score)
+}
+
+export const validateAssessment = (answers: Answer[]): boolean => {
+  return answers.length === 36 && answers.every(a => validateAnswer(a.score))
+}
+
+export const validateUserInput = (input: any): boolean => {
+  // 用户输入验证
+  if (typeof input !== 'object' || input === null) return false
+  
+  const requiredFields = ['name', 'email']
+  return requiredFields.every(field => 
+    input[field] && typeof input[field] === 'string' && input[field].trim().length > 0
+  )
+}
+```
+
+## 隐私保护规范
+
+### 数据处理原则
+```typescript
+// services/privacyService.ts
+
+export class PrivacyService {
+  // 数据最小化原则
+  static minimizeData(userData: any) {
+    return {
+      id: userData.id,
+      assessmentCount: userData.assessmentCount,
+      lastAssessmentAt: userData.lastAssessmentAt
+    }
+  }
+
+  // 数据匿名化
+  static anonymizeAssessmentResult(result: AssessmentResult): AssessmentResult {
+    return {
+      ...result,
+      userId: undefined,
+      userInfo: undefined
+    }
+  }
+
+  // 本地存储加密
+  static encryptData(data: any): string {
+    // 使用简单的本地加密（生产环境应使用更安全的加密）
+    return btoa(JSON.stringify(data))
+  }
+
+  static decryptData(encryptedData: string): any {
+    try {
+      return JSON.parse(atob(encryptedData))
+    } catch {
+      return null
+    }
+  }
+}
+```
+
+### 存储策略
+```typescript
+// services/storageService.ts
+
+export class StorageService {
+  private static readonly PREFIX = 'ecr_assessment_'
+  private static readonly EXPIRY_DAYS = 30
+
+  // 本地存储
+  static saveToLocal(key: string, data: any): void {
+    const encryptedData = PrivacyService.encryptData(data)
+    const expiryDate = new Date()
+    expiryDate.setDate(expiryDate.getDate() + this.EXPIRY_DAYS)
+    
+    const storageData = {
+      data: encryptedData,
+      expiry: expiryDate.getTime()
+    }
+    
+    localStorage.setItem(this.PREFIX + key, JSON.stringify(storageData))
+  }
+
+  static getFromLocal(key: string): any {
+    const stored = localStorage.getItem(this.PREFIX + key)
+    if (!stored) return null
+
+    try {
+      const { data, expiry } = JSON.parse(stored)
+      
+      if (Date.now() > expiry) {
+        localStorage.removeItem(this.PREFIX + key)
+        return null
+      }
+
+      return PrivacyService.decryptData(data)
+    } catch {
+      return null
+    }
+  }
+
+  // 会话存储
+  static saveToSession(key: string, data: any): void {
+    const encryptedData = PrivacyService.encryptData(data)
+    sessionStorage.setItem(this.PREFIX + key, encryptedData)
+  }
+
+  static getFromSession(key: string): any {
+    const stored = sessionStorage.getItem(this.PREFIX + key)
+    if (!stored) return null
+
+    try {
+      return PrivacyService.decryptData(stored)
+    } catch {
+      return null
+    }
+  }
+
+  // 清理过期数据
+  static cleanupExpiredData(): void {
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith(this.PREFIX)) {
+        try {
+          const { expiry } = JSON.parse(localStorage.getItem(key) || '{}')
+          if (expiry && Date.now() > expiry) {
+            localStorage.removeItem(key)
+          }
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    })
+  }
+}
+```
+
+## 用户体验规范
+
+### 测评界面设计
+```vue
+<!-- components/assessment/QuestionCard.vue -->
+<template>
+  <div class="question-card">
+    <!-- 进度指示器 -->
+    <div class="progress-indicator">
+      <span class="current-step">{{ currentStep + 1 }}</span>
+      <span class="total-steps">/ {{ totalSteps }}</span>
+    </div>
+
+    <!-- 题目内容 -->
+    <div class="question-content">
+      <h3 class="question-text">{{ question.text }}</h3>
+    </div>
+
+    <!-- 评分选项 -->
+    <div class="rating-options">
+      <div 
+        v-for="score in 7" 
+        :key="score"
+        class="rating-option"
+        :class="{ active: selectedScore === score }"
+        @click="selectScore(score)"
+      >
+        <span class="score">{{ score }}</span>
+        <span class="label">{{ getScoreLabel(score) }}</span>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+      <button 
+        v-if="canGoBack"
+        @click="goBack"
+        class="btn-secondary"
+      >
+        上一题
+      </button>
+      <button 
+        @click="submitAnswer"
+        :disabled="!selectedScore"
+        class="btn-primary"
+      >
+        {{ isLastQuestion ? '完成测评' : '下一题' }}
+      </button>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+interface Props {
+  question: Question
+  currentStep: number
+  totalSteps: number
+  canGoBack: boolean
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<{
+  submit: [score: number]
+  back: []
+}>()
+
+const selectedScore = ref<number | null>(null)
+
+const isLastQuestion = computed(() => props.currentStep === props.totalSteps - 1)
+
+const getScoreLabel = (score: number): string => {
+  const labels = {
+    1: '完全不同意',
+    2: '不同意',
+    3: '有点不同意',
+    4: '中立',
+    5: '有点同意',
+    6: '同意',
+    7: '完全同意'
+  }
+  return labels[score as keyof typeof labels]
+}
+
+const selectScore = (score: number) => {
+  selectedScore.value = score
+}
+
+const submitAnswer = () => {
+  if (selectedScore.value) {
+    emit('submit', selectedScore.value)
+    selectedScore.value = null
+  }
+}
+
+const goBack = () => {
+  emit('back')
+}
+</script>
+```
+
+### 结果展示规范
+```vue
+<!-- components/report/AssessmentReport.vue -->
+<template>
+  <div class="assessment-report">
+    <!-- 总体结果 -->
+    <div class="overall-result">
+      <h2>您的依恋类型：{{ result.attachmentType }}</h2>
+      <p class="description">{{ getTypeDescription(result.attachmentType) }}</p>
+    </div>
+
+    <!-- 维度得分 -->
+    <div class="dimension-scores">
+      <div class="score-item">
+        <h3>焦虑维度</h3>
+        <div class="score-bar">
+          <div 
+            class="score-fill"
+            :style="{ width: `${getScorePercentage(result.scores.anxiety)}%` }"
+          ></div>
+        </div>
+        <span class="score-value">{{ result.scores.anxiety.toFixed(1) }}</span>
+      </div>
+      
+      <div class="score-item">
+        <h3>回避维度</h3>
+        <div class="score-bar">
+          <div 
+            class="score-fill"
+            :style="{ width: `${getScorePercentage(result.scores.avoidance)}%` }"
+          ></div>
+        </div>
+        <span class="score-value">{{ result.scores.avoidance.toFixed(1) }}</span>
+      </div>
+    </div>
+
+    <!-- 详细解释 -->
+    <div class="detailed-explanation">
+      <h3>详细解释</h3>
+      <div v-html="getDetailedExplanation(result)"></div>
+    </div>
+
+    <!-- 建议 -->
+    <div class="recommendations">
+      <h3>发展建议</h3>
+      <ul>
+        <li v-for="recommendation in getRecommendations(result.attachmentType)" :key="recommendation">
+          {{ recommendation }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+```
+
+## 错误处理规范
+
+### 业务错误类型
+```typescript
+// types/errors.ts
+
+export enum AssessmentErrorType {
+  INVALID_ANSWER = 'INVALID_ANSWER',
+  INCOMPLETE_ASSESSMENT = 'INCOMPLETE_ASSESSMENT',
+  CALCULATION_ERROR = 'CALCULATION_ERROR',
+  STORAGE_ERROR = 'STORAGE_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR'
+}
+
+export class AssessmentError extends Error {
+  constructor(
+    message: string,
+    public type: AssessmentErrorType,
+    public code?: string
+  ) {
+    super(message)
+    this.name = 'AssessmentError'
+  }
+}
+
+// 错误处理服务
+export class ErrorHandlingService {
+  static handleAssessmentError(error: AssessmentError): void {
+    switch (error.type) {
+      case AssessmentErrorType.INVALID_ANSWER:
+        this.showUserMessage('请选择有效的答案选项')
+        break
+      case AssessmentErrorType.INCOMPLETE_ASSESSMENT:
+        this.showUserMessage('测评尚未完成，请继续答题')
+        break
+      case AssessmentErrorType.CALCULATION_ERROR:
+        this.showUserMessage('计算结果出现错误，请重新开始测评')
+        break
+      case AssessmentErrorType.STORAGE_ERROR:
+        this.showUserMessage('数据保存失败，请检查浏览器设置')
+        break
+      case AssessmentErrorType.NETWORK_ERROR:
+        this.showUserMessage('网络连接异常，请稍后重试')
+        break
+    }
+  }
+
+  private static showUserMessage(message: string): void {
+    // 显示用户友好的错误消息
+    console.error(message)
+    // 这里可以集成toast或其他UI组件
+  }
+}
+```
+
+## 性能优化规范
+
+### 数据缓存策略
+```typescript
+// services/cacheService.ts
+
+export class CacheService {
+  private static cache = new Map<string, { data: any; expiry: number }>()
+  private static readonly DEFAULT_TTL = 5 * 60 * 1000 // 5分钟
+
+  static set(key: string, data: any, ttl: number = this.DEFAULT_TTL): void {
+    const expiry = Date.now() + ttl
+    this.cache.set(key, { data, expiry })
+  }
+
+  static get(key: string): any {
+    const item = this.cache.get(key)
+    if (!item) return null
+
+    if (Date.now() > item.expiry) {
+      this.cache.delete(key)
+      return null
+    }
+
+    return item.data
+  }
+
+  static clear(): void {
+    this.cache.clear()
+  }
+
+  static cleanup(): void {
+    const now = Date.now()
+    for (const [key, item] of this.cache.entries()) {
+      if (now > item.expiry) {
+        this.cache.delete(key)
+      }
+    }
+  }
+}
+```
+
+## 测试规范
+
+### 业务逻辑测试
+```typescript
+// tests/assessment.test.ts
+
+import { describe, it, expect } from 'vitest'
+import { CalculationService } from '@/services/calculationService'
+
+describe('CalculationService', () => {
+  const calculationService = new CalculationService()
+
+  it('should calculate anxiety score correctly', () => {
+    const answers = [
+      { questionId: '1', score: 5, timestamp: new Date() },
+      { questionId: '2', score: 3, timestamp: new Date() }
+    ]
+    
+    const questions = [
+      { id: '1', text: 'Test question 1', dimension: 'anxiety', reverseScored: false, category: 'test' },
+      { id: '2', text: 'Test question 2', dimension: 'anxiety', reverseScored: true, category: 'test' }
+    ]
+
+    const score = calculationService.calculateDimensionScore(answers, questions, 'anxiety')
+    expect(score).toBe(5.5) // (5 + (8-3)) / 2
+  })
+
+  it('should determine attachment type correctly', () => {
+    expect(calculationService.determineAttachmentType(2.0, 2.0)).toBe('secure')
+    expect(calculationService.determineAttachmentType(5.0, 2.0)).toBe('anxious')
+    expect(calculationService.determineAttachmentType(2.0, 5.0)).toBe('avoidant')
+    expect(calculationService.determineAttachmentType(5.0, 5.0)).toBe('disorganized')
+  })
+})
+```
+
+## 合规性要求
+
+### 数据保护
+- 所有用户数据仅在本地存储
+- 不向第三方服务器传输个人数据
+- 提供数据删除功能
+- 遵循GDPR和CCPA等隐私法规
+
+### 内容合规
+- 测评内容基于科学验证的量表
+- 不提供医疗诊断或治疗建议
+- 明确说明测评的局限性
+- 提供专业心理咨询资源链接
+
+### 可访问性
+- 支持键盘导航
+- 提供屏幕阅读器支持
+- 确保足够的颜色对比度
+- 支持字体大小调整
+
+## 最佳实践总结
+
+1. **数据准确性**：确保所有计算逻辑的准确性
+2. **隐私保护**：严格保护用户隐私和数据安全
+3. **用户体验**：提供流畅、直观的测评体验
+4. **错误处理**：优雅处理各种异常情况
+5. **性能优化**：确保快速响应和流畅交互
+6. **可维护性**：保持代码的清晰和可维护性
+7. **测试覆盖**：为关键业务逻辑编写测试
+8. **合规性**：遵循相关法律法规和行业标准
+description:
+globs:
+alwaysApply: false
+---

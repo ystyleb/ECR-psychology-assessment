@@ -1,0 +1,474 @@
+# ECR心理测评系统项目结构指南
+
+## 项目概述
+ECR心理测评系统是一个基于Vue3+TypeScript+Pinia的现代化Web应用，用于提供专业的依恋类型评估服务。
+
+## 核心文件结构
+
+### 项目根目录
+```
+ECR/
+├── index.html                 # 应用入口HTML文件
+├── package.json              # 项目依赖和脚本配置
+├── vite.config.ts            # Vite构建配置
+├── tailwind.config.js        # Tailwind CSS配置
+├── tsconfig.json             # TypeScript配置
+├── .eslintrc.cjs             # ESLint代码规范配置
+├── .prettierrc.json          # Prettier代码格式化配置
+├── vercel.json               # Vercel部署配置
+└── README.md                 # 项目说明文档
+```
+
+### 源码目录结构
+```
+src/
+├── main.ts                   # 应用入口文件
+├── App.vue                   # 根组件
+├── router/                   # 路由配置
+│   └── index.ts             # 路由定义
+├── stores/                   # Pinia状态管理
+│   ├── index.ts             # Store导出
+│   ├── assessment.ts        # 测评相关状态
+│   ├── user.ts              # 用户相关状态
+│   ├── ui.ts                # UI状态管理
+│   └── payment.ts           # 支付相关状态
+├── components/               # Vue组件
+│   ├── common/              # 通用组件
+│   │   ├── BaseButton.vue   # 基础按钮组件
+│   │   ├── BaseCard.vue     # 基础卡片组件
+│   │   └── BaseInput.vue    # 基础输入组件
+│   ├── assessment/          # 测评相关组件
+│   │   ├── QuestionCard.vue # 问题卡片组件
+│   │   ├── ProgressBar.vue  # 进度条组件
+│   │   └── NavigationButtons.vue # 导航按钮
+│   ├── report/              # 报告相关组件
+│   ├── payment/             # 支付相关组件
+│   ├── charts/              # 图表组件
+│   └── layout/              # 布局组件
+├── views/                    # 页面组件
+│   ├── HomeView.vue         # 首页
+│   ├── AssessmentView.vue   # 测评页面
+│   ├── ReportView.vue       # 报告页面
+│   ├── PaymentView.vue      # 支付页面
+│   └── AboutView.vue        # 关于页面
+├── services/                 # 服务层
+│   ├── index.ts             # 服务导出
+│   ├── assessmentService.ts # 测评服务
+│   ├── calculationService.ts # 计算服务
+│   ├── storageService.ts    # 存储服务
+│   └── paymentService.ts    # 支付服务
+├── types/                    # TypeScript类型定义
+│   ├── index.ts             # 类型导出
+│   ├── assessment.ts        # 测评相关类型
+│   ├── user.ts              # 用户相关类型
+│   ├── payment.ts           # 支付相关类型
+│   └── common.ts            # 通用类型
+├── composables/              # Vue组合式函数
+│   └── useSwipeGesture.ts   # 滑动手势组合函数
+├── data/                     # 静态数据
+│   └── questions.ts         # 测评题目数据
+└── assets/                   # 静态资源
+    ├── images/              # 图片资源
+    └── styles/              # 样式文件
+        ├── main.css         # 主样式文件
+        └── design-tokens.css # 设计令牌
+```
+
+## 关键文件说明
+
+### 入口文件
+- **[index.html](mdc:index.html)**: 应用HTML入口，包含meta标签和SEO配置
+- **[src/main.ts](mdc:src/main.ts)**: Vue应用初始化，插件注册
+- **[src/App.vue](mdc:src/App.vue)**: 根组件，应用布局
+
+### 配置文件
+- **[vite.config.ts](mdc:vite.config.ts)**: Vite构建工具配置
+- **[tailwind.config.js](mdc:tailwind.config.js)**: Tailwind CSS样式框架配置
+- **[tsconfig.json](mdc:tsconfig.json)**: TypeScript编译器配置
+- **[package.json](mdc:package.json)**: 项目依赖和脚本管理
+
+### 状态管理
+- **[src/stores/assessment.ts](mdc:src/stores/assessment.ts)**: 测评流程状态管理
+- **[src/stores/user.ts](mdc:src/stores/user.ts)**: 用户信息和设置状态
+- **[src/stores/ui.ts](mdc:src/stores/ui.ts)**: UI状态和主题管理
+- **[src/stores/payment.ts](mdc:src/stores/payment.ts)**: 支付流程状态
+
+### 核心服务
+- **[src/services/assessmentService.ts](mdc:src/services/assessmentService.ts)**: 测评业务逻辑
+- **[src/services/calculationService.ts](mdc:src/services/calculationService.ts)**: 分数计算算法
+- **[src/services/storageService.ts](mdc:src/services/storageService.ts)**: 本地数据存储
+- **[src/services/paymentService.ts](mdc:src/services/paymentService.ts)**: 支付集成
+
+## 开发流程指南
+
+### 新功能开发流程
+1. **需求分析**: 在 `docs/` 目录下创建需求文档
+2. **类型定义**: 在 `src/types/` 中添加相关类型
+3. **服务层**: 在 `src/services/` 中实现业务逻辑
+4. **状态管理**: 在 `src/stores/` 中添加状态管理
+5. **组件开发**: 在 `src/components/` 中创建UI组件
+6. **页面集成**: 在 `src/views/` 中集成页面
+7. **路由配置**: 在 `src/router/` 中添加路由
+8. **测试验证**: 编写单元测试和集成测试
+
+### 组件开发规范
+```vue
+<!-- 组件文件结构示例 -->
+<template>
+  <!-- 模板内容 -->
+</template>
+
+<script setup lang="ts">
+// 1. 导入依赖
+import { ref, computed } from 'vue'
+import type { ComponentProps } from '@/types'
+
+// 2. Props定义
+interface Props {
+  title: string
+  loading?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  loading: false
+})
+
+// 3. Emits定义
+interface Emits {
+  (e: 'update', value: string): void
+  (e: 'submit'): void
+}
+
+const emit = defineEmits<Emits>()
+
+// 4. 响应式数据
+const localValue = ref('')
+
+// 5. 计算属性
+const isValid = computed(() => localValue.value.length > 0)
+
+// 6. 方法定义
+const handleSubmit = () => {
+  if (isValid.value) {
+    emit('submit')
+  }
+}
+</script>
+
+<style scoped>
+/* 组件样式 */
+</style>
+```
+
+### 状态管理规范
+```typescript
+// Store文件结构示例
+import { defineStore } from 'pinia'
+import type { StateType } from '@/types'
+
+export const useExampleStore = defineStore('example', () => {
+  // 1. 状态定义
+  const state = reactive<StateType>({
+    data: [],
+    loading: false,
+    error: null
+  })
+
+  // 2. Getters
+  const filteredData = computed(() => {
+    return state.data.filter(item => item.active)
+  })
+
+  // 3. Actions
+  const fetchData = async () => {
+    state.loading = true
+    state.error = null
+    
+    try {
+      const result = await apiService.getData()
+      state.data = result
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : '未知错误'
+    } finally {
+      state.loading = false
+    }
+  }
+
+  // 4. 返回状态和方法
+  return {
+    ...toRefs(state),
+    filteredData,
+    fetchData
+  }
+})
+```
+
+## 文件命名规范
+
+### 组件命名
+- **PascalCase**: 组件文件名使用大驼峰命名
+- **语义化**: 文件名应反映组件功能
+- **目录组织**: 按功能模块组织组件
+
+```
+components/
+├── common/           # 通用组件
+│   ├── BaseButton.vue
+│   ├── BaseCard.vue
+│   └── BaseInput.vue
+├── assessment/       # 测评模块组件
+│   ├── QuestionCard.vue
+│   ├── ProgressBar.vue
+│   └── NavigationButtons.vue
+└── report/          # 报告模块组件
+    ├── ScoreChart.vue
+    └── ResultSummary.vue
+```
+
+### 服务命名
+- **camelCase**: 服务文件名使用小驼峰命名
+- **Service后缀**: 服务文件以Service结尾
+- **功能导向**: 文件名反映服务功能
+
+```
+services/
+├── assessmentService.ts    # 测评服务
+├── calculationService.ts   # 计算服务
+├── storageService.ts       # 存储服务
+└── paymentService.ts       # 支付服务
+```
+
+### 类型定义命名
+- **camelCase**: 类型文件名使用小驼峰命名
+- **功能导向**: 按功能模块组织类型定义
+
+```
+types/
+├── assessment.ts    # 测评相关类型
+├── user.ts          # 用户相关类型
+├── payment.ts       # 支付相关类型
+└── common.ts        # 通用类型
+```
+
+## 导入路径规范
+
+### 别名配置
+```typescript
+// vite.config.ts
+resolve: {
+  alias: {
+    '@': fileURLToPath(new URL('./src', import.meta.url))
+  }
+}
+```
+
+### 导入示例
+```typescript
+// ✅ 推荐：使用别名导入
+import { useAssessmentStore } from '@/stores/assessment'
+import type { Question } from '@/types/assessment'
+import { assessmentService } from '@/services/assessmentService'
+
+// ✅ 推荐：相对路径导入同级文件
+import { BaseButton } from './BaseButton.vue'
+import { helperFunction } from './utils'
+
+// ❌ 避免：过深的相对路径
+import { Component } from '../../../components/Component.vue'
+```
+
+## 开发工具配置
+
+### 编辑器配置
+```json
+// .vscode/settings.json
+{
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "vue.codeActions.enabled": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
+}
+```
+
+### Git配置
+```bash
+# .gitignore
+node_modules/
+dist/
+.env.local
+.env.*.local
+*.log
+.DS_Store
+```
+
+### 脚本命令
+```json
+// package.json scripts
+{
+  "dev": "vite",                    # 开发服务器
+  "build": "vite build",           # 生产构建
+  "preview": "vite preview",       # 预览构建结果
+  "lint": "eslint . --fix",        # 代码检查
+  "format": "prettier --write",    # 代码格式化
+  "type-check": "vue-tsc --build"  # 类型检查
+}
+```
+
+## 部署配置
+
+### Vercel部署
+```json
+// vercel.json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
+```
+
+### 环境变量
+```bash
+# .env.example
+VITE_APP_TITLE=ECR心理测评系统
+VITE_API_BASE_URL=http://localhost:3000
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
+```
+
+## 测试结构
+
+### 测试文件组织
+```
+tests/
+├── unit/                    # 单元测试
+│   ├── components/         # 组件测试
+│   ├── services/           # 服务测试
+│   └── stores/             # 状态测试
+├── integration/            # 集成测试
+│   └── assessment-flow.test.ts
+└── e2e/                   # 端到端测试
+    └── assessment.spec.ts
+```
+
+### 测试文件命名
+```typescript
+// 测试文件命名规范
+ComponentName.test.ts       # 组件测试
+ServiceName.test.ts         # 服务测试
+StoreName.test.ts          # 状态测试
+FeatureName.spec.ts        # 集成测试
+```
+
+## 文档结构
+
+### 项目文档
+```
+docs/
+├── DEVELOPMENT_GUIDE.md    # 开发指南
+├── PROJECT_REQUIREMENTS.md # 项目需求
+├── TECHNICAL_SPECIFICATION.md # 技术规范
+└── API_DOCUMENTATION.md   # API文档
+```
+
+### 部署文档
+```
+demo/
+├── DEPLOYMENT_GUIDE.md     # 部署指南
+├── DEPLOYMENT_CHECKLIST.md # 部署检查清单
+└── PAYMENT_TROUBLESHOOTING.md # 支付问题排查
+```
+
+## 最佳实践
+
+### 代码组织
+1. **单一职责**: 每个文件只负责一个功能
+2. **模块化**: 按功能模块组织代码
+3. **可复用**: 提取通用组件和工具函数
+4. **类型安全**: 严格使用TypeScript类型
+
+### 性能优化
+1. **懒加载**: 路由和组件按需加载
+2. **代码分割**: 合理分割代码包
+3. **缓存策略**: 实现适当的缓存机制
+4. **资源优化**: 压缩和优化静态资源
+
+### 维护性
+1. **清晰命名**: 使用语义化的命名
+2. **文档注释**: 为复杂逻辑添加注释
+3. **版本控制**: 使用有意义的提交信息
+4. **测试覆盖**: 保持足够的测试覆盖率
+
+## 常见问题解决
+
+### 类型错误
+```typescript
+// 解决类型导入问题
+import type { ComponentProps } from '@/types'
+
+// 解决泛型类型问题
+interface ApiResponse<T> {
+  data: T
+  success: boolean
+}
+```
+
+### 路由配置
+```typescript
+// 动态路由配置
+{
+  path: '/report/:id',
+  name: 'Report',
+  component: () => import('@/views/ReportView.vue'),
+  props: true
+}
+```
+
+### 状态管理
+```typescript
+// 在组件中使用Store
+import { useAssessmentStore } from '@/stores/assessment'
+import { storeToRefs } from 'pinia'
+
+const assessmentStore = useAssessmentStore()
+const { currentQuestion, loading } = storeToRefs(assessmentStore)
+```
+
+## 开发检查清单
+
+### 新功能开发
+- [ ] 类型定义完整
+- [ ] 组件结构规范
+- [ ] 状态管理合理
+- [ ] 错误处理完善
+- [ ] 测试覆盖充分
+- [ ] 文档更新及时
+
+### 代码提交
+- [ ] 代码格式化完成
+- [ ] ESLint检查通过
+- [ ] 类型检查通过
+- [ ] 测试用例通过
+- [ ] 提交信息规范
+
+### 部署前检查
+- [ ] 构建成功
+- [ ] 环境变量配置
+- [ ] 性能测试通过
+- [ ] 兼容性测试通过
+- [ ] 安全扫描通过
+description:
+globs:
+alwaysApply: false
+---

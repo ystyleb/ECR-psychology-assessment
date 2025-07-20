@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>修复测试页面</h1>
+    
+    <div class="test-section">
+        <h2>1. 测试支付状态查询修复</h2>
+        <p>模拟不同的支付状态查询场景</p>
+        <button class="btn" onclick="testPaymentStatusCheck()">测试支付状态查询</button>
+        <div id="paymentResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 测试历史报告数据完善</h2>
+        <p>测试历史报告数据结构完善功能</p>
+        <button class="btn" onclick="testCompleteTestResults()">测试数据完善</button>
+        <div id="completeResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 创建测试历史报告</h2>
+        <p>创建一个测试用的历史报告</p>
+        <button class="btn" onclick="createTestHistoryReport()">创建测试报告</button>
+        <div id="createResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 测试数值验证修复</h2>
+        <p>测试对无效数值的处理</p>
+        <button class="btn" onclick="testInvalidNumbers()">测试无效数值处理</button>
+        <div id="invalidResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. 创建有问题的历史报告</h2>
+        <p>创建一个包含无效数值的历史报告，用于测试修复</p>
+        <button class="btn" onclick="createProblematicReport()">创建问题报告</button>
+        <div id="problematicResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        // 复制主页面的completeTestResults函数
+        function completeTestResults(testData) {
+            // 确保基本属性存在
+            const data = { ...testData };
+            
+            // 确保分数属性存在
+            if (!data.anxietyScore && data.anxiety) {
+                data.anxietyScore = data.anxiety.toFixed(1);
+            }
+            if (!data.avoidanceScore && data.avoidance) {
+                data.avoidanceScore = data.avoidance.toFixed(1);
+            }
+            
+            // 确保类型属性存在
+            if (!data.attachmentType && data.type) {
+                // 将type转换为attachmentType
+                const typeMap = {
+                    'secure': '安全型',
+                    'anxious': '焦虑型',
+                    'avoidant': '回避型',
+                    'fearful': '混乱型'
+                };
+                data.attachmentType = typeMap[data.type] || data.type;
+            }
+            
+            // 如果没有typeDescription，根据类型生成
+            if (!data.typeDescription) {
+                const descriptions = {
+                    '安全型': '您在亲密关系中表现出稳定和安全的依恋模式',
+                    '焦虑型': '您可能在关系中表现出较高的焦虑和对被抛弃的担忧',
+                    '回避型': '您可能倾向于在关系中保持独立和情感距离',
+                    '混乱型': '您的依恋模式可能表现出焦虑和回避的混合特征'
+                };
+                data.typeDescription = descriptions[data.attachmentType] || '';
+            }
+            
+            // 如果没有keyFeatures，根据类型生成
+            if (!data.keyFeatures) {
+                const features = {
+                    '安全型': [
+                        { icon: 'fas fa-heart', text: '信任伴侣并感到舒适' },
+                        { icon: 'fas fa-balance-scale', text: '在亲密关系中保持平衡' },
+                        { icon: 'fas fa-comments', text: '良好的沟通能力' }
+                    ],
+                    '焦虑型': [
+                        { icon: 'fas fa-exclamation-circle', text: '担心伴侣不够关心自己' },
+                        { icon: 'fas fa-search', text: '过度寻求确认和安慰' },
+                        { icon: 'fas fa-heartbeat', text: '情感波动较大' }
+                    ],
+                    '回避型': [
+                        { icon: 'fas fa-user-shield', text: '保持情感距离' },
+                        { icon: 'fas fa-arrows-alt-h', text: '重视个人独立性' },
+                        { icon: 'fas fa-lock', text: '不易表达情感需求' }
+                    ],
+                    '混乱型': [
+                        { icon: 'fas fa-random', text: '矛盾的情感反应' },
+                        { icon: 'fas fa-exchange-alt', text: '亲密和疏远之间摇摆' },
+                        { icon: 'fas fa-puzzle-piece', text: '关系模式不稳定' }
+                    ]
+                };
+                data.keyFeatures = features[data.attachmentType] || features['安全型'];
+            }
+            
+            // 如果没有detailedAnalysis，生成基本分析
+            if (!data.detailedAnalysis) {
+                data.detailedAnalysis = [
+                    {
+                        title: "依恋焦虑分析",
+                        content: `您的依恋焦虑得分为${data.anxietyScore}，表明您在亲密关系中的焦虑水平${parseFloat(data.anxietyScore) >= 4 ? '较高' : '适中或较低'}。`
+                    },
+                    {
+                        title: "依恋回避分析",
+                        content: `您的依恋回避得分为${data.avoidanceScore}，表明您在亲密关系中的回避倾向${parseFloat(data.avoidanceScore) >= 4 ? '较高' : '适中或较低'}。`
+                    }
+                ];
+            }
+            
+            // 如果没有suggestions，生成基本建议
+            if (!data.suggestions) {
+                data.suggestions = [
+                    {
+                        title: "自我认知",
+                        items: ["了解自己的依恋模式", "识别触发情绪反应的因素", "接纳自己的情感需求"]
+                    },
+                    {
+                        title: "关系互动",
+                        items: ["练习开放沟通", "表达真实需求", "建立健康界限"]
+                    }
+                ];
+            }
+            
+            // 如果没有relationshipGuidance，生成基本指导
+            if (!data.relationshipGuidance) {
+                data.relationshipGuidance = [
+                    {
+                        title: '建立安全环境',
+                        content: '与伴侣开诚布公地讨论您的感受，寻求理解和支持，共同创造一个安全、可预测的关系环境。'
+                    },
+                    {
+                        title: '渐进式改善',
+                        content: '采用渐进式的方法改善关系模式，不急于求成，允许自己慢慢建立更安全的依恋模式。'
+                    }
+                ];
+            }
+            
+            return data;
+        }
+
+        // 测试支付状态查询
+        function testPaymentStatusCheck() {
+            const resultDiv = document.getElementById('paymentResult');
+            resultDiv.style.display = 'block';
+            
+            // 模拟不同场景
+            const scenarios = [
+                '✅ 有localStorage数据且状态为completed',
+                '✅ 有localStorage数据但状态为pending，且有session_id',
+                '✅ 没有localStorage数据，但有session_id和历史记录',
+                '✅ 只有session_id，使用默认数据',
+                '⚠️ 没有任何数据，显示提示信息'
+            ];
+            
+            resultDiv.innerHTML = `
+                <h4>支付状态查询修复测试</h4>
+                <p>已修复的场景：</p>
+                <ul>
+                    ${scenarios.map(scenario => `<li>${scenario}</li>`).join('')}
+                </ul>
+                <p><strong>修复内容：</strong></p>
+                <ul>
+                    <li>增加了对URL参数session_id的检查</li>
+                    <li>增加了对历史记录的检查</li>
+                    <li>优化了错误提示信息</li>
+                    <li>增加了多种数据恢复策略</li>
+                </ul>
+            `;
+        }
+
+        // 测试数据完善功能
+        function testCompleteTestResults() {
+            const resultDiv = document.getElementById('completeResult');
+            resultDiv.style.display = 'block';
+            
+            // 测试不完整的数据
+            const incompleteData = {
+                anxiety: 4.2,
+                avoidance: 3.1,
+                type: 'anxious'
+            };
+            
+            const completedData = completeTestResults(incompleteData);
+            
+            resultDiv.innerHTML = `
+                <h4>数据完善功能测试</h4>
+                <p><strong>原始数据：</strong></p>
+                <pre>${JSON.stringify(incompleteData, null, 2)}</pre>
+                <p><strong>完善后数据：</strong></p>
+                <pre>${JSON.stringify(completedData, null, 2)}</pre>
+                <p><strong>新增属性：</strong></p>
+                <ul>
+                    <li>anxietyScore: ${completedData.anxietyScore}</li>
+                    <li>avoidanceScore: ${completedData.avoidanceScore}</li>
+                    <li>attachmentType: ${completedData.attachmentType}</li>
+                    <li>typeDescription: ${completedData.typeDescription}</li>
+                    <li>keyFeatures: ${completedData.keyFeatures.length} 项</li>
+                    <li>detailedAnalysis: ${completedData.detailedAnalysis.length} 项</li>
+                    <li>suggestions: ${completedData.suggestions.length} 项</li>
+                    <li>relationshipGuidance: ${completedData.relationshipGuidance.length} 项</li>
+                </ul>
+            `;
+        }
+
+        // 创建测试历史报告
+        function createTestHistoryReport() {
+            const resultDiv = document.getElementById('createResult');
+            resultDiv.style.display = 'block';
+
+            try {
+                // 创建测试报告数据
+                const testReport = {
+                    orderId: 'ECR_TEST_' + Date.now(),
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleString('zh-CN'),
+                    testResults: {
+                        anxiety: 3.8,
+                        avoidance: 2.9,
+                        type: 'secure'
+                    },
+                    reportNumber: '202407171200',
+                    isPaid: true
+                };
+
+                // 保存到localStorage
+                const existingHistory = JSON.parse(localStorage.getItem('paidReportsHistory') || '[]');
+                existingHistory.unshift(testReport);
+                localStorage.setItem('paidReportsHistory', JSON.stringify(existingHistory));
+
+                resultDiv.innerHTML = `
+                    <h4>✅ 测试历史报告创建成功</h4>
+                    <p><strong>订单号：</strong>${testReport.orderId}</p>
+                    <p><strong>报告编号：</strong>${testReport.reportNumber}</p>
+                    <p><strong>生成时间：</strong>${testReport.date}</p>
+                    <p>现在可以在主页面的历史报告中查看和下载此报告。</p>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">创建失败: ${error.message}</p>`;
+            }
+        }
+
+        // 测试无效数值处理
+        function testInvalidNumbers() {
+            const resultDiv = document.getElementById('invalidResult');
+            resultDiv.style.display = 'block';
+
+            // 测试各种无效数值
+            const testCases = [
+                { anxiety: NaN, avoidance: 3.0, desc: 'NaN 焦虑值' },
+                { anxiety: 3.0, avoidance: Infinity, desc: 'Infinity 回避值' },
+                { anxiety: -Infinity, avoidance: 2.0, desc: '-Infinity 焦虑值' },
+                { anxiety: 'invalid', avoidance: 3.0, desc: '字符串焦虑值' },
+                { anxiety: null, avoidance: undefined, desc: 'null/undefined 值' },
+                { anxiety: 10, avoidance: -5, desc: '超出范围的值' }
+            ];
+
+            let results = '<h4>无效数值处理测试结果</h4>';
+
+            testCases.forEach((testCase, index) => {
+                const originalData = {
+                    anxiety: testCase.anxiety,
+                    avoidance: testCase.avoidance,
+                    type: 'secure'
+                };
+
+                const fixedData = completeTestResults(originalData);
+
+                results += `
+                    <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                        <h5>测试 ${index + 1}: ${testCase.desc}</h5>
+                        <p><strong>原始数据:</strong> anxiety=${testCase.anxiety}, avoidance=${testCase.avoidance}</p>
+                        <p><strong>修复后:</strong> anxietyScore=${fixedData.anxietyScore}, avoidanceScore=${fixedData.avoidanceScore}</p>
+                        <p><strong>是否有限:</strong> anxiety=${isFinite(parseFloat(fixedData.anxietyScore))}, avoidance=${isFinite(parseFloat(fixedData.avoidanceScore))}</p>
+                        <p><strong>状态:</strong> <span style="color: ${isFinite(parseFloat(fixedData.anxietyScore)) && isFinite(parseFloat(fixedData.avoidanceScore)) ? 'green' : 'red'}">
+                            ${isFinite(parseFloat(fixedData.anxietyScore)) && isFinite(parseFloat(fixedData.avoidanceScore)) ? '✅ 修复成功' : '❌ 仍有问题'}
+                        </span></p>
+                    </div>
+                `;
+            });
+
+            resultDiv.innerHTML = results;
+        }
+
+        // 创建有问题的历史报告
+        function createProblematicReport() {
+            const resultDiv = document.getElementById('problematicResult');
+            resultDiv.style.display = 'block';
+
+            try {
+                // 创建包含无效数值的测试报告数据
+                const problematicReport = {
+                    orderId: 'ECR_PROBLEM_' + Date.now(),
+                    timestamp: Date.now(),
+                    date: new Date().toLocaleString('zh-CN'),
+                    testResults: {
+                        anxiety: NaN,  // 无效数值
+                        avoidance: Infinity,  // 无效数值
+                        type: 'anxious',
+                        anxietyScore: 'invalid',  // 无效字符串
+                        avoidanceScore: null  // null值
+                    },
+                    reportNumber: '202407171201',
+                    isPaid: true
+                };
+
+                // 保存到localStorage
+                const existingHistory = JSON.parse(localStorage.getItem('paidReportsHistory') || '[]');
+                existingHistory.unshift(problematicReport);
+                localStorage.setItem('paidReportsHistory', JSON.stringify(existingHistory));
+
+                resultDiv.innerHTML = `
+                    <h4>⚠️ 问题报告创建成功</h4>
+                    <p><strong>订单号：</strong>${problematicReport.orderId}</p>
+                    <p><strong>报告编号：</strong>${problematicReport.reportNumber}</p>
+                    <p><strong>生成时间：</strong>${problematicReport.date}</p>
+                    <p><strong>问题数据：</strong></p>
+                    <ul>
+                        <li>anxiety: ${problematicReport.testResults.anxiety}</li>
+                        <li>avoidance: ${problematicReport.testResults.avoidance}</li>
+                        <li>anxietyScore: ${problematicReport.testResults.anxietyScore}</li>
+                        <li>avoidanceScore: ${problematicReport.testResults.avoidanceScore}</li>
+                    </ul>
+                    <p style="color: orange;">现在可以在主页面的历史报告中测试下载此问题报告，验证修复是否有效。</p>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">创建失败: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

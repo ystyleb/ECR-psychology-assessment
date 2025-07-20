@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付取消 - ECR亲密关系经历量表</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .cancel-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .cancel-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+        }
+
+        .cancel-icon i {
+            font-size: 2.5em;
+            color: white;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        .cancel-message {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #f39c12;
+        }
+
+        .info-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .info-box p {
+            color: #856404;
+            margin: 5px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #52c41a, #389e0d);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 10px 25px rgba(82, 196, 26, 0.4);
+        }
+
+        .features-list {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .features-list li {
+            margin: 8px 0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features-list i {
+            color: #667eea;
+            width: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .cancel-container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .cancel-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .cancel-icon i {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cancel-container">
+        <div class="cancel-icon">
+            <i class="fas fa-times"></i>
+        </div>
+        
+        <h1>支付已取消</h1>
+        
+        <div class="cancel-message">
+            您已取消了支付流程。您仍然可以查看基础版的测评结果，或者稍后再次尝试购买详细报告。
+        </div>
+
+        <div class="info-box">
+            <h3><i class="fas fa-gift"></i> 专业版报告包含：</h3>
+            <ul class="features-list">
+                <li><i class="fas fa-chart-pie"></i> 详细的依恋类型可视化分析</li>
+                <li><i class="fas fa-brain"></i> 深度心理学解读和建议</li>
+                <li><i class="fas fa-heart"></i> 个性化的关系改善方案</li>
+                <li><i class="fas fa-download"></i> 可下载的PDF报告</li>
+            </ul>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-success" onclick="retryPayment()">
+                <i class="fas fa-credit-card"></i> 重新支付
+            </button>
+            <a href="index.html" class="btn">
+                <i class="fas fa-eye"></i> 查看基础报告
+            </a>
+            <a href="index.html" class="btn btn-outline">
+                <i class="fas fa-home"></i> 返回首页
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 重新尝试支付
+        function retryPayment() {
+            // 跳转回主页面并打开支付模态框
+            window.location.href = 'index.html?action=payment';
+        }
+
+        // 页面加载时的处理
+        document.addEventListener('DOMContentLoaded', function() {
+            // 清除可能存在的待处理支付数据
+            localStorage.removeItem('pendingResults');
+            
+            // 可以在这里添加一些统计代码，记录支付取消事件
+            console.log('Payment cancelled at:', new Date().toISOString());
+        });
+    </script>
+</body>
+</html>

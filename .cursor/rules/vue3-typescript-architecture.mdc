@@ -1,0 +1,543 @@
+# Vue3 + TypeScript + Pinia 项目架构规则
+
+## 项目概述
+这是一个基于Vue3 + TypeScript + Pinia的现代化心理测评系统，使用Vite作为构建工具，Tailwind CSS作为样式框架。
+
+## 核心技术栈
+
+### 主要依赖
+- **Vue 3.4+**: 使用Composition API
+- **TypeScript 5.3+**: 严格的类型检查
+- **Pinia 2.1+**: 状态管理
+- **Vue Router 4.2+**: 路由管理
+- **Vite 5.0+**: 构建工具
+- **Tailwind CSS 3.4+**: 样式框架
+
+### 开发工具
+- **ESLint + Prettier**: 代码规范和格式化
+- **Husky + lint-staged**: Git钩子
+- **Vue TSC**: TypeScript类型检查
+
+## Vue3 Composition API 规范
+
+### 组件结构
+```vue
+<template>
+  <!-- 模板内容 -->
+</template>
+
+<script setup lang="ts">
+// 导入
+import { ref, computed, onMounted } from 'vue'
+import type { ComponentProps } from '@/types'
+
+// Props定义
+interface Props {
+  title: string
+  count?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  count: 0
+})
+
+// Emits定义
+interface Emits {
+  (e: 'update', value: string): void
+  (e: 'submit'): void
+}
+
+const emit = defineEmits<Emits>()
+
+// 响应式数据
+const loading = ref(false)
+const data = ref<string[]>([])
+
+// 计算属性
+const filteredData = computed(() => {
+  return data.value.filter(item => item.length > 0)
+})
+
+// 方法
+const handleSubmit = () => {
+  emit('submit')
+}
+
+// 生命周期
+onMounted(() => {
+  // 初始化逻辑
+})
+</script>
+
+<style scoped>
+/* 组件样式 */
+</style>
+```
+
+### 响应式数据使用
+```typescript
+// ✅ 推荐：使用ref和reactive
+const count = ref(0)
+const user = reactive({
+  name: '',
+  email: ''
+})
+
+// ✅ 推荐：使用computed进行派生状态
+const doubleCount = computed(() => count.value * 2)
+
+// ✅ 推荐：使用watchEffect进行副作用
+watchEffect(() => {
+  console.log('Count changed:', count.value)
+})
+
+// ❌ 避免：直接修改props
+// props.count++ // 错误
+
+// ✅ 推荐：通过emit更新父组件
+const updateCount = () => {
+  emit('update:count', count.value + 1)
+}
+```
+
+## TypeScript 类型安全
+
+### 类型定义规范
+```typescript
+// 基础类型定义
+interface User {
+  id: string
+  name: string
+  email: string
+  createdAt: Date
+}
+
+// 联合类型
+type AssessmentStatus = 'pending' | 'in-progress' | 'completed' | 'failed'
+
+// 泛型组件Props
+interface BaseComponentProps<T = any> {
+  data: T[]
+  loading?: boolean
+  error?: string | null
+}
+
+// 函数类型
+type ValidationFunction = (value: string) => boolean | string
+type ApiResponse<T> = Promise<{
+  success: boolean
+  data?: T
+  error?: string
+}>
+```
+
+### 严格类型检查
+```typescript
+// ✅ 推荐：明确的类型注解
+const user: User = {
+  id: '1',
+  name: '张三',
+  email: 'zhangsan@example.com',
+  createdAt: new Date()
+}
+
+// ✅ 推荐：使用类型断言
+const element = document.getElementById('app') as HTMLElement
+
+// ✅ 推荐：使用类型守卫
+function isUser(obj: any): obj is User {
+  return obj && typeof obj.id === 'string' && typeof obj.name === 'string'
+}
+
+// ❌ 避免：any类型
+// const data: any = {} // 错误
+
+// ✅ 推荐：使用unknown替代any
+const data: unknown = {}
+```
+
+## Pinia 状态管理
+
+### Store结构
+```typescript
+// stores/assessment.ts
+import { defineStore } from 'pinia'
+import type { Assessment, Question, Answer } from '@/types'
+
+interface AssessmentState {
+  currentAssessment: Assessment | null
+  questions: Question[]
+  answers: Answer[]
+  loading: boolean
+  error: string | null
+}
+
+export const useAssessmentStore = defineStore('assessment', () => {
+  // 状态
+  const state = reactive<AssessmentState>({
+    currentAssessment: null,
+    questions: [],
+    answers: [],
+    loading: false,
+    error: null
+  })
+
+  // Getters
+  const currentQuestion = computed(() => {
+    if (!state.questions.length) return null
+    return state.questions[state.answers.length]
+  })
+
+  const progress = computed(() => {
+    return (state.answers.length / state.questions.length) * 100
+  })
+
+  // Actions
+  const startAssessment = async (assessmentId: string) => {
+    state.loading = true
+    state.error = null
+    
+    try {
+      const assessment = await assessmentService.getAssessment(assessmentId)
+      state.currentAssessment = assessment
+      state.questions = assessment.questions
+      state.answers = []
+    } catch (error) {
+      state.error = error instanceof Error ? error.message : '未知错误'
+    } finally {
+      state.loading = false
+    }
+  }
+
+  const submitAnswer = (answer: Answer) => {
+    state.answers.push(answer)
+  }
+
+  const resetAssessment = () => {
+    state.currentAssessment = null
+    state.questions = []
+    state.answers = []
+    state.error = null
+  }
+
+  return {
+    // 状态
+    ...toRefs(state),
+    // Getters
+    currentQuestion,
+    progress,
+    // Actions
+    startAssessment,
+    submitAnswer,
+    resetAssessment
+  }
+})
+```
+
+### Store使用规范
+```typescript
+// 在组件中使用Store
+import { useAssessmentStore } from '@/stores/assessment'
+
+const assessmentStore = useAssessmentStore()
+
+// 使用状态
+const { currentAssessment, loading, error } = storeToRefs(assessmentStore)
+
+// 使用getters
+const { currentQuestion, progress } = storeToRefs(assessmentStore)
+
+// 调用actions
+const handleStart = () => {
+  assessmentStore.startAssessment('assessment-1')
+}
+```
+
+## 路由管理
+
+### 路由配置
+```typescript
+// router/index.ts
+import { createRouter, createWebHistory } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/HomeView.vue'),
+    meta: {
+      title: '首页',
+      requiresAuth: false
+    }
+  },
+  {
+    path: '/assessment',
+    name: 'Assessment',
+    component: () => import('@/views/AssessmentView.vue'),
+    meta: {
+      title: '心理测评',
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/report/:id',
+    name: 'Report',
+    component: () => import('@/views/ReportView.vue'),
+    props: true,
+    meta: {
+      title: '测评报告',
+      requiresAuth: true
+    }
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.meta.requiresAuth
+  const isAuthenticated = checkAuthStatus()
+  
+  if (requiresAuth && !isAuthenticated) {
+    next('/login')
+  } else {
+    next()
+  }
+})
+```
+
+## 服务层架构
+
+### API服务
+```typescript
+// services/api.ts
+import type { ApiResponse, ApiError } from '@/types'
+
+class ApiService {
+  private baseURL: string
+
+  constructor(baseURL: string) {
+    this.baseURL = baseURL
+  }
+
+  async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        },
+        ...options
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      return { success: true, data }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '未知错误'
+      }
+    }
+  }
+}
+
+export const apiService = new ApiService(import.meta.env.VITE_API_BASE_URL)
+```
+
+### 业务服务
+```typescript
+// services/assessmentService.ts
+import { apiService } from './api'
+import type { Assessment, Question, Answer } from '@/types'
+
+export class AssessmentService {
+  async getAssessment(id: string): Promise<Assessment> {
+    const response = await apiService.request<Assessment>(`/assessments/${id}`)
+    
+    if (!response.success || !response.data) {
+      throw new Error(response.error || '获取测评失败')
+    }
+    
+    return response.data
+  }
+
+  async submitAnswers(assessmentId: string, answers: Answer[]): Promise<void> {
+    const response = await apiService.request(`/assessments/${assessmentId}/answers`, {
+      method: 'POST',
+      body: JSON.stringify({ answers })
+    })
+    
+    if (!response.success) {
+      throw new Error(response.error || '提交答案失败')
+    }
+  }
+}
+
+export const assessmentService = new AssessmentService()
+```
+
+## 错误处理
+
+### 全局错误处理
+```typescript
+// 错误类型定义
+interface AppError extends Error {
+  code?: string
+  status?: number
+}
+
+// 错误处理工具
+export const handleError = (error: unknown): AppError => {
+  if (error instanceof Error) {
+    return error as AppError
+  }
+  
+  return new Error(typeof error === 'string' ? error : '未知错误')
+}
+
+// 在组件中使用
+const handleSubmit = async () => {
+  try {
+    await assessmentService.submitAnswers(assessmentId, answers)
+    // 成功处理
+  } catch (error) {
+    const appError = handleError(error)
+    // 错误处理
+    console.error('提交失败:', appError.message)
+  }
+}
+```
+
+## 性能优化
+
+### 组件懒加载
+```typescript
+// 路由懒加载
+const AssessmentView = () => import('@/views/AssessmentView.vue')
+
+// 组件懒加载
+const LazyComponent = defineAsyncComponent(() => import('@/components/LazyComponent.vue'))
+```
+
+### 响应式优化
+```typescript
+// 使用shallowRef减少响应式开销
+const largeData = shallowRef<LargeDataType[]>([])
+
+// 使用markRaw避免不必要的响应式
+const config = markRaw({
+  apiUrl: 'https://api.example.com',
+  timeout: 5000
+})
+```
+
+## 测试规范
+
+### 组件测试
+```typescript
+// 使用Vue Test Utils
+import { mount } from '@vue/test-utils'
+import { describe, it, expect } from 'vitest'
+import AssessmentComponent from '@/components/AssessmentComponent.vue'
+
+describe('AssessmentComponent', () => {
+  it('should render correctly', () => {
+    const wrapper = mount(AssessmentComponent, {
+      props: {
+        question: {
+          id: '1',
+          text: '测试问题',
+          type: 'single'
+        }
+      }
+    })
+    
+    expect(wrapper.find('.question-text').text()).toBe('测试问题')
+  })
+})
+```
+
+## 代码质量
+
+### ESLint配置
+```javascript
+// .eslintrc.cjs
+module.exports = {
+  extends: [
+    '@vue/eslint-config-typescript',
+    '@vue/eslint-config-prettier'
+  ],
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/explicit-function-return-type': 'warn',
+    'vue/component-name-in-template-casing': ['error', 'PascalCase']
+  }
+}
+```
+
+### Prettier配置
+```json
+{
+  "semi": false,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5"
+}
+```
+
+## 部署配置
+
+### Vite配置
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
+
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router', 'pinia'],
+          utils: ['@vueuse/core']
+        }
+      }
+    }
+  }
+})
+```
+
+## 最佳实践总结
+
+1. **始终使用TypeScript**：避免any类型，使用严格的类型检查
+2. **Composition API优先**：使用`<script setup>`语法
+3. **状态管理集中化**：使用Pinia管理全局状态
+4. **错误处理完善**：提供用户友好的错误信息
+5. **性能优化**：使用懒加载和响应式优化
+6. **代码规范**：遵循ESLint和Prettier规则
+7. **测试覆盖**：为关键功能编写测试
+8. **类型安全**：确保所有API调用都有正确的类型定义
+description:
+globs:
+alwaysApply: false
+---
