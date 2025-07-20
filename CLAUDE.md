@@ -40,10 +40,21 @@ npm run lint           # ESLint check and fix
 npm run format         # Prettier formatting
 npm run type-check     # TypeScript type checking
 
-# Testing (when implemented)
-npm run test           # Run unit tests
+# Testing
+npm run test           # Run unit tests in watch mode  
+npm run test:run       # Run unit tests once
+npm run test:ui        # Run tests with UI
+npm run test:watch     # Run tests in watch mode
 npm run test:coverage  # Run tests with coverage
-```
+
+# Additional Commands
+npm run prepare        # Setup Husky git hooks
+npm run build-only     # Build without type checking
+
+# Running Specific Tests
+npx vitest run tests/unit/components/BaseButton.test.ts  # Run single test file
+npx vitest run --grep "BaseButton"                       # Run tests matching pattern
+npx vitest run src/services/                            # Run tests in directory
 
 ## Project Architecture
 
@@ -212,18 +223,24 @@ tests/
 ```
 
 ### Testing Tools
-- **Vitest** for unit testing
+- **Vitest** for unit testing with coverage thresholds (70% minimum)
 - **@vue/test-utils** for component testing
 - **@testing-library/vue** for user-centric testing
+- **@testing-library/jest-dom** for additional DOM matchers
 - **MSW** for API mocking
+- **jsdom** environment for DOM testing
 
 ## Deployment Configuration
 
 ### Vercel Deployment
-- Configured via `vercel.json`
-- Serverless functions in `api/` directory
-- Environment variables for sensitive data
-- Automatic HTTPS and CDN
+- Configured via `vercel.json` with Node.js 18.x runtime
+- Serverless functions in `api/` directory:
+  - `create-payment.js` - Payment intent creation
+  - `verify-payment.js` - Payment verification
+  - `generate-token.js` - Token generation
+- Environment variables managed through Vercel dashboard
+- SPA routing handled via rewrites to `/index.html`
+- Static asset caching with Cache-Control headers
 
 ### Build Optimization
 - Code splitting by vendor/feature
@@ -278,6 +295,7 @@ Required for full functionality:
 ```bash
 VITE_APP_TITLE=ECR心理测评系统
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
+VITE_SENTRY_DSN=your_sentry_dsn
 VITE_API_BASE_URL=https://your-domain.vercel.app
 ```
 
@@ -291,3 +309,18 @@ VITE_API_BASE_URL=https://your-domain.vercel.app
 6. **package.json** - Dependencies and scripts
 
 Understanding these files will give you a solid foundation for working with this codebase effectively.
+
+## Git Hooks and Code Quality
+
+The project uses Husky and lint-staged for automated code quality checks:
+- **Pre-commit hook**: Automatically runs ESLint and Prettier on staged files
+- **Lint-staged configuration**: Targets `*.{js,ts,vue}` files for linting and formatting
+- Run `npm run prepare` after cloning to setup hooks
+
+## Important Debugging Commands
+
+When working with the codebase, these commands are essential for maintaining code quality:
+1. Always run `npm run lint` after making changes
+2. Run `npm run type-check` to catch TypeScript errors
+3. Use `npm run test:run` for quick test validation before commits
+4. Check `npm run build` success before deploying

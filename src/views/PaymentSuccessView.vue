@@ -337,23 +337,23 @@ const verifyPayment = async () => {
   }
 
   try {
-    const result = await paymentStore.verifyPayment(sessionId.value)
+    const success = await paymentStore.verifyPayment(sessionId.value)
 
-    if (result.success) {
+    if (success) {
       verificationSuccess.value = true
 
-      // 设置支付信息
-      if (result.paymentInfo) {
+      // 设置支付信息（从store的lastPaymentResult获取）
+      if (paymentStore.lastPaymentResult?.paymentInfo) {
         paymentInfo.value = {
-          customerEmail: result.paymentInfo.customerEmail || '',
-          receiptUrl: result.paymentInfo.receiptUrl || ''
+          customerEmail: paymentStore.lastPaymentResult.paymentInfo.customerEmail || '',
+          receiptUrl: paymentStore.lastPaymentResult.paymentInfo.receiptUrl || ''
         }
       }
 
       showToast('支付验证成功！')
     } else {
       verificationError.value = true
-      errorMessage.value = result.error || '支付验证失败'
+      errorMessage.value = paymentStore.error || '支付验证失败'
     }
   } catch (error) {
     console.error('Payment verification failed:', error)
