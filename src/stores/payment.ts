@@ -1,101 +1,296 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { PaymentSession, PaymentStatus } from '@/types/payment'
+import { ref, computed } from 'vue'
+import type { PaymentSession, PaymentStatus, PaymentResult } from '@/types/payment'
+import { paymentService } from '@/services/paymentService'
+import { useUIStore } from './ui'
 
 export const usePaymentStore = defineStore('payment', () => {
   // 状态
   const paymentStatus = ref<PaymentStatus>('idle')
   const currentSession = ref<PaymentSession | null>(null)
-  const unlockedReports = ref<Set<string>>(new Set())
+  const lastPaymentResult = ref<PaymentResult | null>(null)
+  const isProcessing = ref(false)
+  const error = ref<string | null>(null)
+
+  // UI store引用
+  const uiStore = useUIStore()
+
+  // 计算属性
+  const hasActiveSession = computed(() => {
+    return (
+      currentSession.value !== null &&
+      currentSession.value.status === 'pending' &&
+      currentSession.value.expiresAt > new Date()
+    )
+  })
+
+  const isSessionExpired = computed(() => {
+    return currentSession.value !== null && currentSession.value.expiresAt <= new Date()
+  })
 
   // 方法
-  const initiatePayment = async (assessmentId: string) => {
+  /**
+   * 发起支付流程
+   */
+  const initiatePayment = async (assessmentId: string): Promise<PaymentSession | null> => {
     try {
+      // 重置状态
+      error.value = null
       paymentStatus.value = 'loading'
+      isProcessing.value = true
 
-      // 这里应该调用后端API创建支付会话
-      // 暂时使用模拟的Stripe Payment Link
-      const paymentUrl = generatePaymentUrl(assessmentId)
+      uiStore.showInfo('正在创建支付会话...')
 
-      // 跳转到支付页面
-      window.location.href = paymentUrl
+      // 检查是否已有访问权限
+      const existingAccess = await paymentService.checkExistingAccess(assessmentId)
+      if (existingAccess.hasAccess) {
+        uiStore.showSuccess('您已经购买了详细报告')
+        paymentStatus.value = 'success'
+        return null
+      }
+
+      // 创建支付会话
+      const session = await paymentService.createPaymentSession(assessmentId)
+      currentSession.value = session
+
+      console.log('Payment session created:', session)
+
+      // 更新状态
+      paymentStatus.value = 'loading'
+      uiStore.showSuccess('支付会话已创建，正在跳转...')
+
+      // 跳转到Stripe Checkout
+      await paymentService.redirectToCheckout(session.stripeSessionId!)
+
+      return session
     } catch (error) {
       console.error('Payment initiation failed:', error)
-      paymentStatus.value = 'error'
+      handlePaymentError(error as Error)
+      return null
+    } finally {
+      isProcessing.value = false
     }
   }
 
-  const verifyPayment = async (_sessionId: string): Promise<boolean> => {
+  /**
+   * 验证支付结果
+   */
+  const verifyPayment = async (sessionId: string): Promise<boolean> => {
     try {
+      error.value = null
       paymentStatus.value = 'verifying'
+      isProcessing.value = true
 
-      // 这里应该调用后端API验证支付状态
-      // 暂时返回true模拟成功
-      const isSuccess = true
+      uiStore.showInfo('正在验证支付结果...')
 
-      if (isSuccess) {
+      // 调用支付服务验证
+      const result = await paymentService.verifyPayment(sessionId)
+      lastPaymentResult.value = result
+
+      if (result.success) {
         paymentStatus.value = 'success'
+        uiStore.showSuccess('支付验证成功！')
+
+        // 清理当前会话
+        if (currentSession.value?.stripeSessionId === sessionId) {
+          currentSession.value.status = 'completed'
+        }
+
+        console.log('Payment verified successfully:', result)
         return true
       } else {
         paymentStatus.value = 'failed'
+        error.value = result.error || '支付验证失败'
+        uiStore.showError(result.error || '支付验证失败')
         return false
       }
     } catch (error) {
       console.error('Payment verification failed:', error)
-      paymentStatus.value = 'error'
+      handlePaymentError(error as Error)
       return false
+    } finally {
+      isProcessing.value = false
     }
   }
 
-  const unlockReport = (assessmentId: string) => {
-    unlockedReports.value.add(assessmentId)
-    saveUnlockedReports()
+  /**
+   * 检查支付状态
+   */
+  const checkPaymentStatus = async (sessionId: string) => {
+    try {
+      const status = await paymentService.checkPaymentStatus(sessionId)
+
+      if (status.isPaid) {
+        paymentStatus.value = 'success'
+        return 'paid'
+      } else if (status.isExpired) {
+        paymentStatus.value = 'failed'
+        error.value = '支付会话已过期'
+        return 'expired'
+      } else {
+        return status.status
+      }
+    } catch (error) {
+      console.error('Failed to check payment status:', error)
+      return 'unknown'
+    }
   }
 
+  /**
+   * 检查报告是否已解锁
+   */
   const isReportUnlocked = (assessmentId: string): boolean => {
-    return unlockedReports.value.has(assessmentId)
+    return paymentService.isReportUnlocked(assessmentId)
   }
 
-  const generatePaymentUrl = (assessmentId: string): string => {
-    // 这里应该使用真实的Stripe Payment Link
-    // 暂时返回一个模拟URL
-    const baseUrl = 'https://buy.stripe.com/test_payment_link'
-    const successUrl = `${window.location.origin}/payment/success?assessment_id=${assessmentId}`
-    const cancelUrl = `${window.location.origin}/payment/cancel?assessment_id=${assessmentId}`
-
-    return `${baseUrl}?success_url=${encodeURIComponent(successUrl)}&cancel_url=${encodeURIComponent(cancelUrl)}`
+  /**
+   * 获取访问权限信息
+   */
+  const getAccessInfo = async (assessmentId: string) => {
+    try {
+      return await paymentService.checkExistingAccess(assessmentId)
+    } catch (error) {
+      console.error('Failed to get access info:', error)
+      return { hasAccess: false }
+    }
   }
 
-  const saveUnlockedReports = () => {
-    const data = Array.from(unlockedReports.value)
-    localStorage.setItem('ecr_unlocked_reports', JSON.stringify(data))
+  /**
+   * 获取订单历史
+   */
+  const getOrderHistory = async () => {
+    try {
+      return await paymentService.getOrderHistory()
+    } catch (error) {
+      console.error('Failed to get order history:', error)
+      return []
+    }
   }
 
-  const loadUnlockedReports = () => {
-    const data = localStorage.getItem('ecr_unlocked_reports')
-    if (data) {
-      try {
-        const reports = JSON.parse(data)
-        unlockedReports.value = new Set(reports)
-      } catch (error) {
-        console.error('Failed to load unlocked reports:', error)
+  /**
+   * 获取产品信息
+   */
+  const getProductInfo = () => {
+    return paymentService.getProductInfo()
+  }
+
+  /**
+   * 格式化金额
+   */
+  const formatAmount = (amount: number, currency = 'CNY'): string => {
+    return paymentService.formatAmount(amount, currency)
+  }
+
+  /**
+   * 重置支付状态
+   */
+  const resetPaymentState = () => {
+    paymentStatus.value = 'idle'
+    currentSession.value = null
+    lastPaymentResult.value = null
+    error.value = null
+    isProcessing.value = false
+  }
+
+  /**
+   * 取消当前支付
+   */
+  const cancelPayment = () => {
+    if (currentSession.value) {
+      currentSession.value.status = 'expired'
+    }
+    paymentStatus.value = 'idle'
+    error.value = null
+    uiStore.showInfo('支付已取消')
+  }
+
+  /**
+   * 重试支付
+   */
+  const retryPayment = async (assessmentId: string) => {
+    resetPaymentState()
+    return await initiatePayment(assessmentId)
+  }
+
+  /**
+   * 处理支付错误
+   */
+  const handlePaymentError = (err: Error) => {
+    paymentStatus.value = 'error'
+    error.value = err.message
+
+    let userMessage = '支付过程中出现错误'
+
+    if (err.message.includes('Report already purchased')) {
+      userMessage = '您已经购买了详细报告'
+      paymentStatus.value = 'success'
+    } else if (err.message.includes('Configuration error')) {
+      userMessage = '支付配置错误，请联系客服'
+    } else if (err.message.includes('Invalid assessment')) {
+      userMessage = '测评信息无效，请重新进行测评'
+    } else if (err.message.includes('Network')) {
+      userMessage = '网络连接错误，请检查网络后重试'
+    } else if (err.message.includes('session')) {
+      userMessage = '支付会话创建失败，请重试'
+    }
+
+    uiStore.showError(userMessage)
+    console.error('Payment error:', err)
+  }
+
+  /**
+   * 清理过期数据
+   */
+  const cleanupExpiredData = async () => {
+    try {
+      await paymentService.cleanupExpiredData()
+    } catch (error) {
+      console.error('Failed to cleanup expired data:', error)
+    }
+  }
+
+  /**
+   * 检查会话有效性
+   */
+  const validateSession = () => {
+    if (currentSession.value && isSessionExpired.value) {
+      currentSession.value.status = 'expired'
+      if (paymentStatus.value === 'loading') {
+        paymentStatus.value = 'failed'
+        error.value = '支付会话已过期'
       }
     }
   }
 
-  // 初始化时加载已解锁的报告
-  loadUnlockedReports()
+  // 初始化时清理过期数据
+  cleanupExpiredData()
 
   return {
     // 状态
     paymentStatus,
     currentSession,
-    unlockedReports,
+    lastPaymentResult,
+    isProcessing,
+    error,
+
+    // 计算属性
+    hasActiveSession,
+    isSessionExpired,
 
     // 方法
     initiatePayment,
     verifyPayment,
-    unlockReport,
-    isReportUnlocked
+    checkPaymentStatus,
+    isReportUnlocked,
+    getAccessInfo,
+    getOrderHistory,
+    getProductInfo,
+    formatAmount,
+    resetPaymentState,
+    cancelPayment,
+    retryPayment,
+    handlePaymentError,
+    cleanupExpiredData,
+    validateSession
   }
 })
