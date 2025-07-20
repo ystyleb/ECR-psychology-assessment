@@ -1,4 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Ensure nvm environment is loaded
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Check if npx is available
+if ! command -v npx >/dev/null 2>&1; then
+    echo "Error: npx command not found. Please ensure Node.js is properly installed."
+    echo "Current PATH: $PATH"
+    exit 1
+fi
+
 npx lint-staged
