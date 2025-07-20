@@ -1,0 +1,7 @@
+# Load nvm environment for husky hooks
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Ensure PATH includes node_modules/.bin
+export PATH="$PWD/node_modules/.bin:$PATH" 
