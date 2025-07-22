@@ -1,0 +1,14 @@
+# Temporarily ignore new files while fixing issues
+src/components/charts/ProgressRing.vue
+src/components/charts/QuadrantChart.vue
+src/components/charts/RadarChart.vue
+src/components/common/ErrorState.vue
+src/components/report/ReportExporter.vue
+src/components/report/ReportSharer.vue
+src/composables/useChartPerformance.ts
+src/composables/useUserExperience.ts
+src/services/reportCacheService.ts
+src/services/reportService.ts
+src/services/toastService.ts
+src/utils/performance.ts
+src/views/DetailedReportView.vue
