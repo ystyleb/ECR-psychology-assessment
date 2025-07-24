@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteLocationNormalized } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { useAssessmentStore } from '@/stores/assessment'
+import { useECR } from '@/store'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -95,9 +95,9 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   // 验证测评详情页面的访问权限
   if (to.name === 'assessment-detail') {
     const assessmentId = to.params.id as string
-    const assessmentStore = useAssessmentStore()
+    const store = useECR()
 
-    if (!assessmentStore.hasAssessment(assessmentId)) {
+    if (!store.hasAssessment(assessmentId)) {
       // 如果测评不存在，重定向到测评开始页面
       next({ name: 'assessment' })
       return
@@ -107,9 +107,9 @@ router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, n
   // 验证报告页面的访问权限
   if (to.name === 'report') {
     const assessmentId = to.params.id as string
-    const assessmentStore = useAssessmentStore()
+    const store = useECR()
 
-    if (!assessmentStore.hasAssessment(assessmentId)) {
+    if (!store.hasAssessment(assessmentId)) {
       // 如果测评不存在，重定向到首页
       next({ name: 'home' })
       return

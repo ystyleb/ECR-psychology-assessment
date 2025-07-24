@@ -170,12 +170,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAssessmentStore } from '@/stores/assessment'
-import { useUIStore } from '@/stores/ui'
+import { useECR } from '@/store'
 
 const router = useRouter()
-const assessmentStore = useAssessmentStore()
-const uiStore = useUIStore()
+const store = useECR()
 
 const loading = ref(false)
 const stats = ref({
@@ -187,13 +185,10 @@ const stats = ref({
 const startAssessment = async () => {
   try {
     loading.value = true
-    uiStore.showInfo('正在准备测评...')
+    store.showInfo('正在准备测评...')
 
     // 创建新的测评会话
-    const assessmentId = assessmentStore.createNewAssessment()
-
-    // 初始化测评
-    assessmentStore.startAssessment()
+    const assessmentId = await store.createNewAssessment()
 
     // 短暂延迟以显示加载状态
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -201,10 +196,10 @@ const startAssessment = async () => {
     // 跳转到测评详情页面
     router.push(`/assessment/${assessmentId}`)
 
-    uiStore.showSuccess('测评已开始！')
+    store.showSuccess('测评已开始！')
   } catch (error) {
     console.error('Failed to start assessment:', error)
-    uiStore.showError('启动测评失败，请重试')
+    store.showError('启动测评失败，请重试')
   } finally {
     loading.value = false
   }
