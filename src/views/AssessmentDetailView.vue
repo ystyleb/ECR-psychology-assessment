@@ -204,15 +204,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAssessmentStore } from '@/stores/assessment'
-import { useUIStore } from '@/stores/ui'
-import { questionService } from '@/services/questionService'
+import { useECR } from '@/store'
 import type { AssessmentQuestion } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
-const assessmentStore = useAssessmentStore()
-const uiStore = useUIStore()
+const store = useECR()
 
 // 响应式数据
 const currentQuestionIndex = ref(0)
