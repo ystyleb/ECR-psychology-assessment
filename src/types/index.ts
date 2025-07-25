@@ -12,6 +12,9 @@ export type * from './assessment'
 // 支付相关类型
 export type * from './payment'
 
+// 报告相关类型
+export type * from './report'
+
 // 服务层类型
 export type * from './services'
 
@@ -22,31 +25,19 @@ export type {
   AssessmentData,
   AssessmentQuestion,
   BasicResult,
-  DetailedReport,
-
-  // 支付相关
-  PaymentStatus,
-  PaymentSession,
-  PaymentResult,
-
-  // 通用类型
-  ApiResponse,
-  LoadingState,
-  AsyncState,
-  NotificationType,
-
-  // UI类型
-  ButtonVariant,
-  ButtonSize,
-  ModalSize,
-  AlertType,
-
-  // 服务类型
-  HttpMethod,
-  RequestConfig,
-  Response,
-  ValidationResult
+  DetailedReport
 } from './assessment'
+
+export type {
+  // 报告相关
+  BasicReport,
+  DetailedReportData,
+  AttachmentTypeDescription,
+  AttachmentScores,
+  AttachmentPercentiles,
+  ReportType,
+  ReportStatus
+} from './report'
 
 export type { PaymentStatus, PaymentSession, PaymentResult } from './payment'
 

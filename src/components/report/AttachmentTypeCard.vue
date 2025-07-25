@@ -119,34 +119,7 @@
       </div>
     </div>
 
-    <!-- 操作按钮 -->
-    <div v-if="showActions" class="flex flex-wrap gap-2">
-      <button
-        v-if="!isUnlocked"
-        @click="$emit('unlock-detailed')"
-        class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
-      >
-        <i class="fas fa-unlock mr-2"></i>
-        解锁详细分析
-      </button>
 
-      <button
-        v-if="isUnlocked"
-        @click="$emit('view-detailed')"
-        class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-      >
-        <i class="fas fa-eye mr-2"></i>
-        查看详细报告
-      </button>
-
-      <button
-        @click="$emit('share')"
-        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-      >
-        <i class="fas fa-share-alt mr-2"></i>
-        分享
-      </button>
-    </div>
   </div>
 </template>
 

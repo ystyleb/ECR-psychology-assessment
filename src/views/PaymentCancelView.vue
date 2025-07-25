@@ -276,8 +276,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { usePaymentStore } from '@/stores/payment'
-import { useUIStore } from '@/stores/ui'
+import { useAppStore } from '@/store'
+// import { useUIStore } from '@/stores/ui'
 
 // 响应式数据
 const isRetrying = ref(false)
@@ -299,8 +299,8 @@ const premiumFeatures = [
 // 路由和状态管理
 const route = useRoute()
 const router = useRouter()
-const paymentStore = usePaymentStore()
-const uiStore = useUIStore()
+const appStore = useAppStore()
+// const uiStore = useUIStore()
 
 // 计算属性
 const assessmentId = computed(() => route.query.assessment_id as string)

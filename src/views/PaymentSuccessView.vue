@@ -283,8 +283,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { usePaymentStore } from '@/stores/payment'
-import { useUIStore } from '@/stores/ui'
+import { useAppStore } from '@/store'
+// import { useUIStore } from '@/stores/ui'
 
 // 响应式数据
 const isVerifying = ref(true)
@@ -310,8 +310,7 @@ const features = [
 // 路由和状态管理
 const route = useRoute()
 const router = useRouter()
-const paymentStore = usePaymentStore()
-const uiStore = useUIStore()
+const appStore = useAppStore()
 
 // 计算属性
 const sessionId = computed(() => route.query.session_id as string)

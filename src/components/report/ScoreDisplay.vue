@@ -162,38 +162,13 @@
       </p>
     </div>
 
-    <!-- 操作按钮 -->
-    <div v-if="showActions" class="mt-6 flex flex-wrap gap-3">
-      <button
-        @click="$emit('view-chart')"
-        class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
-      >
-        <i class="fas fa-chart-radar mr-2"></i>
-        查看图表
-      </button>
 
-      <button
-        @click="$emit('compare')"
-        class="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors flex items-center justify-center"
-      >
-        <i class="fas fa-balance-scale mr-2"></i>
-        对比分析
-      </button>
-
-      <button
-        @click="$emit('export')"
-        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
-      >
-        <i class="fas fa-download mr-2"></i>
-        导出
-      </button>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 // import { computed } from 'vue'
-import type { AttachmentScores, AttachmentPercentiles } from '@/types'
+import type { AttachmentScores, AttachmentPercentiles } from '@/types/report'
 
 interface Props {
   scores: AttachmentScores

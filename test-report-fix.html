@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报告页面测试脚本</title>
+    <style>
+        body {
+            font-family: 'PingFang SC', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .script-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .script-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .step-number {
+            background: #007bff;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 ECR报告页面测试脚本</h1>
+        
+        <div class="instructions">
+            <strong>📋 使用说明：</strong><br>
+            1. 确保开发服务器运行在 http://localhost:5173<br>
+            2. 打开浏览器开发者工具 (F12)<br>
+            3. 切换到 Console 标签<br>
+            4. 复制并执行下面的脚本
+        </div>
+
+        <div class="step">
+            <div class="script-title">
+                <span class="step-number">1</span>
+                创建测评并快速完成
+            </div>
+            <div class="code-block">
+// 导入store
+const { useAppStore } = await import('/src/store.ts')
+const store = useAppStore()
+
+// 创建新测评
+console.log('🚀 创建新测评...')
+const assessmentId = await store.createNewAssessment()
+console.log('✅ 测评创建成功，ID:', assessmentId)
+
+// 快速完成测评（安全型）
+console.log('⚡ 快速完成测评...')
+await store.quickCompleteAssessment('secure')
+console.log('✅ 测评完成！')
+
+// 检查数据
+console.log('📊 检查测评数据:', store.currentAssessment)
+console.log('📈 检查结果数据:', store.currentAssessment?.result)
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="script-title">
+                <span class="step-number">2</span>
+                跳转到报告页面
+            </div>
+            <div class="code-block">
+// 跳转到基础报告页面
+const reportUrl = `/report/${assessmentId}`
+console.log('🔗 跳转到报告页面:', reportUrl)
+window.location.href = reportUrl
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ 如果仍然看到"测评尚未完成"错误：</strong><br>
+            请在控制台中运行调试脚本检查数据状态
+        </div>
+
+        <div class="step">
+            <div class="script-title">
+                <span class="step-number">3</span>
+                调试脚本（如果报告页面仍有问题）
+            </div>
+            <div class="code-block">
+// 调试当前状态
+console.log('=== 调试信息 ===')
+console.log('Current URL:', window.location.href)
+console.log('Assessment ID from URL:', window.location.pathname.split('/')[2])
+
+// 重新获取store
+const { useAppStore } = await import('/src/store.ts')
+const store = useAppStore()
+
+console.log('Store assessment:', store.currentAssessment)
+console.log('Has assessment:', !!store.currentAssessment)
+console.log('Assessment result:', store.currentAssessment?.result)
+console.log('Assessment basicResult:', store.currentAssessment?.basicResult)
+
+// 如果没有数据，尝试加载
+const urlAssessmentId = window.location.pathname.split('/')[2]
+if (urlAssessmentId && (!store.currentAssessment || store.currentAssessment.id !== urlAssessmentId)) {
+    console.log('🔄 尝试加载测评数据...')
+    const success = await store.loadAssessment(urlAssessmentId)
+    console.log('加载结果:', success)
+    console.log('加载后的数据:', store.currentAssessment)
+}
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="script-title">
+                <span class="step-number">4</span>
+                快速测试不同依恋类型
+            </div>
+            <div class="code-block">
+// 测试不同依恋类型
+const testTypes = ['secure', 'anxious', 'avoidant', 'disorganized']
+
+for (const type of testTypes) {
+    console.log(`🧪 测试 ${type} 类型...`)
+    
+    // 创建新测评
+    const id = await store.createNewAssessment()
+    await store.quickCompleteAssessment(type)
+    
+    console.log(`✅ ${type} 类型测评完成`)
+    console.log(`📊 结果:`, store.currentAssessment?.result)
+    
+    // 跳转到报告页面进行验证
+    console.log(`🔗 访问报告: /report/${id}`)
+}
+            </div>
+        </div>
+
+        <div class="success">
+            <strong>✅ 预期结果：</strong><br>
+            1. 能够成功创建和完成测评<br>
+            2. 报告页面显示正确的依恋类型和分数<br>
+            3. 基础报告和详细报告都能正常显示<br>
+            4. 不再出现"测评尚未完成"的错误
+        </div>
+
+        <div class="script-section">
+            <div class="script-title">🎯 直接测试按钮</div>
+            <p>你也可以点击下面的按钮来快速执行测试：</p>
+            
+            <button class="button" onclick="runQuickTest()">🚀 快速测试</button>
+            <button class="button" onclick="runFullTest()">🧪 完整测试</button>
+            <button class="button" onclick="runDebugCheck()">🔍 调试检查</button>
+            <button class="button" onclick="runAutoTest()">🤖 自动测试修复</button>
+        </div>
+    </div>
+
+    <script>
+        async function runQuickTest() {
+            try {
+                console.log('🚀 开始快速测试...')
+                
+                const { useAppStore } = await import('/src/store.ts')
+                const store = useAppStore()
+                
+                const assessmentId = await store.createNewAssessment()
+                console.log('✅ 测评创建成功，ID:', assessmentId)
+                
+                await store.quickCompleteAssessment('secure')
+                console.log('✅ 测评完成！')
+                
+                window.location.href = `/report/${assessmentId}`
+            } catch (error) {
+                console.error('❌ 测试失败:', error)
+                alert('测试失败，请查看控制台')
+            }
+        }
+
+        async function runFullTest() {
+            try {
+                console.log('🧪 开始完整测试...')
+                
+                const { useAppStore } = await import('/src/store.ts')
+                const store = useAppStore()
+                
+                const types = ['secure', 'anxious', 'avoidant', 'disorganized']
+                
+                for (const type of types) {
+                    console.log(`🧪 测试 ${type} 类型...`)
+                    
+                    const id = await store.createNewAssessment()
+                    await store.quickCompleteAssessment(type)
+                    
+                    console.log(`✅ ${type} 类型测评完成`)
+                    console.log(`📊 结果:`, store.currentAssessment?.result)
+                }
+                
+                alert('完整测试完成，请查看控制台日志')
+            } catch (error) {
+                console.error('❌ 测试失败:', error)
+                alert('测试失败，请查看控制台')
+            }
+        }
+
+        async function runDebugCheck() {
+            try {
+                console.log('🔍 开始调试检查...')
+                
+                const { useAppStore } = await import('/src/store.ts')
+                const store = useAppStore()
+                
+                console.log('Store assessment:', store.currentAssessment)
+                console.log('Has assessment:', !!store.currentAssessment)
+                console.log('Assessment basicResult:', store.currentAssessment?.basicResult)
+                
+                const urlAssessmentId = window.location.pathname.split('/')[2]
+                if (urlAssessmentId) {
+                    console.log('URL Assessment ID:', urlAssessmentId)
+                    const success = await store.loadAssessment(urlAssessmentId)
+                    console.log('Load success:', success)
+                }
+                
+                alert('调试检查完成，请查看控制台日志')
+            } catch (error) {
+                console.error('❌ 调试失败:', error)
+                alert('调试失败，请查看控制台')
+            }
+        }
+
+        async function runAutoTest() {
+            try {
+                console.log('🤖 开始自动测试报告页面修复...')
+                
+                const { useAppStore } = await import('/src/store.ts')
+                const store = useAppStore()
+                
+                // 创建新测评
+                console.log('📝 创建新测评...')
+                const assessmentId = await store.createNewAssessment()
+                console.log('✅ 测评创建成功，ID:', assessmentId)
+                
+                // 快速完成测评
+                console.log('⚡ 快速完成测评（焦虑型）...')
+                await store.quickCompleteAssessment('anxious')
+                console.log('✅ 测评完成！')
+                
+                // 检查数据结构
+                console.log('📊 检查数据结构:')
+                console.log('  - currentAssessment:', !!store.currentAssessment)
+                console.log('  - has basicResult:', !!store.currentAssessment?.basicResult)
+                console.log('  - result data:', store.currentAssessment?.basicResult)
+                
+                // 模拟报告页面检查逻辑
+                console.log('🔍 模拟报告页面检查逻辑...')
+                const assessment = store.currentAssessment
+                const hasBasicResult = !!assessment?.basicResult
+                
+                if (hasBasicResult) {
+                    console.log('✅ 报告页面应该能正常显示数据')
+                    
+                    // 测试数据转换逻辑
+                    const result = assessment?.basicResult
+                    const convertedResult = {
+                        anxious: result.anxious,
+                        avoidant: result.avoidant,
+                        attachmentStyle: result.style
+                    }
+                    console.log('📈 转换后的结果:', convertedResult)
+                    
+                    // 跳转到报告页面验证
+                    console.log('🔗 跳转到报告页面进行最终验证...')
+                    window.location.href = `/report/${assessmentId}`
+                    
+                } else {
+                    console.error('❌ 数据检查失败，报告页面仍然会出错')
+                    alert('数据检查失败，请查看控制台')
+                }
+                
+            } catch (error) {
+                console.error('❌ 自动测试失败:', error)
+                alert('自动测试失败，请查看控制台')
+            }
+        }
+    </script>
+</body>
+</html> 
