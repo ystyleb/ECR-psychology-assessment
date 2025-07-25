@@ -9,6 +9,7 @@ export interface PaymentSession {
   currency: string
   status: 'pending' | 'completed' | 'expired'
   stripeSessionId?: string
+  url?: string
   createdAt: Date
   expiresAt: Date
 }

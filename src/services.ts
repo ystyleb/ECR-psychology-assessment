@@ -463,18 +463,58 @@ class ECRService {
 
   // ===== 支付相关方法 =====
   async createPaymentSession(assessmentId: string): Promise<PaymentSession> {
+    // 开发环境模拟支付
+    if (import.meta.env.DEV) {
+      console.log('🔧 Development mode: Creating mock payment session')
+      
+      // 模拟支付会话
+      const mockSession = {
+        id: `mock_session_${Date.now()}`,
+        assessmentId,
+        amount: 1990,
+        currency: 'cny',
+        status: 'pending' as const,
+        stripeSessionId: `mock_stripe_${Date.now()}`,
+        url: `${window.location.origin}/payment/success?session_id=mock_session&assessment_id=${assessmentId}`,
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30分钟后过期
+      } as PaymentSession
+      
+      // 保存会话信息
+      const sessions = this.getItem<Record<string, any>>(this.STORAGE_KEYS.sessions) || {}
+      sessions[assessmentId] = {
+        sessionId: mockSession.id,
+        status: 'pending',
+        createdAt: new Date(),
+        assessmentId
+      }
+      this.setItem(this.STORAGE_KEYS.sessions, sessions)
+      
+      console.log('🔧 Mock payment session created:', mockSession)
+      return mockSession
+    }
+    
+    // 生产环境实际支付
     try {
+      const successUrl = `${window.location.origin}/payment/success`
+      const cancelUrl = `${window.location.origin}/payment/cancel`
+      
       const response = await fetch(`${this.baseUrl}/api/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assessmentId })
+        body: JSON.stringify({ 
+          assessmentId,
+          successUrl,
+          cancelUrl
+        })
       })
 
       if (!response.ok) {
         throw new Error('支付会话创建失败')
       }
 
-      const session = await response.json()
+      const data = await response.json()
+      const session = data.session
       
       // 保存会话信息
       const sessions = this.getItem<Record<string, any>>(this.STORAGE_KEYS.sessions) || {}

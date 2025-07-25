@@ -132,8 +132,24 @@ const retryLoad = () => {
   loadBasicReport()
 }
 
-const handleUnlock = () => {
-  // 支付成功后跳转到详细报告
-  router.push(`/report/${assessmentId.value}/detailed`)
+const handleUnlock = async () => {
+  try {
+    console.log('🔓 Starting payment process for assessment:', assessmentId.value)
+    
+    // 发起支付
+    const session = await appStore.initiatePayment(assessmentId.value)
+    
+    if (session && (session as any).url) {
+      console.log('💳 Redirecting to payment URL:', (session as any).url)
+      // 跳转到Stripe支付页面
+      window.location.href = (session as any).url
+    } else {
+      console.error('❌ No payment URL received')
+      appStore.showError('支付创建失败，请重试')
+    }
+  } catch (error) {
+    console.error('❌ Payment initiation failed:', error)
+    appStore.showError('支付创建失败，请重试')
+  }
 }
 </script>

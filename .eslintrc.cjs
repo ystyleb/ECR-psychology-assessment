@@ -1,3 +1,13 @@
+/*
+ * @Author       : winsonyang 
+ * @Date         : 2025-07-20 16:13:37
+ * @LastEditors  : winsonyang 
+ * @LastEditTime : 2025-07-25 17:00:20
+ * @FilePath     : /ECR/.eslintrc.cjs
+ * @Description  : 
+ * 
+ * Copyright (c) 2025 by Tencent, All Rights Reserved. 
+ */
 /* eslint-env node */
 require('@rushstack/eslint-patch/modern-module-resolution')
 

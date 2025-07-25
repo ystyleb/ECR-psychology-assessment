@@ -307,9 +307,17 @@ const { attachmentDescription, scores, percentiles, basicReportData } = useRepor
 
 // 生命周期
 onMounted(async () => {
+  console.log('🔒 DetailedReportView: Checking access for assessment:', assessmentId.value)
+  console.log('🔒 DetailedReportView: hasAccess:', hasAccess.value)
+  
   if (!hasAccess.value) {
+    console.log('🔒 DetailedReportView: No access, redirecting to basic report')
+    // 没有访问权限，重定向到基础报告页面
+    router.replace({ name: 'report', params: { id: assessmentId.value } })
     return
   }
+  
+  console.log('🔒 DetailedReportView: Access granted, loading detailed report')
   await loadDetailedReport()
 })
 

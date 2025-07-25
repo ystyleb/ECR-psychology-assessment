@@ -336,23 +336,39 @@ const verifyPayment = async () => {
   }
 
   try {
-    const success = await paymentStore.verifyPayment(sessionId.value)
+    // 开发环境模拟支付验证成功
+    if (import.meta.env.DEV && sessionId.value.includes('mock_session')) {
+      console.log('🔧 Development mode: Mock payment verification success')
+      
+      // 模拟支付状态更新
+      const sessions = JSON.parse(localStorage.getItem('ecr_payment_sessions') || '{}')
+      if (assessmentId.value && sessions[assessmentId.value]) {
+        sessions[assessmentId.value].status = 'completed'
+        localStorage.setItem('ecr_payment_sessions', JSON.stringify(sessions))
+      }
+      
+      verificationSuccess.value = true
+      isVerifying.value = false
+      return
+    }
+    
+    // 生产环境实际验证
+    const result = await appStore.verifyPayment(sessionId.value)
+    const success = result.success
 
     if (success) {
       verificationSuccess.value = true
 
-      // 设置支付信息（从store的lastPaymentResult获取）
-      if (paymentStore.lastPaymentResult?.paymentInfo) {
-        paymentInfo.value = {
-          customerEmail: paymentStore.lastPaymentResult.paymentInfo.customerEmail || '',
-          receiptUrl: paymentStore.lastPaymentResult.paymentInfo.receiptUrl || ''
-        }
+      // 设置支付信息（模拟）
+      paymentInfo.value = {
+        customerEmail: 'user@example.com',
+        receiptUrl: '#'
       }
 
       showToast('支付验证成功！')
     } else {
       verificationError.value = true
-      errorMessage.value = paymentStore.error || '支付验证失败'
+      errorMessage.value = '支付验证失败'
     }
   } catch (error) {
     console.error('Payment verification failed:', error)
@@ -376,9 +392,11 @@ const retryVerification = async () => {
 
 const goToReport = () => {
   if (assessmentId.value) {
-    router.push(`/assessment/${assessmentId.value}/report`)
+    // 跳转到详细报告页面
+    router.push(`/report/${assessmentId.value}/detailed`)
   } else {
-    router.push('/assessments')
+    // 没有assessmentId时跳转到首页
+    router.push('/')
   }
 }
 
@@ -429,7 +447,7 @@ onMounted(() => {
   verifyPayment()
 
   // 显示成功提示
-  uiStore.showSuccess('欢迎来到支付成功页面')
+  appStore.showSuccess('支付成功！')
 })
 </script>
 
