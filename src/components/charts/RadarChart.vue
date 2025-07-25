@@ -1,357 +1,458 @@
 <template>
   <div class="radar-chart-container">
+    <!-- 图表标题 -->
     <div class="chart-header mb-4">
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">依恋维度分析</h3>
-      <p class="text-sm text-gray-600">您在焦虑和回避两个维度上的得分分布</p>
+      <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+        <i class="fas fa-chart-pie mr-2 text-blue-600"></i>
+        {{ title || '依恋维度雷达图' }}
+      </h4>
+      <p v-if="description" class="text-sm text-gray-600 mt-1">{{ description }}</p>
     </div>
-    
+
+    <!-- 图表容器 -->
     <div class="chart-wrapper relative">
-      <canvas 
-        ref="chartCanvas" 
-        :width="canvasSize.width" 
-        :height="canvasSize.height"
-        class="max-w-full h-auto"
-      ></canvas>
-      
+      <div class="aspect-square max-w-md mx-auto">
+        <Radar
+          :data="chartData"
+          :options="chartOptions"
+          :chart-id="chartId"
+          :dataset-id-key="datasetIdKey"
+          :plugins="chartPlugins"
+          :css-classes="cssClasses"
+          :styles="styles"
+          :width="width"
+          :height="height"
+        />
+      </div>
+
       <!-- 加载状态 -->
-      <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
-        <div class="flex items-center space-x-2">
-          <div class="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
-          <span class="text-gray-600">正在渲染图表...</span>
+      <div
+        v-if="loading"
+        class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center"
+      >
+        <div class="text-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p class="text-sm text-gray-600">正在生成图表...</p>
         </div>
       </div>
     </div>
 
     <!-- 图表说明 -->
-    <div class="chart-legend mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div class="flex items-center">
-        <div class="w-4 h-4 rounded bg-blue-500 mr-2"></div>
-        <span class="text-sm text-gray-700">您的得分</span>
+    <div class="chart-legend mt-4">
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <div class="flex items-center space-x-2">
+          <div class="w-3 h-3 rounded-full bg-red-500"></div>
+          <span class="text-gray-700">焦虑依恋</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span class="text-gray-700">回避依恋</span>
+        </div>
       </div>
-      <div class="flex items-center">
-        <div class="w-4 h-4 rounded bg-gray-300 border-2 border-gray-400 mr-2"></div>
-        <span class="text-sm text-gray-700">平均水平</span>
+      <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+        <p class="text-xs text-gray-600 leading-relaxed">
+          雷达图展示了您在不同依恋维度上的得分分布。图形越向外扩展，表示该维度得分越高。
+          理想的安全型依恋通常在焦虑和回避维度上都保持较低得分。
+        </p>
       </div>
     </div>
 
-    <!-- 维度解释 -->
-    <div class="dimensions-explanation mt-6 space-y-3">
-      <div class="explanation-item">
-        <div class="flex items-center mb-1">
-          <div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div>
-          <span class="font-medium text-gray-800">焦虑维度 ({{ Math.round(scores.anxious * 10) / 10 }}分)</span>
-        </div>
-        <p class="text-sm text-gray-600 ml-4">
-          {{ getAnxietyDescription(scores.anxious) }}
-        </p>
+    <!-- 数据表格（可选） -->
+    <div v-if="showDataTable" class="data-table mt-4">
+      <h5 class="font-medium text-gray-800 mb-2">详细数据</h5>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="px-3 py-2 text-left font-medium text-gray-700">维度</th>
+              <th class="px-3 py-2 text-center font-medium text-gray-700">得分</th>
+              <th class="px-3 py-2 text-center font-medium text-gray-700">百分位</th>
+              <th class="px-3 py-2 text-left font-medium text-gray-700">解释</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in tableData" :key="index" class="border-t">
+              <td class="px-3 py-2 font-medium" :style="{ color: item.color }">
+                {{ item.label }}
+              </td>
+              <td class="px-3 py-2 text-center">{{ item.value.toFixed(1) }}</td>
+              <td class="px-3 py-2 text-center">{{ item.percentile }}%</td>
+              <td class="px-3 py-2 text-xs text-gray-600">{{ item.interpretation }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      
-      <div class="explanation-item">
-        <div class="flex items-center mb-1">
-          <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
-          <span class="font-medium text-gray-800">回避维度 ({{ Math.round(scores.avoidant * 10) / 10 }}分)</span>
-        </div>
-        <p class="text-sm text-gray-600 ml-4">
-          {{ getAvoidanceDescription(scores.avoidant) }}
-        </p>
-      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div v-if="showActions" class="chart-actions mt-4 flex flex-wrap gap-2">
+      <button
+        @click="downloadChart"
+        class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+      >
+        <i class="fas fa-download mr-2"></i>
+        下载图表
+      </button>
+      <button
+        @click="toggleDataTable"
+        class="flex-1 bg-gray-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-700 transition-colors"
+      >
+        <i class="fas fa-table mr-2"></i>
+        {{ showDataTable ? '隐藏' : '显示' }}数据
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
-import { Chart, RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js'
+import { ref, computed, watch, onMounted } from 'vue'
+import {
+  Chart as ChartJS,
+  RadialLinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip,
+  Legend,
+  type ChartData,
+  type ChartOptions
+} from 'chart.js'
+import { Radar } from 'vue-chartjs'
+import type { AttachmentScores, AttachmentPercentiles } from '@/types'
 
 // 注册Chart.js组件
-Chart.register(RadarController, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
+ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
 interface Props {
-  scores: {
-    anxious: number
-    avoidant: number
+  data: {
+    scores: AttachmentScores
+    percentiles?: AttachmentPercentiles
   }
-  showComparison?: boolean
-  animated?: boolean
+  title?: string
+  description?: string
+  config?: Record<string, any>
+  loading?: boolean
+  showDataTable?: boolean
+  showActions?: boolean
+  chartId?: string
+  datasetIdKey?: string
+  width?: number
+  height?: number
+  cssClasses?: string
+  styles?: Record<string, string>
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showComparison: true,
-  animated: true
+  loading: false,
+  showDataTable: false,
+  showActions: true,
+  chartId: 'radar-chart',
+  datasetIdKey: 'label',
+  width: 400,
+  height: 400,
+  cssClasses: '',
+  styles: () => ({})
 })
 
-// 响应式数据
-const chartCanvas = ref<HTMLCanvasElement>()
-const chartInstance = ref<Chart | null>(null)
-const isLoading = ref(true)
+// 响应式状态
+const showTableData = ref(props.showDataTable)
 
 // 计算属性
-const canvasSize = computed(() => ({
-  width: 400,
-  height: 400
-}))
-
-// 方法
-const getAnxietyDescription = (score: number): string => {
-  if (score <= 2.5) return '您在关系中表现出较低的焦虑，通常能够保持情绪稳定。'
-  if (score <= 4.0) return '您的焦虑水平适中，在多数情况下能够有效管理关系压力。'
-  if (score <= 5.5) return '您可能会在关系中感到一定程度的焦虑，担心伴侣的反应。'
-  return '您在关系中容易感到强烈焦虑，经常担心被拒绝或遗弃。'
-}
-
-const getAvoidanceDescription = (score: number): string => {
-  if (score <= 2.5) return '您很愿意在关系中保持亲密，容易信任他人。'
-  if (score <= 4.0) return '您能够建立亲密关系，但有时会保持一定的情感距离。'
-  if (score <= 5.5) return '您倾向于在关系中保持独立，可能会避免过度依赖。'
-  return '您更喜欢保持情感距离，认为过度依赖他人是有风险的。'
-}
-
-const createChart = async () => {
-  if (!chartCanvas.value) return
-
-  try {
-    isLoading.value = true
-    
-    const ctx = chartCanvas.value.getContext('2d')
-    if (!ctx) return
-
-    // 准备数据
-    const userData = [
-      props.scores.anxious,
-      props.scores.avoidant,
-      (props.scores.anxious + props.scores.avoidant) / 2, // 综合指标
-      Math.abs(props.scores.anxious - props.scores.avoidant) // 差异指标
-    ]
-
-    const averageData = [3.5, 3.5, 3.5, 1.0] // 平均水平参考
-
-    const chartData = {
-      labels: ['焦虑依恋', '回避依恋', '整体水平', '维度差异'],
-      datasets: [
-        {
-          label: '您的得分',
-          data: userData,
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          borderColor: 'rgba(59, 130, 246, 1)',
-          borderWidth: 2,
-          pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgba(59, 130, 246, 1)',
-          pointRadius: 5,
-          pointHoverRadius: 7,
-        }
-      ]
-    }
-
-    // 如果显示对比，添加平均水平
-    if (props.showComparison) {
-      chartData.datasets.push({
-        label: '平均水平',
-        data: averageData,
-        backgroundColor: 'rgba(156, 163, 175, 0.1)',
-        borderColor: 'rgba(156, 163, 175, 0.8)',
-        borderWidth: 1,
-        borderDash: [5, 5],
-        pointBackgroundColor: 'rgba(156, 163, 175, 0.8)',
+const chartData = computed<ChartData<'radar'>>(() => {
+  const scores = props.data.scores
+  
+  return {
+    labels: ['焦虑依恋', '回避依恋'],
+    datasets: [
+      {
+        label: '我的得分',
+        data: [scores.anxious, scores.avoidant],
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
         pointBorderColor: '#fff',
-        pointRadius: 3,
-        pointHoverRadius: 5,
-      })
-    }
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(59, 130, 246, 1)',
+        pointRadius: 6,
+        pointHoverRadius: 8
+      },
+      {
+        label: '安全型参考',
+        data: [2.0, 2.0], // 安全型依恋的典型得分
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        borderColor: 'rgba(34, 197, 94, 0.8)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        pointBackgroundColor: 'rgba(34, 197, 94, 0.8)',
+        pointBorderColor: '#fff',
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }
+    ]
+  }
+})
 
-    // 图表配置
-    const config = {
-      type: 'radar' as const,
-      data: chartData,
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: props.animated ? {
-          duration: 1500,
-          easing: 'easeInOutCubic' as const,
-        } : false,
-        plugins: {
-          legend: {
-            position: 'bottom' as const,
-            labels: {
-              padding: 20,
-              font: {
-                size: 12
-              },
-              color: '#374151'
-            }
+const chartOptions = computed<ChartOptions<'radar'>>(() => {
+  const baseOptions: ChartOptions<'radar'> = {
+    responsive: true,
+    maintainAspectRatio: true,
+    animation: {
+      duration: 1500,
+      easing: 'easeInOutQuart'
+    },
+    scales: {
+      r: {
+        beginAtZero: true,
+        min: 0,
+        max: 7,
+        stepSize: 1,
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        },
+        angleLines: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        },
+        pointLabels: {
+          font: {
+            size: 12,
+            weight: '500'
           },
-          tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            borderColor: 'rgba(59, 130, 246, 0.5)',
-            borderWidth: 1,
-            callbacks: {
-              label: function(context: any) {
-                const label = context.dataset.label || ''
-                const value = Math.round(context.parsed.r * 10) / 10
-                return `${label}: ${value}分`
-              }
-            }
-          }
+          color: '#374151'
         },
-        scales: {
-          r: {
-            beginAtZero: true,
-            min: 0,
-            max: 7,
-            ticks: {
-              stepSize: 1,
-              showLabelBackdrop: false,
-              color: '#6b7280',
-              font: {
-                size: 11
-              }
-            },
-            grid: {
-              color: 'rgba(156, 163, 175, 0.3)'
-            },
-            angleLines: {
-              color: 'rgba(156, 163, 175, 0.3)'
-            },
-            pointLabels: {
-              color: '#374151',
-              font: {
-                size: 12,
-                weight: 'bold' as const
-              },
-              padding: 15
-            }
-          }
-        },
-        interaction: {
-          intersect: false,
-          mode: 'nearest' as const
+        ticks: {
+          stepSize: 1,
+          font: {
+            size: 10
+          },
+          color: '#6B7280'
         }
       }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 20,
+          font: {
+            size: 12
+          },
+          color: '#374151',
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          title: (context) => {
+            return `${context[0].label}`
+          },
+          label: (context) => {
+            const value = context.parsed.r
+            const label = context.dataset.label
+            const percentile = getPercentileForScore(context.label as string, value)
+            return [
+              `${label}: ${value.toFixed(1)}分`,
+              percentile ? `超过 ${percentile}% 的人群` : ''
+            ].filter(Boolean)
+          }
+        }
+      }
+    },
+    elements: {
+      point: {
+        hoverRadius: 8
+      }
     }
+  }
 
-    // 创建图表实例
-    chartInstance.value = new Chart(ctx, config)
-    
-    // 延迟隐藏加载状态以显示动画
-    setTimeout(() => {
-      isLoading.value = false
-    }, props.animated ? 800 : 100)
+  // 合并用户配置
+  if (props.config) {
+    return { ...baseOptions, ...props.config }
+  }
 
-  } catch (error) {
-    console.error('创建雷达图失败:', error)
-    isLoading.value = false
+  return baseOptions
+})
+
+const chartPlugins = computed(() => [
+  {
+    id: 'customCanvasBackgroundColor',
+    beforeDraw: (chart: any) => {
+      const { ctx } = chart
+      ctx.save()
+      ctx.globalCompositeOperation = 'destination-over'
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, chart.width, chart.height)
+      ctx.restore()
+    }
+  }
+])
+
+const tableData = computed(() => {
+  const scores = props.data.scores
+  const percentiles = props.data.percentiles
+  
+  return [
+    {
+      label: '焦虑依恋',
+      value: scores.anxious,
+      percentile: percentiles?.anxious || 0,
+      color: '#EF4444',
+      interpretation: getScoreInterpretation(scores.anxious)
+    },
+    {
+      label: '回避依恋',
+      value: scores.avoidant,
+      percentile: percentiles?.avoidant || 0,
+      color: '#3B82F6',
+      interpretation: getScoreInterpretation(scores.avoidant)
+    }
+  ]
+})
+
+// 方法
+const getPercentileForScore = (dimension: string, _score: number): number | null => {
+  if (!props.data.percentiles) return null
+  
+  switch (dimension) {
+    case '焦虑依恋':
+      return props.data.percentiles.anxious
+    case '回避依恋':
+      return props.data.percentiles.avoidant
+    default:
+      return null
   }
 }
 
-const destroyChart = () => {
-  if (chartInstance.value) {
-    chartInstance.value.destroy()
-    chartInstance.value = null
+const getScoreInterpretation = (score: number): string => {
+  if (score <= 2.5) {
+    return '得分较低，该维度特征不明显'
+  } else if (score <= 4.5) {
+    return '得分中等，该维度特征适中'
+  } else if (score <= 6.0) {
+    return '得分较高，该维度特征比较明显'
+  } else {
+    return '得分很高，该维度特征非常明显'
   }
 }
 
-const updateChart = () => {
-  destroyChart()
-  nextTick(() => {
-    createChart()
-  })
+const toggleDataTable = () => {
+  showTableData.value = !showTableData.value
 }
+
+const downloadChart = () => {
+  const canvas = document.querySelector(`#${props.chartId} canvas`) as HTMLCanvasElement
+  if (canvas) {
+    const link = document.createElement('a')
+    link.download = `ecr-radar-chart-${Date.now()}.png`
+    link.href = canvas.toDataURL()
+    link.click()
+  }
+}
+
+// 监听数据变化
+watch(
+  () => props.data,
+  () => {
+    // 数据变化时的处理逻辑
+  },
+  { deep: true }
+)
 
 // 生命周期
 onMounted(() => {
-  nextTick(() => {
-    createChart()
-  })
-})
-
-onUnmounted(() => {
-  destroyChart()
-})
-
-// 暴露方法供父组件调用
-defineExpose({
-  updateChart,
-  destroyChart
+  // 组件挂载后的初始化逻辑
 })
 </script>
 
 <style scoped>
 .radar-chart-container {
-  @apply bg-white rounded-lg p-6 shadow-sm border border-gray-200;
+  @apply bg-white rounded-2xl shadow-lg p-6;
 }
 
 .chart-wrapper {
-  @apply flex justify-center items-center;
-  min-height: 300px;
+  @apply transition-all duration-300;
 }
 
-.chart-header h3 {
-  @apply text-gray-800;
+.chart-header h4 {
+  @apply transition-colors duration-200;
 }
 
-.dimensions-explanation {
-  @apply bg-gray-50 rounded-lg p-4;
+.chart-header:hover h4 {
+  @apply text-blue-700;
 }
 
-.explanation-item {
-  @apply py-2;
+.data-table {
+  @apply transition-all duration-300;
 }
 
-.explanation-item:not(:last-child) {
+.data-table table {
+  @apply border-collapse border-spacing-0;
+}
+
+.data-table th {
+  @apply bg-gray-100 font-semibold;
+}
+
+.data-table td,
+.data-table th {
   @apply border-b border-gray-200;
 }
 
-/* 暗色主题 */
-[data-theme='dark'] .radar-chart-container {
-  @apply bg-gray-800 border-gray-700;
+.data-table tr:hover {
+  @apply bg-gray-50;
 }
 
-[data-theme='dark'] .chart-header h3,
-[data-theme='dark'] .chart-header p {
-  @apply text-gray-200;
+.chart-actions button {
+  @apply transition-all duration-200 transform;
 }
 
-[data-theme='dark'] .dimensions-explanation {
-  @apply bg-gray-700;
+.chart-actions button:hover {
+  @apply scale-105 shadow-md;
 }
 
-[data-theme='dark'] .explanation-item {
-  @apply border-gray-600;
+.chart-actions button:active {
+  @apply scale-95;
 }
 
-[data-theme='dark'] .explanation-item span,
-[data-theme='dark'] .explanation-item p {
-  @apply text-gray-300;
-}
-
-/* 响应式设计 */
-@media (max-width: 640px) {
-  .chart-wrapper {
-    min-height: 250px;
-  }
-  
-  .chart-legend {
-    @apply grid-cols-1;
-  }
-}
-
-/* 加载动画 */
+/* 动画效果 */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }
 
 .radar-chart-container {
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 640px) {
+  .chart-wrapper .aspect-square {
+    max-width: 280px;
+  }
+  
+  .data-table {
+    font-size: 0.75rem;
+  }
+  
+  .chart-actions {
+    flex-direction: column;
+  }
+  
+  .chart-actions button {
+    flex: none;
+    width: 100%;
+  }
 }
 </style>

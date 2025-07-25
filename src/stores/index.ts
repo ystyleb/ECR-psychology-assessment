@@ -1,41 +1,35 @@
-// 统一导出所有stores
+// 统一导出store（现在使用单一统一store）
+// 为了兼容性，重新导出统一store
 
-export { useAssessmentStore } from './assessment'
-export { usePaymentStore } from './payment'
-export { useUIStore } from './ui'
-export { useUserStore } from './user'
+import { useAppStore } from '@/store'
 
-// 导出store类型（如果需要）
-export type { AssessmentStore } from './assessment'
-export type { PaymentStore } from './payment'
-export type { UIStore } from './ui'
-export type { UserStore } from './user'
+// 主要导出
+export { useAppStore }
 
-// 为了类型推导，我们需要定义这些类型
-import type { useAssessmentStore } from './assessment'
-import type { usePaymentStore } from './payment'
-import type { useUIStore } from './ui'
-import type { useUserStore } from './user'
+// 兼容性别名
+export const useAssessmentStore = useAppStore
+export const usePaymentStore = useAppStore
+export const useUIStore = useAppStore
+export const useUserStore = useAppStore
 
-export type AssessmentStore = ReturnType<typeof useAssessmentStore>
-export type PaymentStore = ReturnType<typeof usePaymentStore>
-export type UIStore = ReturnType<typeof useUIStore>
-export type UserStore = ReturnType<typeof useUserStore>
+// 类型导出
+export type AppStore = ReturnType<typeof useAppStore>
+export type AssessmentStore = AppStore
+export type PaymentStore = AppStore
+export type UIStore = AppStore
+export type UserStore = AppStore
 
 // 全局store初始化函数
 export const initializeStores = () => {
-  const assessmentStore = useAssessmentStore()
-  const uiStore = useUIStore()
-  const userStore = useUserStore()
-
-  // 初始化各个store
-  assessmentStore.init()
-  uiStore.init()
-  userStore.init()
+  const appStore = useAppStore()
+  
+  // 初始化统一store
+  appStore.init()
 
   return {
-    assessmentStore,
-    uiStore,
-    userStore
+    appStore,
+    assessmentStore: appStore,
+    uiStore: appStore,
+    userStore: appStore
   }
 }

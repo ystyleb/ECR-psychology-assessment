@@ -113,23 +113,51 @@
 
         <!-- 可视化图表 -->
         <div class="grid lg:grid-cols-2 gap-8">
-          <div
-            v-for="visualization in detailedReport.visualizations"
-            :key="visualization.id"
-            class="bg-white rounded-2xl shadow-lg p-6"
-          >
-            <component
-              :is="getChartComponent(visualization.type)"
-              :data="visualization.data"
-              :title="visualization.title"
-              :description="visualization.description"
-              :config="visualization.config"
-            />
-          </div>
+          <!-- 雷达图 -->
+          <RadarChart
+            :data="{
+              scores: detailedReport.scores,
+              percentiles: detailedReport.percentiles
+            }"
+            title="依恋维度雷达图"
+            description="您在各个依恋维度上的得分分布"
+            :show-data-table="true"
+            :show-actions="true"
+          />
+          
+          <!-- 柱状图 -->
+          <BarChart
+            :data="{
+              scores: detailedReport.scores,
+              percentiles: detailedReport.percentiles,
+              attachmentStyle: detailedReport.attachmentStyle
+            }"
+            title="依恋得分对比图"
+            description="您的得分与人群平均水平的对比"
+            :show-comparison="true"
+            :show-suggestions="true"
+            :show-actions="true"
+          />
         </div>
 
+        <!-- 得分对比分析 -->
+        <ScoreComparison
+          :data="{
+            scores: detailedReport.scores,
+            percentiles: detailedReport.percentiles,
+            attachmentStyle: detailedReport.attachmentStyle
+          }"
+          title="综合对比分析"
+          description="您的依恋得分与人群的全面对比"
+          :show-trend="false"
+          :show-actions="true"
+          @export="handleExportComparison"
+          @share="handleShareComparison"
+          @view-detailed="handleViewDetailed"
+        />
+
         <!-- 深度分析章节 -->
-        <div class="bg-white rounded-2xl shadow-lg p-8">
+        <div class="detailed-analysis bg-white rounded-2xl shadow-lg p-8">
           <h3 class="text-2xl font-bold text-gray-800 mb-8 flex items-center">
             <i class="fas fa-microscope mr-3 text-blue-600"></i>
             深度心理分析
@@ -348,6 +376,7 @@ import type { DetailedReportData } from '@/types'
 // 组件导入
 import RadarChart from '@/components/charts/RadarChart.vue'
 import BarChart from '@/components/charts/BarChart.vue'
+import ScoreComparison from '@/components/charts/ScoreComparison.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -404,14 +433,29 @@ const loadDetailedReport = async () => {
   }
 }
 
-const getChartComponent = (type: string) => {
-  switch (type) {
-    case 'radar':
-      return RadarChart
-    case 'bar':
-      return BarChart
-    default:
-      return RadarChart
+const handleExportComparison = () => {
+  uiStore.showInfo('正在导出对比报告...')
+  // 实际的PDF导出逻辑
+}
+
+const handleShareComparison = () => {
+  if (navigator.share) {
+    navigator.share({
+      title: 'ECR依恋测评详细对比分析',
+      text: '我的详细依恋测评对比分析，深度分析我的关系模式！',
+      url: window.location.href
+    })
+  } else {
+    navigator.clipboard.writeText(window.location.href)
+    uiStore.showSuccess('链接已复制到剪贴板')
+  }
+}
+
+const handleViewDetailed = () => {
+  // 滚动到详细分析部分
+  const detailedSection = document.querySelector('.detailed-analysis')
+  if (detailedSection) {
+    detailedSection.scrollIntoView({ behavior: 'smooth' })
   }
 }
 

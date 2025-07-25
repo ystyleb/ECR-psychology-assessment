@@ -170,10 +170,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useECR } from '@/store'
+import { useAppStore } from '@/store'
 
 const router = useRouter()
-const store = useECR()
+const appStore = useAppStore()
 
 const loading = ref(false)
 const stats = ref({
@@ -183,25 +183,38 @@ const stats = ref({
 })
 
 const startAssessment = async () => {
+  console.log('🚀 startAssessment method called')
+  
   try {
     loading.value = true
-    store.showInfo('正在准备测评...')
+    console.log('📱 Setting loading to true')
+    
+    appStore.showInfo('正在准备测评...')
+    console.log('💬 Showing info message')
 
     // 创建新的测评会话
-    const assessmentId = await store.createNewAssessment()
+    console.log('🔄 About to call createNewAssessment')
+    const assessmentId = await appStore.createNewAssessment()
+    console.log('✅ Assessment created with ID:', assessmentId)
 
     // 短暂延迟以显示加载状态
+    console.log('⏳ Starting delay...')
     await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('⏳ Delay finished')
 
     // 跳转到测评详情页面
-    router.push(`/assessment/${assessmentId}`)
+    console.log('🔄 About to navigate to:', `/assessment/${assessmentId}`)
+    await router.push(`/assessment/${assessmentId}`)
+    console.log('✅ Navigation completed')
 
-    store.showSuccess('测评已开始！')
+    appStore.showSuccess('测评已开始！')
+    console.log('💬 Success message shown')
   } catch (error) {
-    console.error('Failed to start assessment:', error)
-    store.showError('启动测评失败，请重试')
+    console.error('❌ Failed to start assessment:', error)
+    appStore.showError('启动测评失败，请重试')
   } finally {
     loading.value = false
+    console.log('📱 Loading set to false')
   }
 }
 

@@ -7,12 +7,21 @@
       "Bash(open:*)",
       "Bash(rg:*)",
       "Bash(mkdir:*)",
+<<<<<<< HEAD
       "Bash(git checkout:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(cp:*)",
       "Bash(npm run type-check:*)",
       "Bash(npm run build:*)"
+=======
+      "Bash(npm run lint)",
+      "Bash(npm run dev:*)",
+      "Bash(rm:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run lint:*)",
+      "Bash(pkill:*)"
+>>>>>>> 34dc0cd (feat: 统一状态管理和报告访问控制)
     ],
     "deny": []
   }

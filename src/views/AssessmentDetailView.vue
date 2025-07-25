@@ -45,6 +45,53 @@
         </div>
       </div>
 
+      <!-- 开发者模式工具栏 (仅在开发环境显示) -->
+      <div v-if="isDevelopment" class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-medium text-yellow-800 flex items-center">
+            <i class="fas fa-code mr-2"></i>
+            开发者模式
+          </h3>
+          <button
+            @click="showDevTools = !showDevTools"
+            class="text-xs px-2 py-1 bg-yellow-200 text-yellow-800 rounded hover:bg-yellow-300 transition-colors"
+          >
+            {{ showDevTools ? '隐藏' : '显示' }}工具
+          </button>
+        </div>
+        
+        <div v-if="showDevTools" class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button
+            @click="quickComplete('secure')"
+            class="px-3 py-2 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200 transition-colors"
+          >
+            安全型
+          </button>
+          <button
+            @click="quickComplete('anxious')"
+            class="px-3 py-2 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200 transition-colors"
+          >
+            焦虑型
+          </button>
+          <button
+            @click="quickComplete('avoidant')"
+            class="px-3 py-2 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
+          >
+            回避型
+          </button>
+          <button
+            @click="quickComplete('disorganized')"
+            class="px-3 py-2 text-xs bg-purple-100 text-purple-800 rounded hover:bg-purple-200 transition-colors"
+          >
+            混乱型
+          </button>
+        </div>
+        
+        <p class="text-xs text-yellow-700 mt-2">
+          快速完成功能仅用于开发测试，会自动生成对应依恋类型的模拟答案。
+        </p>
+      </div>
+
       <!-- 题目卡片 -->
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
         <!-- 题目头部 -->
@@ -204,27 +251,28 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useECR } from '@/store'
-import type { AssessmentQuestion } from '@/types'
+import { useAppStore } from '@/store'
 
 const route = useRoute()
 const router = useRouter()
-const store = useECR()
+const appStore = useAppStore()
 
-// 响应式数据
-const currentQuestionIndex = ref(0)
+// 开发者模式状态 (临时禁用以排查问题)
+const isDevelopment = ref(true) // 临时设为false
+const showDevTools = ref(false)
+
+// 响应式数据 (现在从统一store获取)
 const selectedAnswer = ref<number | null>(null)
-const questions = ref<AssessmentQuestion[]>([])
-const responses = ref<(number | null)[]>([])
 const elapsedTime = ref(0)
 const timer = ref<NodeJS.Timeout | null>(null)
 
-// 计算属性
-const totalQuestions = computed(() => questions.value.length)
-const currentQuestion = computed(() => questions.value[currentQuestionIndex.value])
-const progressPercentage = computed(() =>
-  Math.round(((currentQuestionIndex.value + 1) / totalQuestions.value) * 100)
-)
+// 计算属性 (从统一store获取)
+const totalQuestions = computed(() => appStore.questions.length)
+const currentQuestion = computed(() => appStore.currentQuestion)
+const currentQuestionIndex = computed(() => appStore.currentQuestionIndex)
+const questions = computed(() => appStore.questions)
+const responses = computed(() => appStore.currentAssessment?.responses || [])
+const progressPercentage = computed(() => appStore.currentProgress)
 
 const estimatedTimeLeft = computed(() => {
   if (currentQuestionIndex.value === 0) return 12
@@ -245,12 +293,11 @@ const formatTime = (seconds: number) => {
   return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
-const selectAnswer = (score: number) => {
+const selectAnswer = async (score: number) => {
   selectedAnswer.value = score
-  responses.value[currentQuestionIndex.value] = score
-
-  // 自动保存
-  saveProgress()
+  
+  // 通过store保存回答
+  await appStore.saveCurrentResponse(currentQuestionIndex.value, score)
 
   // 短暂延迟后自动进入下一题（可选）
   if (currentQuestionIndex.value < totalQuestions.value - 1) {
@@ -264,84 +311,90 @@ const selectAnswer = (score: number) => {
 }
 
 const previousQuestion = () => {
-  if (currentQuestionIndex.value > 0) {
-    currentQuestionIndex.value--
-    selectedAnswer.value = responses.value[currentQuestionIndex.value]
+  if (appStore.canGoPrevious) {
+    appStore.previousQuestion()
+    selectedAnswer.value = responses.value[currentQuestionIndex.value] || null
   }
 }
 
-const nextQuestion = () => {
+const nextQuestion = async () => {
   if (selectedAnswer.value !== null) {
-    // 保存当前答案
-    responses.value[currentQuestionIndex.value] = selectedAnswer.value
+    // 先保存当前答案
+    await appStore.saveCurrentResponse(currentQuestionIndex.value, selectedAnswer.value)
 
     if (currentQuestionIndex.value === totalQuestions.value - 1) {
       // 完成测评
-      completeAssessment()
+      await completeAssessment()
     } else {
       // 下一题
-      currentQuestionIndex.value++
-      selectedAnswer.value = responses.value[currentQuestionIndex.value]
+      appStore.nextQuestion()
+      selectedAnswer.value = responses.value[currentQuestionIndex.value] || null
     }
   }
 }
 
 const goToQuestion = (index: number) => {
-  if (index >= 0 && index < totalQuestions.value) {
-    currentQuestionIndex.value = index
-    selectedAnswer.value = responses.value[index]
-  }
+  appStore.goToQuestion(index)
+  selectedAnswer.value = responses.value[index] || null
 }
 
-const saveProgress = () => {
+const saveProgress = async () => {
   try {
-    // 保存每个答案
-    responses.value.forEach((response, index) => {
-      if (response !== null) {
-        assessmentStore.saveAnswer(index, response)
-      }
-    })
+    // 统一store会自动保存，这里可以是空的或者显示保存状态
+    appStore.showInfo('进度已保存')
   } catch (error) {
+    appStore.showError('保存失败')
     console.error('Failed to save progress:', error)
   }
 }
 
 const completeAssessment = async () => {
   try {
-    uiStore.showInfo('正在计算您的测评结果...')
+    appStore.showInfo('正在计算您的测评结果...')
 
     const assessmentId = route.params.id as string
 
-    // 保存最终答案
-    responses.value[currentQuestionIndex.value] = selectedAnswer.value
+    // 如果还有当前答案，先保存
+    if (selectedAnswer.value !== null) {
+      await appStore.saveCurrentResponse(currentQuestionIndex.value, selectedAnswer.value)
+    }
 
-    // 保存所有答案
-    responses.value.forEach((response, index) => {
-      if (response !== null) {
-        assessmentStore.saveAnswer(index, response)
+    // 检查是否完成
+    if (appStore.isAssessmentComplete) {
+      // 确保结果已计算并保存
+      if (!appStore.currentAssessment?.basicResult) {
+        await appStore.calculateAndSaveResult()
       }
-    })
-
-    // 计算结果
-    assessmentStore.calculateResult()
-
-    // 完成测评
-    assessmentStore.completeAssessment()
-
-    // 跳转到报告页面
-    router.push(`/report/${assessmentId}`)
-
-    uiStore.showSuccess('测评完成！正在生成您的专属报告...')
+      
+      // 跳转到报告页面
+      router.push(`/report/${assessmentId}`)
+      appStore.showSuccess('测评完成！正在生成您的专属报告...')
+    } else {
+      appStore.showError('请完成所有题目后再提交')
+    }
   } catch (error) {
     console.error('Failed to complete assessment:', error)
-    uiStore.showError('完成测评时出现错误，请重试')
+    appStore.showError('完成测评时出现错误，请重试')
   }
 }
 
-const handleExit = () => {
+// 开发者模式快速完成方法
+const quickComplete = async (style: 'secure' | 'anxious' | 'avoidant' | 'disorganized') => {
+  try {
+    await appStore.quickCompleteAssessment(style)
+    // 完成后直接跳转到报告页面
+    const assessmentId = route.params.id as string
+    router.push(`/report/${assessmentId}`)
+  } catch (error) {
+    console.error('Quick complete failed:', error)
+    appStore.showError('快速完成失败')
+  }
+}
+
+const handleExit = async () => {
   if (responses.value.some(r => r !== null)) {
     if (confirm('您的测评进度将被保存，确定要退出吗？')) {
-      saveProgress()
+      await saveProgress()
       router.push('/assessment')
     }
   } else {
@@ -373,34 +426,44 @@ const handleKeydown = (event: KeyboardEvent) => {
 
 // 生命周期钩子
 onMounted(async () => {
+  console.log('📊 AssessmentDetailView: onMounted called')
+  
   try {
-    // 获取题目数据
-    questions.value = questionService.getQuestions()
+    // 初始化题目数据 (统一store会自动初始化)
+    await appStore.init()
 
     // 初始化或恢复测评状态
     const assessmentId = route.params.id as string
+    console.log('📊 AssessmentDetailView: Checking assessment ID:', assessmentId)
 
-    if (!assessmentStore.hasAssessment(assessmentId)) {
-      uiStore.showError('测评不存在，请重新开始')
+    const hasAssessment = appStore.hasAssessment(assessmentId)
+    console.log('📊 AssessmentDetailView: hasAssessment result:', hasAssessment)
+    console.log('📊 AssessmentDetailView: Current assessment in store:', appStore.currentAssessment)
+
+    if (!hasAssessment) {
+      console.log('📊 AssessmentDetailView: Assessment not found, redirecting')
+      appStore.showError('测评不存在，请重新开始')
       router.push('/assessment')
       return
     }
 
-    // 获取当前测评数据
-    const currentAssessment = assessmentStore.currentAssessment
-    if (currentAssessment) {
-      responses.value = [...currentAssessment.responses]
-
-      // 找到第一个未回答的题目
-      const firstUnanswered = responses.value.findIndex(r => r === null)
-      if (firstUnanswered !== -1) {
-        currentQuestionIndex.value = firstUnanswered
-      } else {
-        currentQuestionIndex.value = responses.value.length - 1
+    // 加载当前测评数据 (如果不是当前测评，尝试加载)
+    if (appStore.currentAssessment?.id !== assessmentId) {
+      console.log('📊 AssessmentDetailView: Loading assessment from storage')
+      const success = await appStore.loadAssessment(assessmentId)
+      if (!success) {
+        console.log('📊 AssessmentDetailView: Failed to load assessment')
+        appStore.showError('无法加载测评数据')
+        router.push('/assessment')
+        return
       }
-
-      selectedAnswer.value = responses.value[currentQuestionIndex.value]
+    } else {
+      console.log('📊 AssessmentDetailView: Using current assessment from store')
     }
+
+    // 设置当前选中的答案
+    selectedAnswer.value = responses.value[currentQuestionIndex.value] || null
+    console.log('📊 AssessmentDetailView: Set selected answer:', selectedAnswer.value)
 
     // 启动计时器
     timer.value = setInterval(() => {
@@ -410,15 +473,15 @@ onMounted(async () => {
     // 添加键盘事件监听
     document.addEventListener('keydown', handleKeydown)
 
-    uiStore.showInfo('测评已恢复，请继续作答')
+    appStore.showInfo('测评已恢复，请继续作答')
   } catch (error) {
     console.error('Failed to initialize assessment:', error)
-    uiStore.showError('初始化测评失败')
+    appStore.showError('初始化测评失败')
     router.push('/assessment')
   }
 })
 
-onUnmounted(() => {
+onUnmounted(async () => {
   // 清理计时器
   if (timer.value) {
     clearInterval(timer.value)
@@ -428,7 +491,7 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
 
   // 保存进度
-  saveProgress()
+  await saveProgress()
 })
 
 // 监听路由变化

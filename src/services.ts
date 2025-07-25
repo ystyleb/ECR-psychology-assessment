@@ -4,7 +4,6 @@ import type {
   AssessmentQuestion, 
   AttachmentStyle, 
   BasicResult, 
-  DetailedReport,
   PaymentSession,
   PaymentResult
 } from '@/types'
@@ -174,8 +173,7 @@ class ECRService {
       id: `ecr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       responses: new Array(36).fill(null),
       createdAt: new Date(),
-      updatedAt: new Date(),
-      isCompleted: false
+      basicResult: null
     }
 
     // 保存到本地存储
@@ -193,14 +191,11 @@ class ECRService {
 
   async updateAssessment(assessment: AssessmentData): Promise<void> {
     const assessments = this.getItem<Record<string, AssessmentData>>(this.STORAGE_KEYS.assessments) || {}
-    assessment.updatedAt = new Date()
     
-    // 检查是否完成
-    assessment.isCompleted = assessment.responses.every(r => r !== null)
-    
-    // 如果完成，计算结果
-    if (assessment.isCompleted && !assessment.result) {
-      assessment.result = this.calculateResult(assessment.responses)
+    // 如果完成但没有结果，计算结果
+    const isCompleted = assessment.responses.every(r => r !== null)
+    if (isCompleted && !assessment.basicResult) {
+      assessment.basicResult = this.calculateResult(assessment.responses)
     }
 
     assessments[assessment.id] = assessment

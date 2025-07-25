@@ -1,209 +1,213 @@
-import { usePaymentStore } from '@/stores/payment'
-import { useAssessmentStore } from '@/stores/assessment'
+import { useAppStore } from '@/store'
 import reportService from '@/services/reportService'
 import type { BasicReport, DetailedReportData } from '@/types'
 
 /**
- * 报告访问控制工具
+ * 检查是否有基础报告访问权限
  */
-export class ReportAccessControl {
-  private paymentStore = usePaymentStore()
-  private assessmentStore = useAssessmentStore()
-
-  /**
-   * 检查是否有基础报告访问权限
-   */
-  canAccessBasicReport(assessmentId: string): boolean {
-    // 检查是否存在评估数据
-    const assessment = this.assessmentStore.getAssessment(assessmentId)
-    return assessment !== null && assessment.basicResult !== null
+export async function canAccessBasicReport(assessmentId: string): Promise<boolean> {
+  console.log('🔐 canAccessBasicReport called for ID:', assessmentId)
+  
+  const appStore = useAppStore()
+  
+  // 检查是否存在评估数据
+  const hasAssessment = appStore.hasAssessment(assessmentId)
+  console.log('🔐 hasAssessment result:', hasAssessment)
+  if (!hasAssessment) {
+    console.log('🔐 Assessment not found, denying access')
+    return false
   }
-
-  /**
-   * 检查是否有详细报告访问权限
-   */
-  canAccessDetailedReport(assessmentId: string): boolean {
-    // 首先检查基础报告权限
-    if (!this.canAccessBasicReport(assessmentId)) {
+  
+  // 如果当前store中已经有这个评估且ID匹配，就不需要重新加载
+  if (appStore.currentAssessment?.id === assessmentId) {
+    console.log('🔐 Using current assessment from store, no need to reload')
+  } else {
+    // 尝试加载评估数据
+    const success = await appStore.loadAssessment(assessmentId)
+    console.log('🔐 loadAssessment success:', success)
+    console.log('🔐 currentAssessment after load:', appStore.currentAssessment)
+    
+    if (!success || !appStore.currentAssessment) {
+      console.log('🔐 Failed to load assessment or no current assessment')
       return false
     }
+  }
+  
+  // 检查是否已经完成并有结果
+  const isComplete = appStore.isAssessmentComplete
+  const hasResult = !!appStore.currentAssessment.basicResult
+  console.log('🔐 isAssessmentComplete:', isComplete)
+  console.log('🔐 has basicResult:', hasResult)
+  
+  const canAccess = isComplete && hasResult
+  console.log('🔐 Final canAccessBasicReport result:', canAccess)
+  
+  return canAccess
+}
 
-    // 检查是否已支付
-    return this.paymentStore.isReportUnlocked(assessmentId)
+/**
+ * 检查是否有详细报告访问权限
+ */
+export async function canAccessDetailedReport(assessmentId: string): Promise<boolean> {
+  // 首先检查基础报告权限
+  if (!(await canAccessBasicReport(assessmentId))) {
+    return false
   }
 
-  /**
-   * 获取基础报告
-   */
-  async getBasicReport(assessmentId: string): Promise<BasicReport | null> {
-    if (!this.canAccessBasicReport(assessmentId)) {
+  const appStore = useAppStore()
+  // 检查是否已支付
+  const paymentStatus = appStore.checkPaymentStatus(assessmentId)
+  return paymentStatus.isPaid
+}
+
+/**
+ * 获取基础报告
+ */
+export async function getBasicReport(assessmentId: string): Promise<BasicReport | null> {
+  if (!canAccessBasicReport(assessmentId)) {
+    return null
+  }
+
+  // 尝试从缓存获取
+  let report = reportService.getReportByAssessmentId(assessmentId)
+
+  if (!report) {
+    // 生成基础报告
+    const appStore = useAppStore()
+    // 需要通过服务层获取评估数据
+    const assessment = appStore.currentAssessment
+    if (assessment && assessment.basicResult) {
+      report = reportService.generateBasicReport(
+        assessmentId,
+        assessment.basicResult,
+        {
+          anxious: assessment.basicResult.anxious,
+          avoidant: assessment.basicResult.avoidant,
+          secure: 7 - Math.max(assessment.basicResult.anxious, assessment.basicResult.avoidant)
+        },
+        0.85 // 默认可靠性
+      )
+    }
+  }
+
+  return report
+}
+
+/**
+ * 获取详细报告
+ */
+export async function getDetailedReport(assessmentId: string): Promise<DetailedReportData | null> {
+  if (!canAccessDetailedReport(assessmentId)) {
+    return null
+  }
+
+  // 尝试从缓存获取详细报告
+  let detailedReport = reportService.getReportByAssessmentId(assessmentId) as DetailedReportData
+
+  if (!detailedReport || detailedReport.type !== 'detailed') {
+    // 获取基础报告
+    const basicReport = await getBasicReport(assessmentId)
+    if (!basicReport) {
       return null
     }
 
-    // 尝试从缓存获取
-    let report = reportService.getReportByAssessmentId(assessmentId)
-
-    if (!report) {
-      // 生成基础报告
-      const assessment = this.assessmentStore.getAssessment(assessmentId)
-      if (assessment && assessment.basicResult) {
-        report = reportService.generateBasicReport(
-          assessmentId,
-          assessment.basicResult,
-          {
-            anxious: assessment.basicResult.anxious,
-            avoidant: assessment.basicResult.avoidant,
-            secure: 7 - Math.max(assessment.basicResult.anxious, assessment.basicResult.avoidant)
-          },
-          0.85 // 默认可靠性
-        )
-      }
-    }
-
-    return report
+    // 生成详细报告
+    detailedReport = reportService.generateDetailedReport(basicReport)
   }
 
-  /**
-   * 获取详细报告
-   */
-  async getDetailedReport(assessmentId: string): Promise<DetailedReportData | null> {
-    if (!this.canAccessDetailedReport(assessmentId)) {
-      return null
-    }
+  return detailedReport
+}
 
-    // 尝试从缓存获取详细报告
-    let detailedReport = reportService.getReportByAssessmentId(assessmentId) as DetailedReportData
+/**
+ * 获取访问状态信息
+ */
+export async function getAccessStatus(assessmentId: string) {
+  const appStore = useAppStore()
+  
+  const hasAssessment = appStore.hasAssessment(assessmentId)
+  const hasBasicAccess = await canAccessBasicReport(assessmentId)
+  const hasDetailedAccess = await canAccessDetailedReport(assessmentId)
+  const paymentStatus = appStore.checkPaymentStatus(assessmentId)
 
-    if (!detailedReport || detailedReport.type !== 'detailed') {
-      // 获取基础报告
-      const basicReport = await this.getBasicReport(assessmentId)
-      if (!basicReport) {
-        return null
-      }
-
-      // 生成详细报告
-      detailedReport = reportService.generateDetailedReport(basicReport)
-    }
-
-    return detailedReport
-  }
-
-  /**
-   * 获取访问状态信息
-   */
-  getAccessStatus(assessmentId: string) {
-    const hasAssessment = this.assessmentStore.hasAssessment(assessmentId)
-    const hasBasicAccess = this.canAccessBasicReport(assessmentId)
-    const hasDetailedAccess = this.canAccessDetailedReport(assessmentId)
-
-    return {
-      hasAssessment,
-      hasBasicAccess,
-      hasDetailedAccess,
-      needsPayment: hasBasicAccess && !hasDetailedAccess,
-      accessInfo: this.paymentStore.getAccessInfo
-        ? this.paymentStore.getAccessInfo(assessmentId)
-        : { hasAccess: false }
-    }
-  }
-
-  /**
-   * 验证报告访问令牌
-   */
-  validateAccessToken(assessmentId: string, token?: string): boolean {
-    if (!token) {
-      return this.canAccessDetailedReport(assessmentId)
-    }
-
-    // 这里可以添加更复杂的令牌验证逻辑
-    // 目前简化为检查支付状态
-    return this.paymentStore.isReportUnlocked(assessmentId)
-  }
-
-  /**
-   * 生成报告分享链接
-   */
-  generateShareLink(assessmentId: string, includeToken = false): string {
-    const baseUrl = window.location.origin
-    const reportPath = `/report/${assessmentId}`
-
-    if (includeToken && this.canAccessDetailedReport(assessmentId)) {
-      // 生成带访问令牌的链接（用于分享详细报告）
-      const accessInfo = this.paymentStore.getAccessInfo
-        ? this.paymentStore.getAccessInfo(assessmentId)
-        : null
-
-      if (accessInfo?.accessToken) {
-        return `${baseUrl}${reportPath}/detailed?token=${accessInfo.accessToken}`
-      }
-    }
-
-    return `${baseUrl}${reportPath}`
-  }
-
-  /**
-   * 检查报告是否过期
-   */
-  isReportExpired(assessmentId: string): boolean {
-    const accessInfo = this.paymentStore.getAccessInfo
-      ? this.paymentStore.getAccessInfo(assessmentId)
-      : null
-
-    if (!accessInfo?.expiresAt) {
-      return false // 没有过期时间表示永久有效
-    }
-
-    return new Date() > new Date(accessInfo.expiresAt)
-  }
-
-  /**
-   * 获取报告过期时间
-   */
-  getReportExpiryDate(assessmentId: string): Date | null {
-    const accessInfo = this.paymentStore.getAccessInfo
-      ? this.paymentStore.getAccessInfo(assessmentId)
-      : null
-
-    return accessInfo?.expiresAt ? new Date(accessInfo.expiresAt) : null
-  }
-
-  /**
-   * 清理过期的报告访问权限
-   */
-  cleanupExpiredAccess(): void {
-    // 这个方法应该定期调用以清理过期的访问权限
-    // 具体实现取决于存储机制
-    console.log('Cleaning up expired report access...')
+  return {
+    hasAssessment,
+    hasBasicAccess,
+    hasDetailedAccess,
+    needsPayment: hasBasicAccess && !hasDetailedAccess,
+    accessInfo: { hasAccess: paymentStatus.isPaid }
   }
 }
 
-// 创建单例实例
-export const reportAccessControl = new ReportAccessControl()
+/**
+ * 验证报告访问令牌
+ */
+export async function validateAccessToken(assessmentId: string, token?: string): Promise<boolean> {
+  if (!token) {
+    return canAccessDetailedReport(assessmentId)
+  }
 
-// 导出便捷函数
-export const canAccessBasicReport = (assessmentId: string) =>
-  reportAccessControl.canAccessBasicReport(assessmentId)
+  // 这里可以添加更复杂的令牌验证逻辑
+  // 目前简化为检查支付状态
+  const appStore = useAppStore()
+  const paymentStatus = appStore.checkPaymentStatus(assessmentId)
+  return paymentStatus.isPaid
+}
 
-export const canAccessDetailedReport = (assessmentId: string) =>
-  reportAccessControl.canAccessDetailedReport(assessmentId)
+/**
+ * 生成报告分享链接
+ */
+export async function generateShareLink(assessmentId: string, includeToken = false): Promise<string> {
+  const baseUrl = window.location.origin
+  const reportPath = `/report/${assessmentId}`
 
-export const getBasicReport = (assessmentId: string) =>
-  reportAccessControl.getBasicReport(assessmentId)
+  if (includeToken && (await canAccessDetailedReport(assessmentId))) {
+    // 生成带访问令牌的链接（用于分享详细报告）
+    const appStore = useAppStore()
+    const paymentStatus = appStore.checkPaymentStatus(assessmentId)
 
-export const getDetailedReport = (assessmentId: string) =>
-  reportAccessControl.getDetailedReport(assessmentId)
+    if (paymentStatus.sessionId) {
+      return `${baseUrl}${reportPath}/detailed?token=${paymentStatus.sessionId}`
+    }
+  }
 
-export const getAccessStatus = (assessmentId: string) =>
-  reportAccessControl.getAccessStatus(assessmentId)
+  return `${baseUrl}${reportPath}`
+}
 
-export const generateShareLink = (assessmentId: string, includeToken = false) =>
-  reportAccessControl.generateShareLink(assessmentId, includeToken)
+/**
+ * 检查报告是否过期
+ */
+export function isReportExpired(_assessmentId: string): boolean {
+  // 简化实现，暂时返回false表示永不过期
+  return false
+}
 
-export const isReportExpired = (assessmentId: string) =>
-  reportAccessControl.isReportExpired(assessmentId)
+/**
+ * 获取报告过期时间
+ */
+export function getReportExpiryDate(_assessmentId: string): Date | null {
+  // 简化实现，暂时返回null表示永不过期
+  return null
+}
 
-export const getReportExpiryDate = (assessmentId: string) =>
-  reportAccessControl.getReportExpiryDate(assessmentId)
+/**
+ * 清理过期的报告访问权限
+ */
+export function cleanupExpiredAccess(): void {
+  // 这个方法应该定期调用以清理过期的访问权限
+  // 具体实现取决于存储机制
+  console.log('Cleaning up expired report access...')
+}
 
 // 默认导出
-export default reportAccessControl
+export default {
+  canAccessBasicReport,
+  canAccessDetailedReport,
+  getBasicReport,
+  getDetailedReport,
+  getAccessStatus,
+  validateAccessToken,
+  generateShareLink,
+  isReportExpired,
+  getReportExpiryDate,
+  cleanupExpiredAccess
+}

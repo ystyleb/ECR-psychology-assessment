@@ -1,10 +1,9 @@
 // 统一状态管理 - 合并所有stores为单一文件
 import { defineStore } from 'pinia'
-import { ref, computed, reactive } from 'vue'
+import { ref, computed } from 'vue'
 import type { 
   AssessmentData, 
   AssessmentQuestion, 
-  AttachmentStyle,
   PaymentSession,
   PaymentStatus,
   LoadingState,
@@ -91,16 +90,28 @@ export const useAppStore = defineStore('app', () => {
   }
 
   const createNewAssessment = async (): Promise<string> => {
+    console.log('🏪 Store: createNewAssessment called')
+    
     try {
       setLoading('loading')
+      console.log('🏪 Store: Set loading state')
+      
       const assessment = await ecrService.createAssessment()
+      console.log('🏪 Store: Assessment created by service:', assessment)
+      
       currentAssessment.value = assessment
       currentQuestionIndex.value = 0
       startTime.value = new Date()
+      
+      console.log('🏪 Store: Updated store state, current assessment:', currentAssessment.value)
+      
       setLoading('idle')
       showSuccess('测评已创建')
+      
+      console.log('🏪 Store: Returning assessment ID:', assessment.id)
       return assessment.id
     } catch (error) {
+      console.error('🏪 Store: Error in createNewAssessment:', error)
       setLoading('error')
       showError('创建测评失败')
       throw error
@@ -143,13 +154,46 @@ export const useAppStore = defineStore('app', () => {
       // 保存到存储
       await ecrService.updateAssessment(currentAssessment.value)
       
-      // 如果是最后一题且完成，显示成功消息
-      if (isAssessmentComplete.value) {
-        showSuccess('测评已完成！')
+      // 如果是最后一题且完成，自动计算结果
+      if (isAssessmentComplete.value && !currentAssessment.value.basicResult) {
+        await calculateAndSaveResult()
       }
     } catch (error) {
       console.error('保存回答失败:', error)
       showError('保存失败')
+    }
+  }
+
+  // 计算并保存测评结果
+  const calculateAndSaveResult = async () => {
+    console.log('📊 Store: calculateAndSaveResult called')
+    console.log('📊 Store: currentAssessment exists:', !!currentAssessment.value)
+    console.log('📊 Store: isAssessmentComplete:', isAssessmentComplete.value)
+    
+    if (!currentAssessment.value || !isAssessmentComplete.value) {
+      console.log('📊 Store: Conditions not met, aborting calculation')
+      return
+    }
+
+    try {
+      console.log('📊 Store: Calculating result...')
+      const result = ecrService.calculateResult(currentAssessment.value.responses)
+      console.log('📊 Store: Calculated result:', result)
+      
+      currentAssessment.value.basicResult = result
+      console.log('📊 Store: Set basicResult on assessment')
+      
+      // 保存更新的评估数据
+      console.log('📊 Store: Saving assessment to storage...')
+      await ecrService.updateAssessment(currentAssessment.value)
+      console.log('📊 Store: Assessment saved successfully')
+      
+      showSuccess('测评结果已生成！')
+      return result
+    } catch (error) {
+      console.error('📊 Store: 计算结果失败:', error)
+      showError('计算结果失败')
+      throw error
     }
   }
 
@@ -172,7 +216,128 @@ export const useAppStore = defineStore('app', () => {
   }
 
   const hasAssessment = (id: string): boolean => {
-    return ecrService.hasAssessment(id)
+    console.log('🔍 Store: hasAssessment called with ID:', id)
+    console.log('🔍 Store: Current assessment:', currentAssessment.value)
+    
+    const result = ecrService.hasAssessment(id)
+    console.log('🔍 Store: ecrService.hasAssessment result:', result)
+    
+    // 如果当前正有一个评估并且ID匹配，也应该返回true
+    const hasCurrentAssessment = currentAssessment.value?.id === id
+    console.log('🔍 Store: Current assessment ID matches:', hasCurrentAssessment)
+    
+    const finalResult = result || hasCurrentAssessment
+    console.log('🔍 Store: Final hasAssessment result:', finalResult)
+    
+    return finalResult
+  }
+
+  // ===== 开发者模式方法 =====
+  const quickCompleteAssessment = async (style: 'secure' | 'anxious' | 'avoidant' | 'disorganized' = 'secure') => {
+    console.log('🚀 Store: quickCompleteAssessment called with style:', style)
+    if (!currentAssessment.value) {
+      console.log('❌ Store: No current assessment, aborting quickComplete')
+      return
+    }
+    
+    try {
+      setLoading('loading')
+      console.log('⚡ Store: Starting quick complete with style:', style)
+      
+      // 根据指定的依恋类型生成模拟答案
+      const mockResponses = generateMockResponses(style)
+      console.log('📊 Store: Generated mock responses:', mockResponses)
+      currentAssessment.value.responses = mockResponses
+      
+      // 保存更新的评估
+      await ecrService.updateAssessment(currentAssessment.value)
+      console.log('💾 Store: Saved assessment with mock responses')
+      
+      // 计算并保存结果
+      await calculateAndSaveResult()
+      console.log('✅ Store: Quick complete finished successfully')
+      
+      setLoading('idle')
+      showSuccess(`快速完成测评 - ${style} 类型`)
+    } catch (error) {
+      console.error('❌ Store: Quick complete failed:', error)
+      setLoading('error')
+      showError('快速完成失败')
+      throw error
+    }
+  }
+
+  // 生成模拟回答数据
+  const generateMockResponses = (style: 'secure' | 'anxious' | 'avoidant' | 'disorganized'): number[] => {
+    const responses = new Array(36).fill(0)
+    
+    // 焦虑依恋题目: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35]
+    // 回避依恋题目: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36]  
+    // 反向计分题目: [6, 9, 15, 19, 22, 25, 27, 30, 31, 33, 36]
+    
+    const anxiousItems = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34] // 转为0-based index
+    const avoidantItems = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35]
+    const reverseItems = [5, 8, 14, 18, 21, 24, 26, 29, 30, 32, 35] // 转为0-based index
+    
+    switch (style) {
+      case 'secure':
+        // 安全型: 低焦虑 + 低回避
+        anxiousItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 5 : // 反向题给高分(5-6)变成低分(2-3)
+            Math.floor(Math.random() * 2) + 2   // 正向题给低分(2-3)
+        })
+        avoidantItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 5 : // 反向题给高分(5-6)变成低分(2-3)
+            Math.floor(Math.random() * 2) + 2   // 正向题给低分(2-3)
+        })
+        break
+        
+      case 'anxious':
+        // 焦虑型: 高焦虑 + 低回避
+        anxiousItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 2 : // 反向题给低分(2-3)变成高分(5-6)
+            Math.floor(Math.random() * 2) + 5   // 正向题给高分(5-6)
+        })
+        avoidantItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 5 : // 反向题给高分(5-6)变成低分(2-3)
+            Math.floor(Math.random() * 2) + 2   // 正向题给低分(2-3)
+        })
+        break
+        
+      case 'avoidant':
+        // 回避型: 低焦虑 + 高回避
+        anxiousItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 5 : // 反向题给高分(5-6)变成低分(2-3)
+            Math.floor(Math.random() * 2) + 2   // 正向题给低分(2-3)
+        })
+        avoidantItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 2 : // 反向题给低分(2-3)变成高分(5-6)
+            Math.floor(Math.random() * 2) + 5   // 正向题给高分(5-6)
+        })
+        break
+        
+      case 'disorganized':
+        // 混乱型: 高焦虑 + 高回避
+        anxiousItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 2 : // 反向题给低分(2-3)变成高分(5-6)
+            Math.floor(Math.random() * 2) + 5   // 正向题给高分(5-6)
+        })
+        avoidantItems.forEach(i => {
+          responses[i] = reverseItems.includes(i) ? 
+            Math.floor(Math.random() * 2) + 2 : // 反向题给低分(2-3)变成高分(5-6)
+            Math.floor(Math.random() * 2) + 5   // 正向题给高分(5-6)
+        })
+        break
+    }
+    
+    return responses
   }
 
   // ===== 支付相关方法 =====
@@ -361,10 +526,12 @@ export const useAppStore = defineStore('app', () => {
     createNewAssessment,
     loadAssessment,
     saveCurrentResponse,
+    calculateAndSaveResult,
     nextQuestion,
     previousQuestion,
     goToQuestion,
     hasAssessment,
+    quickCompleteAssessment,
 
     // 支付方法
     initiatePayment,

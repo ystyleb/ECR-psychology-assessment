@@ -13,7 +13,7 @@ import type {
   DetailedReport
 } from '@/types'
 
-import { attachmentDescriptions } from '@/data/attachmentDescriptions'
+import { ATTACHMENT_DESCRIPTIONS } from '@/data/attachmentDescriptions'
 
 /**
  * 报告生成服务
@@ -94,7 +94,7 @@ class ReportService {
    * 获取依恋类型描述
    */
   private getAttachmentDescription(style: AttachmentStyle): AttachmentTypeDescription {
-    const description = attachmentDescriptions[style]
+    const description = ATTACHMENT_DESCRIPTIONS[style]
     if (!description) {
       throw new Error(`Unknown attachment style: ${style}`)
     }
@@ -158,7 +158,7 @@ class ReportService {
    */
   private generateDetailedContent(basicResult: BasicResult): DetailedReport {
     const style = basicResult.attachmentStyle
-    const description = attachmentDescriptions[style]
+    const description = ATTACHMENT_DESCRIPTIONS[style]
 
     return {
       personalityTraits: this.generatePersonalityTraits(style),
