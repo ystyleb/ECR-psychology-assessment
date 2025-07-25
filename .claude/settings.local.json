@@ -6,7 +6,13 @@
       "Bash(sed:*)",
       "Bash(open:*)",
       "Bash(rg:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(cp:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }
