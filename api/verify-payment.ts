@@ -34,7 +34,7 @@ function generateAccessToken(assessmentId: string, sessionId: string): string {
   return `${header}.${payloadStr}.${signature}`
 }
 
-export = async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   // 处理预检请求
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ message: 'OK' })
@@ -206,3 +206,5 @@ export = async function handler(req: VercelRequest, res: VercelResponse) {
     })
   }
 }
+
+module.exports = handler

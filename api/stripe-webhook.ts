@@ -94,7 +94,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
   // 3. 发送退款确认
 }
 
-export = async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req: VercelRequest, res: VercelResponse) {
   // 处理预检请求
   if (req.method === 'OPTIONS') {
     Object.entries(corsHeaders).forEach(([key, value]) => {
@@ -247,3 +247,5 @@ export = async function handler(req: VercelRequest, res: VercelResponse) {
     })
   }
 }
+
+module.exports = handler
