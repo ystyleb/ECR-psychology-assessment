@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil'
 })
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export = async function handler(req: VercelRequest, res: VercelResponse) {
   // 设置CORS头部
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
