@@ -1,18 +1,9 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Stripe from 'stripe'
-import { buffer } from 'micro'
+const Stripe = require('stripe')
 
 // 初始化Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-06-30.basil'
 })
-
-// 禁用body解析，因为我们需要原始数据来验证webhook签名
-export const config = {
-  api: {
-    bodyParser: false
-  }
-}
 
 // CORS头部配置
 const corsHeaders = {
@@ -23,7 +14,7 @@ const corsHeaders = {
 }
 
 // 处理支付成功事件
-async function handlePaymentSucceeded(session: Stripe.Checkout.Session) {
+async function handlePaymentSucceeded(session) {
   const assessmentId = session.metadata?.assessment_id
 
   if (!assessmentId) {
@@ -49,7 +40,7 @@ async function handlePaymentSucceeded(session: Stripe.Checkout.Session) {
 }
 
 // 处理支付失败事件
-async function handlePaymentFailed(session: Stripe.Checkout.Session) {
+async function handlePaymentFailed(session) {
   const assessmentId = session.metadata?.assessment_id
 
   console.log('Payment failed:', {
@@ -65,7 +56,7 @@ async function handlePaymentFailed(session: Stripe.Checkout.Session) {
 }
 
 // 处理会话过期事件
-async function handleSessionExpired(session: Stripe.Checkout.Session) {
+async function handleSessionExpired(session) {
   const assessmentId = session.metadata?.assessment_id
 
   console.log('Session expired:', {
@@ -80,7 +71,7 @@ async function handleSessionExpired(session: Stripe.Checkout.Session) {
 }
 
 // 处理退款事件
-async function handleChargeRefunded(charge: Stripe.Charge) {
+async function handleChargeRefunded(charge) {
   console.log('Charge refunded:', {
     chargeId: charge.id,
     amount: charge.amount_refunded,
@@ -94,7 +85,7 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
   // 3. 发送退款确认
 }
 
-async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req, res) {
   // 处理预检请求
   if (req.method === 'OPTIONS') {
     Object.entries(corsHeaders).forEach(([key, value]) => {
@@ -128,7 +119,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 获取原始请求体
-    const buf = await buffer(req)
+    let buf
+    if (req.body && Buffer.isBuffer(req.body)) {
+      buf = req.body
+    } else if (typeof req.body === 'string') {
+      buf = Buffer.from(req.body)
+    } else {
+      // 对于Vercel，通常原始请求体会在req.body中
+      buf = Buffer.from(JSON.stringify(req.body || ''))
+    }
     const sig = req.headers['stripe-signature']
 
     if (!sig) {
@@ -140,7 +139,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 验证webhook签名
-    let event: Stripe.Event
+    let event
     try {
       event = stripe.webhooks.constructEvent(buf, sig, webhookSecret)
     } catch (err) {
@@ -162,7 +161,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     // 处理不同类型的事件
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session
+        const session = event.data.object
 
         // 检查是否是支付模式的会话
         if (session.mode === 'payment' && session.payment_status === 'paid') {
@@ -172,25 +171,25 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       case 'checkout.session.async_payment_succeeded': {
-        const session = event.data.object as Stripe.Checkout.Session
+        const session = event.data.object
         await handlePaymentSucceeded(session)
         break
       }
 
       case 'checkout.session.async_payment_failed': {
-        const session = event.data.object as Stripe.Checkout.Session
+        const session = event.data.object
         await handlePaymentFailed(session)
         break
       }
 
       case 'checkout.session.expired': {
-        const session = event.data.object as Stripe.Checkout.Session
+        const session = event.data.object
         await handleSessionExpired(session)
         break
       }
 
       case 'charge.dispute.created': {
-        const dispute = event.data.object as Stripe.Dispute
+        const dispute = event.data.object
         console.log('Dispute created:', {
           chargeId: dispute.charge,
           amount: dispute.amount,
@@ -201,13 +200,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       case 'charge.refunded': {
-        const charge = event.data.object as Stripe.Charge
+        const charge = event.data.object
         await handleChargeRefunded(charge)
         break
       }
 
       case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        const paymentIntent = event.data.object
         console.log('Payment intent succeeded:', {
           id: paymentIntent.id,
           amount: paymentIntent.amount,
@@ -217,7 +216,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        const paymentIntent = event.data.object
         console.log('Payment intent failed:', {
           id: paymentIntent.id,
           last_payment_error: paymentIntent.last_payment_error?.message

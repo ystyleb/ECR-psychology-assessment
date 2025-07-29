@@ -1,12 +1,11 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Stripe from 'stripe'
+const Stripe = require('stripe')
 
 // 初始化Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-06-30.basil'
 })
 
-async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req, res) {
   // 设置CORS头部
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -39,11 +38,11 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: 'cny',
             product_data: {
               name: 'ECR Report'
             },
-            unit_amount: 299
+            unit_amount: 1990
           },
           quantity: 1
         }

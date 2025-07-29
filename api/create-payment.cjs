@@ -1,8 +1,7 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Stripe from 'stripe'
+const Stripe = require('stripe')
 
 // 初始化Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-06-30.basil'
 })
 
@@ -14,7 +13,7 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400'
 }
 
-async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req, res) {
   // 处理预检请求
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ message: 'OK' })

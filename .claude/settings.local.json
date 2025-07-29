@@ -32,7 +32,10 @@
       "mcp__playwright__browser_console_messages",
       "mcp__playwright__browser_snapshot",
       "Bash(cat:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(for file in *.ts)",
+      "Bash(do mv \"$file\" \"$file%.ts.cjs\")",
+      "Bash(done)"
     ],
     "deny": []
   }

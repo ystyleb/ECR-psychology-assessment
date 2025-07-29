@@ -1,8 +1,7 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Stripe from 'stripe'
+const Stripe = require('stripe')
 
 // 初始化Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-06-30.basil'
 })
 
@@ -15,7 +14,7 @@ const corsHeaders = {
 }
 
 // JWT工具函数（简化版）
-function generateAccessToken(assessmentId: string, sessionId: string): string {
+function generateAccessToken(assessmentId, sessionId) {
   const payload = {
     assessmentId,
     sessionId,
@@ -34,7 +33,7 @@ function generateAccessToken(assessmentId: string, sessionId: string): string {
   return `${header}.${payloadStr}.${signature}`
 }
 
-async function handler(req: VercelRequest, res: VercelResponse) {
+async function handler(req, res) {
   // 处理预检请求
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ message: 'OK' })
@@ -106,7 +105,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
     // 检查支付状态
     const paymentStatus = session.payment_status
-    const paymentIntent = session.payment_intent as Stripe.PaymentIntent
+    const paymentIntent = session.payment_intent
 
     // 记录支付验证请求
     console.log('Payment verification:', {
