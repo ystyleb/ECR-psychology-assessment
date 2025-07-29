@@ -151,7 +151,7 @@ module.exports = async (req, res) => {
     })
 
     // 记录支付会话
-    console.log('Payment session created:', {
+    console.log('Payment session created successfully:', {
       sessionId: session.id,
       assessmentId,
       amount: 1990,

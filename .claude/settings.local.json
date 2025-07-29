@@ -35,7 +35,14 @@
       "Bash(git push:*)",
       "Bash(for file in *.ts)",
       "Bash(do mv \"$file\" \"$file%.ts.cjs\")",
-      "Bash(done)"
+      "Bash(done)",
+      "mcp__playwright__browser_install",
+      "Bash(npm ls:*)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "Bash(git config:*)",
+      "Bash(ssh:*)",
+      "WebFetch(domain:vercel.com)"
     ],
     "deny": []
   }

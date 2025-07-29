@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付流程测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .test-section h3 { margin-top: 0; color: #333; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; white-space: pre-wrap; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; width: 300px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 ECR支付流程测试工具</h1>
+    
+    <div class="test-section">
+        <h3>📡 API连接测试</h3>
+        <p>首先测试API连接是否正常</p>
+        <button onclick="testConnection()">测试API连接</button>
+        <div id="connectionResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>💳 创建支付会话测试</h3>
+        <p>测试create-payment端点</p>
+        <input id="assessmentId" placeholder="Assessment ID" value="ecr_test_123">
+        <input id="successUrl" placeholder="Success URL" value="https://ecr-kappa.vercel.app/payment-success">
+        <input id="cancelUrl" placeholder="Cancel URL" value="https://ecr-kappa.vercel.app/payment-cancel">
+        <br>
+        <button onclick="testCreatePayment()">创建支付会话</button>
+        <div id="createPaymentResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>✅ 验证支付测试</h3>
+        <p>测试verify-payment端点</p>
+        <input id="sessionId" placeholder="Session ID" value="">
+        <br>
+        <button onclick="testVerifyPayment()">验证支付</button>
+        <div id="verifyPaymentResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔄 完整支付流程测试</h3>
+        <p>端到端支付流程测试</p>
+        <button onclick="testCompleteFlow()">运行完整流程</button>
+        <div id="completeFlowResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001';
+        
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).textContent = '';
+        }
+
+        async function testConnection() {
+            clearLog('connectionResult');
+            log('connectionResult', '🔍 测试API连接...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('connectionResult', `✅ API连接成功: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    log('connectionResult', `❌ API连接失败: ${response.status} ${response.statusText}`, true);
+                }
+            } catch (error) {
+                log('connectionResult', `❌ 连接错误: ${error.message}`, true);
+            }
+        }
+
+        async function testCreatePayment() {
+            clearLog('createPaymentResult');
+            log('createPaymentResult', '💳 测试创建支付会话...');
+            
+            const assessmentId = document.getElementById('assessmentId').value;
+            const successUrl = document.getElementById('successUrl').value;
+            const cancelUrl = document.getElementById('cancelUrl').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/create-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        assessmentId,
+                        successUrl,
+                        cancelUrl
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    log('createPaymentResult', `✅ 支付会话创建成功:`);
+                    log('createPaymentResult', JSON.stringify(data, null, 2));
+                    
+                    // 自动填充sessionId到验证测试
+                    document.getElementById('sessionId').value = data.session.stripeSessionId;
+                } else {
+                    log('createPaymentResult', `❌ 支付会话创建失败: ${JSON.stringify(data)}`, true);
+                }
+            } catch (error) {
+                log('createPaymentResult', `❌ 请求错误: ${error.message}`, true);
+            }
+        }
+
+        async function testVerifyPayment() {
+            clearLog('verifyPaymentResult');
+            log('verifyPaymentResult', '✅ 测试验证支付...');
+            
+            const sessionId = document.getElementById('sessionId').value;
+            
+            if (!sessionId) {
+                log('verifyPaymentResult', '❌ 请先输入Session ID或创建支付会话', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/verify-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sessionId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    log('verifyPaymentResult', `✅ 支付验证成功:`);
+                    log('verifyPaymentResult', JSON.stringify(data, null, 2));
+                } else {
+                    log('verifyPaymentResult', `❌ 支付验证失败: ${JSON.stringify(data)}`, true);
+                }
+            } catch (error) {
+                log('verifyPaymentResult', `❌ 请求错误: ${error.message}`, true);
+            }
+        }
+
+        async function testCompleteFlow() {
+            clearLog('completeFlowResult');
+            log('completeFlowResult', '🔄 开始完整支付流程测试...');
+            
+            try {
+                // 步骤 1: 创建支付会话
+                log('completeFlowResult', '步骤 1: 创建支付会话');
+                const createResponse = await fetch(`${API_BASE_URL}/api/create-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        assessmentId: 'ecr_complete_flow_test_' + Date.now(),
+                        successUrl: 'https://ecr-kappa.vercel.app/payment-success',
+                        cancelUrl: 'https://ecr-kappa.vercel.app/payment-cancel'
+                    })
+                });
+                
+                const createData = await createResponse.json();
+                
+                if (!createResponse.ok || !createData.success) {
+                    throw new Error(`创建支付会话失败: ${JSON.stringify(createData)}`);
+                }
+                
+                log('completeFlowResult', `✅ 支付会话创建成功: ${createData.session.id}`);
+                
+                // 步骤 2: 模拟用户完成支付(延迟一下模拟真实情况)
+                log('completeFlowResult', '步骤 2: 模拟用户支付过程...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // 步骤 3: 验证支付
+                log('completeFlowResult', '步骤 3: 验证支付结果');
+                const verifyResponse = await fetch(`${API_BASE_URL}/api/verify-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        sessionId: createData.session.stripeSessionId
+                    })
+                });
+                
+                const verifyData = await verifyResponse.json();
+                
+                if (!verifyResponse.ok || !verifyData.success) {
+                    throw new Error(`支付验证失败: ${JSON.stringify(verifyData)}`);
+                }
+                
+                log('completeFlowResult', `✅ 支付验证成功: ${verifyData.accessToken.substring(0, 50)}...`);
+                log('completeFlowResult', '🎉 完整支付流程测试成功！所有步骤都正常工作。');
+                
+            } catch (error) {
+                log('completeFlowResult', `❌ 完整流程测试失败: ${error.message}`, true);
+            }
+        }
+
+        // 页面加载时自动测试连接
+        window.onload = () => {
+            testConnection();
+        };
+    </script>
+</body>
+</html>
