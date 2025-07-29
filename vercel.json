@@ -6,7 +6,7 @@
   "devCommand": "npm run dev",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api).*)",
       "destination": "/index.html"
     }
   ],
@@ -20,22 +20,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "api/create-payment.js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/verify-payment.js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/generate-token.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "env": {
-    "VITE_APP_TITLE": "@VITE_APP_TITLE",
-    "VITE_STRIPE_PUBLISHABLE_KEY": "@VITE_STRIPE_PUBLISHABLE_KEY",
-    "VITE_SENTRY_DSN": "@VITE_SENTRY_DSN",
-    "VITE_API_BASE_URL": "@VITE_API_BASE_URL"
-  }
+  ]
 }

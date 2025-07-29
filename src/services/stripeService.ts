@@ -16,6 +16,7 @@ let stripeInstance: Stripe | null = null
 
 class StripeService {
   private stripe: Stripe | null = null
+  private readonly baseUrl = import.meta.env.VITE_API_BASE_URL || ''
 
   /**
    * 初始化Stripe实例
@@ -55,7 +56,7 @@ class StripeService {
    */
   async createPaymentSession(assessmentId: string): Promise<PaymentSession> {
     try {
-      const response = await fetch('/api/create-payment', {
+      const response = await fetch(`${this.baseUrl}/api/create-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -101,7 +102,7 @@ class StripeService {
    */
   async verifyPayment(sessionId: string): Promise<PaymentResult> {
     try {
-      const response = await fetch('/api/verify-payment', {
+      const response = await fetch(`${this.baseUrl}/api/verify-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -126,7 +127,7 @@ class StripeService {
    */
   async checkPaymentStatus(sessionId: string): Promise<string> {
     try {
-      const response = await fetch(`/api/payment-status?session_id=${sessionId}`)
+      const response = await fetch(`${this.baseUrl}/api/payment-status?session_id=${sessionId}`)
 
       if (!response.ok) {
         throw new Error('Failed to check payment status')
@@ -145,7 +146,7 @@ class StripeService {
    */
   async getPaymentHistory(assessmentId: string): Promise<PaymentSession[]> {
     try {
-      const response = await fetch(`/api/payment-history?assessment_id=${assessmentId}`)
+      const response = await fetch(`${this.baseUrl}/api/payment-history?assessment_id=${assessmentId}`)
 
       if (!response.ok) {
         throw new Error('Failed to get payment history')

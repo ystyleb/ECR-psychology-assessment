@@ -41,3 +41,4 @@ ehthumbs.db
 # Husky
 .husky/_
 .vercel
+.claude/*

@@ -49,7 +49,7 @@ class StripePaymentService {
       }
 
       // 调用API创建支付会话
-      const response = await fetch('/api/create-payment', {
+      const response = await fetch(`${this.baseUrl}/api/create-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -119,7 +119,7 @@ class StripePaymentService {
   async verifyPayment(sessionId: string): Promise<PaymentResult> {
     try {
       // 调用API验证支付
-      const response = await fetch('/api/verify-payment', {
+      const response = await fetch(`${this.baseUrl}/api/verify-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -193,7 +193,7 @@ class StripePaymentService {
    */
   async checkPaymentStatus(sessionId: string): Promise<PaymentSessionData> {
     try {
-      const response = await fetch(`/api/payment-status?session_id=${sessionId}`)
+      const response = await fetch(`${this.baseUrl}/api/payment-status?session_id=${sessionId}`)
 
       if (!response.ok) {
         throw new Error('Failed to check payment status')
@@ -334,7 +334,7 @@ class StripePaymentService {
       }
 
       // 调用API处理退款
-      const response = await fetch('/api/request-refund', {
+      const response = await fetch(`${this.baseUrl}/api/request-refund`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

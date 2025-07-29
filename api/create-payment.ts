@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 
 // 初始化Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
+  apiVersion: '2025-06-30.basil'
 })
 
 // CORS头部配置
@@ -99,9 +99,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             product_data: {
               name: 'ECR详细报告',
               description: '获取完整的依恋风格分析报告，包括个性特征、成长建议和关系兼容性分析',
-              images: ['https://your-domain.com/report-preview.jpg'] // 可选：产品图片
+              // images: ['https://your-domain.com/report-preview.jpg'] // 暂时注释掉图片
             },
-            unit_amount: 1990 // 19.9元，以分为单位
+            unit_amount: 1990 // ¥19.90，以分为单位
           },
           quantity: 1
         }

@@ -4,7 +4,7 @@ import { buffer } from 'micro'
 
 // 初始化Stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
+  apiVersion: '2025-06-30.basil'
 })
 
 // 禁用body解析，因为我们需要原始数据来验证webhook签名

@@ -463,8 +463,8 @@ class ECRService {
 
   // ===== 支付相关方法 =====
   async createPaymentSession(assessmentId: string): Promise<PaymentSession> {
-    // 开发环境模拟支付
-    if (import.meta.env.DEV) {
+    // 开发环境模拟支付 - 临时禁用以测试真实Stripe
+    if (false && import.meta.env.DEV) {
       console.log('🔧 Development mode: Creating mock payment session')
       
       // 模拟支付会话
@@ -496,10 +496,14 @@ class ECRService {
     
     // 生产环境实际支付
     try {
+      console.log('🔧 Debug: baseUrl =', this.baseUrl)
+      console.log('🔧 Debug: VITE_API_BASE_URL =', import.meta.env.VITE_API_BASE_URL)
       const successUrl = `${window.location.origin}/payment/success`
       const cancelUrl = `${window.location.origin}/payment/cancel`
+      const requestUrl = `${this.baseUrl}/api/create-payment`
+      console.log('🔧 Debug: requestUrl =', requestUrl)
       
-      const response = await fetch(`${this.baseUrl}/api/create-payment`, {
+      const response = await fetch(requestUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

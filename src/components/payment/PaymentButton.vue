@@ -153,7 +153,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { usePaymentStore } from '@/stores/payment'
+import { useAppStore } from '@/store'
 
 interface Props {
   assessmentId: string
@@ -205,22 +205,22 @@ const rippleRef = ref<HTMLElement>()
 const isHovered = ref(false)
 const isProcessing = ref(false)
 
-// 支付store
-const paymentStore = usePaymentStore()
+// 支付store（使用统一store）
+const appStore = useAppStore()
 
 // 计算属性
 const isLoading = computed(() => {
-  return props.loading || isProcessing.value || paymentStore.paymentStatus === 'loading'
+  return props.loading || isProcessing.value || appStore.paymentStatus === 'loading'
 })
 
 const isPaid = computed(() => {
   return (
-    paymentStore.isReportUnlocked(props.assessmentId) || paymentStore.paymentStatus === 'success'
+    appStore.checkPaymentStatus(props.assessmentId) || appStore.paymentStatus === 'success'
   )
 })
 
 const error = computed(() => {
-  return paymentStore.error
+  return appStore.paymentError
 })
 
 const isDisabled = computed(() => {
@@ -236,7 +236,7 @@ const buttonText = computed(() => {
     return '已购买'
   }
   if (isLoading.value) {
-    if (paymentStore.paymentStatus === 'verifying') {
+    if (appStore.paymentStatus === 'verifying') {
       return '验证支付中...'
     }
     return '处理中...'
@@ -277,7 +277,11 @@ const buttonVariantClasses = computed(() => {
 
 // 方法
 const formatPrice = (amount: number, currency: string): string => {
-  return paymentStore.formatAmount(amount, currency)
+  return new Intl.NumberFormat('zh-CN', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2
+  }).format(amount / 100)
 }
 
 const handlePayment = async (event: Event) => {
@@ -297,7 +301,7 @@ const handlePayment = async (event: Event) => {
     isProcessing.value = true
 
     // 发起支付
-    const session = await paymentStore.initiatePayment(props.assessmentId)
+    const session = await appStore.initiatePayment(props.assessmentId)
 
     if (session) {
       emit('payment-initiated', session)
@@ -354,9 +358,9 @@ const handleMouseLeave = () => {
 // 检查访问状态
 const checkAccessStatus = async () => {
   try {
-    const accessInfo = await paymentStore.getAccessInfo(props.assessmentId)
-    if (accessInfo.hasAccess) {
-      paymentStore.paymentStatus = 'success'
+    const hasAccess = appStore.checkPaymentStatus(props.assessmentId)
+    if (hasAccess) {
+      appStore.paymentStatus = 'success'
     }
   } catch (error) {
     console.error('Failed to check access status:', error)
