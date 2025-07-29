@@ -58,7 +58,6 @@ module.exports = async (req, res) => {
   try {
     // 验证环境变量
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.error('STRIPE_SECRET_KEY is not configured')
       return res.status(500).json({
         error: 'Configuration error',
         message: 'Payment service is not properly configured'
@@ -110,17 +109,6 @@ module.exports = async (req, res) => {
     const paymentStatus = session.payment_status
     const paymentIntent = session.payment_intent
 
-    // 记录支付验证请求
-    console.log('Payment verification:', {
-      sessionId,
-      assessmentId,
-      paymentStatus,
-      paymentIntentStatus: paymentIntent?.status,
-      amount: session.amount_total,
-      currency: session.currency,
-      customerEmail: session.customer_details?.email
-    })
-
     // 根据支付状态返回结果
     if (paymentStatus === 'paid' && paymentIntent?.status === 'succeeded') {
       // 支付成功
@@ -129,12 +117,6 @@ module.exports = async (req, res) => {
       expiresAt.setDate(expiresAt.getDate() + 30) // 30天后过期
 
       // 在实际项目中，这里应该将支付信息存储到数据库
-      console.log('Payment verified successfully:', {
-        sessionId,
-        assessmentId,
-        accessToken: `${accessToken.substring(0, 20)}...`,
-        expiresAt: expiresAt.toISOString()
-      })
 
       return res.status(200).json({
         success: true,
@@ -179,8 +161,6 @@ module.exports = async (req, res) => {
       })
     }
   } catch (error) {
-    console.error('Payment verification failed:', error)
-
     // 处理Stripe特定错误
     if (error.name === 'StripeError') {
       if (error.type === 'StripeInvalidRequestError') {

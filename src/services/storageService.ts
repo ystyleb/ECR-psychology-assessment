@@ -1,5 +1,6 @@
 // 本地存储服务
 import type { StorageService, AssessmentData } from '@/types'
+import logger from '@/utils/logger'
 
 class LocalStorageService implements StorageService {
   private encryptionKey = 'ecr_encryption_key'
@@ -10,7 +11,7 @@ class LocalStorageService implements StorageService {
       const item = localStorage.getItem(key)
       return item ? JSON.parse(item) : null
     } catch (error) {
-      console.error(`Failed to get item ${key}:`, error)
+      logger.error(`Failed to get item ${key}:`, error)
       return null
     }
   }
@@ -19,7 +20,7 @@ class LocalStorageService implements StorageService {
     try {
       localStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
-      console.error(`Failed to set item ${key}:`, error)
+      logger.error(`Failed to set item ${key}:`, error)
     }
   }
 
@@ -27,7 +28,7 @@ class LocalStorageService implements StorageService {
     try {
       localStorage.removeItem(key)
     } catch (error) {
-      console.error(`Failed to remove item ${key}:`, error)
+      logger.error(`Failed to remove item ${key}:`, error)
     }
   }
 
@@ -35,7 +36,7 @@ class LocalStorageService implements StorageService {
     try {
       localStorage.clear()
     } catch (error) {
-      console.error('Failed to clear storage:', error)
+      logger.error('Failed to clear storage:', error)
     }
   }
 
@@ -48,7 +49,7 @@ class LocalStorageService implements StorageService {
       const decrypted = this.decrypt(encryptedItem)
       return JSON.parse(decrypted)
     } catch (error) {
-      console.error(`Failed to get encrypted item ${key}:`, error)
+      logger.error(`Failed to get encrypted item ${key}:`, error)
       return null
     }
   }
@@ -59,7 +60,7 @@ class LocalStorageService implements StorageService {
       const encrypted = this.encrypt(serialized)
       localStorage.setItem(key, encrypted)
     } catch (error) {
-      console.error(`Failed to set encrypted item ${key}:`, error)
+      logger.error(`Failed to set encrypted item ${key}:`, error)
     }
   }
 
@@ -101,7 +102,7 @@ class LocalStorageService implements StorageService {
 
       return { used, available, quota }
     } catch (error) {
-      console.error('Failed to get storage info:', error)
+      logger.error('Failed to get storage info:', error)
       return { used: 0, available: 0, quota: 0 }
     }
   }
@@ -226,7 +227,7 @@ class LocalStorageService implements StorageService {
       // 保存最后更新时间
       this.setItem('ecr_assessments_updated', new Date().toISOString())
     } catch (error) {
-      console.error('Failed to save assessment:', error)
+      logger.error('Failed to save assessment:', error)
       throw new Error('保存测评数据失败')
     }
   }
@@ -239,7 +240,7 @@ class LocalStorageService implements StorageService {
       const assessments = this.getAssessments()
       return assessments.get(id) || null
     } catch (error) {
-      console.error('Failed to get assessment:', error)
+      logger.error('Failed to get assessment:', error)
       return null
     }
   }
@@ -278,7 +279,7 @@ class LocalStorageService implements StorageService {
 
       return new Map(processedArray)
     } catch (error) {
-      console.error('Failed to get assessments:', error)
+      logger.error('Failed to get assessments:', error)
       return new Map()
     }
   }
@@ -299,7 +300,7 @@ class LocalStorageService implements StorageService {
 
       return deleted
     } catch (error) {
-      console.error('Failed to delete assessment:', error)
+      logger.error('Failed to delete assessment:', error)
       return false
     }
   }
@@ -333,7 +334,7 @@ class LocalStorageService implements StorageService {
         })
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     } catch (error) {
-      console.error('Failed to get assessment list:', error)
+      logger.error('Failed to get assessment list:', error)
       return []
     }
   }
@@ -368,7 +369,7 @@ class LocalStorageService implements StorageService {
 
       return deletedCount
     } catch (error) {
-      console.error('Failed to cleanup expired assessments:', error)
+      logger.error('Failed to cleanup expired assessments:', error)
       return 0
     }
   }
@@ -400,7 +401,7 @@ class LocalStorageService implements StorageService {
 
       return ''
     } catch (error) {
-      console.error('Failed to export assessment data:', error)
+      logger.error('Failed to export assessment data:', error)
       throw new Error('导出测评数据失败')
     }
   }
@@ -431,7 +432,7 @@ class LocalStorageService implements StorageService {
         lastUpdated
       }
     } catch (error) {
-      console.error('Failed to get storage stats:', error)
+      logger.error('Failed to get storage stats:', error)
       return {
         totalAssessments: 0,
         completedAssessments: 0,

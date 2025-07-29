@@ -277,6 +277,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
+import logger from '@/utils/logger'
 // import { useUIStore } from '@/stores/ui'
 
 // 响应式数据
@@ -324,10 +325,10 @@ const retryPayment = async () => {
 
     if (session) {
       // 如果成功创建会话，会自动跳转到 Stripe
-      console.log('Payment retry initiated:', session)
+      logger.log('Payment retry initiated:', session)
     }
   } catch (error) {
-    console.error('Retry payment failed:', error)
+    logger.error('Retry payment failed:', error)
     showToast('支付跳转失败，请稍后重试')
   } finally {
     isRetrying.value = false
@@ -352,7 +353,7 @@ const contactSupport = () => {
     phone: '400-123-4567'
   }
 
-  console.log('Support contact info:', supportInfo)
+  logger.log('Support contact info:', supportInfo)
 }
 
 const showToast = (message: string) => {
@@ -368,7 +369,7 @@ onMounted(() => {
   paymentStore.cancelPayment()
 
   // 记录取消事件（用于分析）
-  console.log('Payment cancelled:', {
+  logger.log('Payment cancelled:', {
     assessmentId: assessmentId.value,
     timestamp: new Date().toISOString(),
     sessionId: route.query.session_id

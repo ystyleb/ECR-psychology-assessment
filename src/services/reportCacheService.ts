@@ -1,5 +1,6 @@
 import { storageService } from './storageService'
 import type { BasicReport, DetailedReportData, BasicResult, AttachmentScores } from '@/types'
+import logger from '@/utils/logger'
 
 /**
  * 报告缓存服务
@@ -134,7 +135,7 @@ class ReportCacheService {
 
       return cacheMap
     } catch (error) {
-      console.error('Failed to load persistent cache:', error)
+      logger.error('Failed to load persistent cache:', error)
       return new Map()
     }
   }
@@ -166,7 +167,7 @@ class ReportCacheService {
 
       storageService.setEncryptedItem(this.cacheKey, cacheObject)
     } catch (error) {
-      console.error('Failed to save persistent cache:', error)
+      logger.error('Failed to save persistent cache:', error)
     }
   }
 
@@ -347,7 +348,7 @@ class ReportCacheService {
    */
   async warmupCache(assessmentIds: string[]): Promise<void> {
     // 这里可以实现预加载逻辑
-    console.log('Cache warmup for assessments:', assessmentIds)
+    logger.log('Cache warmup for assessments:', assessmentIds)
   }
 }
 

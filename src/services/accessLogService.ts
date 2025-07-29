@@ -1,4 +1,5 @@
 import { storageService } from './storageService'
+import logger from '@/utils/logger'
 
 // 访问日志条目接口
 interface AccessLogEntry {
@@ -71,9 +72,9 @@ class AccessLogService {
       // 更新当前会话
       this.updateCurrentSession(logEntry)
 
-      console.log('Access logged:', logEntry)
+      logger.log('Access logged:', logEntry)
     } catch (error) {
-      console.error('Failed to log access:', error)
+      logger.error('Failed to log access:', error)
     }
   }
 
@@ -206,7 +207,7 @@ class AccessLogService {
 
       return stats
     } catch (error) {
-      console.error('Failed to get access stats:', error)
+      logger.error('Failed to get access stats:', error)
       return {
         totalViews: 0,
         uniqueUsers: 0,
@@ -230,7 +231,7 @@ class AccessLogService {
         .filter(log => log.sessionId === targetSessionId)
         .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
     } catch (error) {
-      console.error('Failed to get user journey:', error)
+      logger.error('Failed to get user journey:', error)
       return []
     }
   }
@@ -253,9 +254,9 @@ class AccessLogService {
       const filteredSessions = sessions.filter(session => session.startTime >= cutoffDate)
       this.saveAllSessions(filteredSessions)
 
-      console.log(`Cleaned up logs older than ${daysToKeep} days`)
+      logger.log(`Cleaned up logs older than ${daysToKeep} days`)
     } catch (error) {
-      console.error('Failed to cleanup old logs:', error)
+      logger.error('Failed to cleanup old logs:', error)
     }
   }
 
@@ -274,7 +275,7 @@ class AccessLogService {
         this.saveAllSessions(sessions)
       }
     } catch (error) {
-      console.error('Failed to end current session:', error)
+      logger.error('Failed to end current session:', error)
     }
   }
 
@@ -299,7 +300,7 @@ class AccessLogService {
       sessions.push(newSession)
       this.saveAllSessions(sessions)
     } catch (error) {
-      console.error('Failed to initialize session:', error)
+      logger.error('Failed to initialize session:', error)
     }
   }
 
@@ -313,7 +314,7 @@ class AccessLogService {
         this.saveAllSessions(sessions)
       }
     } catch (error) {
-      console.error('Failed to update current session:', error)
+      logger.error('Failed to update current session:', error)
     }
   }
 
@@ -331,7 +332,7 @@ class AccessLogService {
         timestamp: new Date(log.timestamp)
       }))
     } catch (error) {
-      console.error('Failed to get all logs:', error)
+      logger.error('Failed to get all logs:', error)
       return []
     }
   }
@@ -349,7 +350,7 @@ class AccessLogService {
         endTime: session.endTime ? new Date(session.endTime) : undefined
       }))
     } catch (error) {
-      console.error('Failed to get all sessions:', error)
+      logger.error('Failed to get all sessions:', error)
       return []
     }
   }

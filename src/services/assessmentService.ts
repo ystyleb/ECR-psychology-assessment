@@ -9,6 +9,7 @@ import type {
 } from '@/types'
 import { storageService } from './storageService'
 import { calculationService } from './calculationService'
+import logger from '@/utils/logger'
 
 interface AttachmentScores {
   anxious: number
@@ -70,7 +71,7 @@ class ECRAssessmentService implements AssessmentService {
 
       return questions
     } catch (error) {
-      console.error('Failed to get questions:', error)
+      logger.error('Failed to get questions:', error)
       return this.defaultQuestions
     }
   }
@@ -81,7 +82,7 @@ class ECRAssessmentService implements AssessmentService {
       const questions = await this.getQuestions()
       return questions.find(q => q.id === id) || null
     } catch (error) {
-      console.error('Failed to get question by id:', error)
+      logger.error('Failed to get question by id:', error)
       return null
     }
   }
@@ -118,7 +119,7 @@ class ECRAssessmentService implements AssessmentService {
       await this.saveAssessment(assessment)
       return id
     } catch (error) {
-      console.error('Failed to create assessment:', error)
+      logger.error('Failed to create assessment:', error)
       throw new Error('Failed to create assessment')
     }
   }
@@ -132,7 +133,7 @@ class ECRAssessmentService implements AssessmentService {
       const assessmentArray = Array.from(assessments.entries())
       storageService.setEncryptedItem(this.storageKey, assessmentArray)
     } catch (error) {
-      console.error('Failed to save assessment:', error)
+      logger.error('Failed to save assessment:', error)
       throw new Error('Failed to save assessment')
     }
   }
@@ -143,7 +144,7 @@ class ECRAssessmentService implements AssessmentService {
       const assessments = this.getAllAssessments()
       return assessments.get(id) || null
     } catch (error) {
-      console.error('Failed to get assessment:', error)
+      logger.error('Failed to get assessment:', error)
       return null
     }
   }
@@ -157,7 +158,7 @@ class ECRAssessmentService implements AssessmentService {
       const assessmentArray = Array.from(assessments.entries())
       storageService.setEncryptedItem(this.storageKey, assessmentArray)
     } catch (error) {
-      console.error('Failed to delete assessment:', error)
+      logger.error('Failed to delete assessment:', error)
       throw new Error('Failed to delete assessment')
     }
   }
@@ -181,7 +182,7 @@ class ECRAssessmentService implements AssessmentService {
 
       return { anxious, avoidant, attachmentStyle }
     } catch (error) {
-      console.error('Failed to calculate scores:', error)
+      logger.error('Failed to calculate scores:', error)
       throw new Error('Failed to calculate scores')
     }
   }
@@ -207,7 +208,7 @@ class ECRAssessmentService implements AssessmentService {
 
       return assessment.basicResult
     } catch (error) {
-      console.error('Failed to generate basic report:', error)
+      logger.error('Failed to generate basic report:', error)
       throw new Error('Failed to generate basic report')
     }
   }
@@ -246,7 +247,7 @@ class ECRAssessmentService implements AssessmentService {
 
       return detailedReport
     } catch (error) {
-      console.error('Failed to generate detailed report:', error)
+      logger.error('Failed to generate detailed report:', error)
       throw new Error('Failed to generate detailed report')
     }
   }
@@ -259,7 +260,7 @@ class ECRAssessmentService implements AssessmentService {
       )
       return assessmentArray ? new Map(assessmentArray) : new Map()
     } catch (error) {
-      console.error('Failed to get all assessments:', error)
+      logger.error('Failed to get all assessments:', error)
       return new Map()
     }
   }

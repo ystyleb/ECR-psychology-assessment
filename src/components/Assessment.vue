@@ -143,6 +143,7 @@
 import { ref, computed, watch } from 'vue'
 import type { AssessmentQuestion } from '@/types'
 import { useECR } from '@/store'
+import logger from '@/utils/logger'
 
 interface Props {
   questions: AssessmentQuestion[]
@@ -185,7 +186,7 @@ const selectScore = async (score: number) => {
     loading.value = true
     await store.saveCurrentResponse(currentIndex.value, score)
   } catch (error) {
-    console.error('保存答案失败:', error)
+    logger.error('保存答案失败:', error)
     store.showError('保存失败，请重试')
   } finally {
     loading.value = false
@@ -211,7 +212,7 @@ const nextQuestion = async () => {
         await navigateToResults()
       }
     } catch (error) {
-      console.error('完成测评失败:', error)
+      logger.error('完成测评失败:', error)
       store.showError('完成测评失败，请重试')
     } finally {
       loading.value = false
@@ -225,7 +226,7 @@ const nextQuestion = async () => {
 const navigateToResults = async () => {
   // 这里应该触发路由导航到结果页面
   // 由父组件或路由处理
-  console.log('导航到结果页面')
+  logger.log('导航到结果页面')
 }
 
 // 暴露方法给父组件

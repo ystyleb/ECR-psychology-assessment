@@ -171,6 +171,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
+import logger from '@/utils/logger'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -183,43 +184,43 @@ const stats = ref({
 })
 
 const startAssessment = async () => {
-  console.log('🚀 startAssessment method called')
+  logger.log('🚀 startAssessment method called')
   
   try {
     loading.value = true
-    console.log('📱 Setting loading to true')
+    logger.log('📱 Setting loading to true')
     
     appStore.showInfo('正在准备测评...')
-    console.log('💬 Showing info message')
+    logger.log('💬 Showing info message')
 
     // 创建新的测评会话
-    console.log('🔄 About to call createNewAssessment')
+    logger.log('🔄 About to call createNewAssessment')
     const assessmentId = await appStore.createNewAssessment()
-    console.log('✅ Assessment created with ID:', assessmentId)
+    logger.log('✅ Assessment created with ID:', assessmentId)
 
     // 短暂延迟以显示加载状态
-    console.log('⏳ Starting delay...')
+    logger.log('⏳ Starting delay...')
     await new Promise(resolve => setTimeout(resolve, 1000))
-    console.log('⏳ Delay finished')
+    logger.log('⏳ Delay finished')
 
     // 跳转到测评详情页面
-    console.log('🔄 About to navigate to:', `/assessment/${assessmentId}`)
+    logger.log('🔄 About to navigate to:', `/assessment/${assessmentId}`)
     await router.push(`/assessment/${assessmentId}`)
-    console.log('✅ Navigation completed')
+    logger.log('✅ Navigation completed')
 
     appStore.showSuccess('测评已开始！')
-    console.log('💬 Success message shown')
+    logger.log('💬 Success message shown')
   } catch (error) {
-    console.error('❌ Failed to start assessment:', error)
+    logger.error('❌ Failed to start assessment:', error)
     appStore.showError('启动测评失败，请重试')
   } finally {
     loading.value = false
-    console.log('📱 Loading set to false')
+    logger.log('📱 Loading set to false')
   }
 }
 
 onMounted(() => {
   // 页面加载时的初始化逻辑
-  console.log('Assessment intro page loaded')
+  logger.log('Assessment intro page loaded')
 })
 </script>

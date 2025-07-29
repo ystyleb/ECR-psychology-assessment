@@ -144,6 +144,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { DetailedReportData } from '@/types'
+import logger from '@/utils/logger'
 
 interface Props {
   report: DetailedReportData
@@ -247,7 +248,7 @@ const generateQRCode = async () => {
       ctx.fillText('二维码', 64, 64)
     }
   } catch (error) {
-    console.error('Failed to generate QR code:', error)
+    logger.error('Failed to generate QR code:', error)
   }
 }
 
@@ -276,7 +277,7 @@ const nativeShare = async () => {
     })
     emit('share', 'native', shareUrl.value)
   } catch (error) {
-    console.error('Native share failed:', error)
+    logger.error('Native share failed:', error)
   }
 }
 </script>

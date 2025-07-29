@@ -66,6 +66,7 @@ import {
 } from 'echarts/components'
 import type { EChartsOption } from 'echarts'
 import type { AttachmentStyle } from '@/types'
+import logger from '@/utils/logger'
 
 // 注册ECharts组件
 use([
@@ -473,7 +474,7 @@ const getPositionDescription = (): string => {
 }
 
 const handleChartClick = (params: any) => {
-  console.log('Chart clicked:', params)
+  logger.log('Chart clicked:', params)
 }
 
 // 生命周期

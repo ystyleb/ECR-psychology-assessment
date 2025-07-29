@@ -38,6 +38,7 @@ import { computed } from 'vue'
 import { toastService } from '@/services/toastService'
 import type { ToastPosition, Toast } from '@/services/toastService'
 import ToastNotification from './ToastNotification.vue'
+import logger from '@/utils/logger'
 
 // 所有可能的位置
 const positions: ToastPosition[] = [
@@ -93,7 +94,7 @@ const handleToastClick = (toast: Toast) => {
 
 const handleToastAfterLeave = (id: string) => {
   // Toast已经从DOM中移除，可以进行清理工作
-  console.log(`Toast ${id} removed from DOM`)
+  logger.log(`Toast ${id} removed from DOM`)
 }
 </script>
 

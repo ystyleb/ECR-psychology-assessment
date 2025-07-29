@@ -2,6 +2,7 @@
 import type { PaymentSession, PaymentResult, OrderInfo } from '@/types'
 import { storageService } from './storageService'
 import { stripeService } from './stripeService'
+import logger from '@/utils/logger'
 
 interface RefundResult {
   success: boolean
@@ -79,7 +80,7 @@ class StripePaymentService {
       await this.savePaymentSession(session)
 
       // 记录支付尝试
-      console.log('Payment session created:', {
+      logger.log('Payment session created:', {
         sessionId: session.id,
         assessmentId,
         amount: session.amount,
@@ -88,7 +89,7 @@ class StripePaymentService {
 
       return session
     } catch (error) {
-      console.error('Failed to create payment session:', error)
+      logger.error('Failed to create payment session:', error)
       throw error
     }
   }
@@ -108,7 +109,7 @@ class StripePaymentService {
         throw new Error(error.message)
       }
     } catch (error) {
-      console.error('Failed to redirect to checkout:', error)
+      logger.error('Failed to redirect to checkout:', error)
       throw error
     }
   }
@@ -169,7 +170,7 @@ class StripePaymentService {
         }
         await this.saveOrder(order)
 
-        console.log('Payment verified successfully:', {
+        logger.log('Payment verified successfully:', {
           sessionId,
           assessmentId: result.assessmentId,
           amount: order.amount
@@ -178,7 +179,7 @@ class StripePaymentService {
 
       return result
     } catch (error) {
-      console.error('Failed to verify payment:', error)
+      logger.error('Failed to verify payment:', error)
       return {
         success: false,
         sessionId,
@@ -201,7 +202,7 @@ class StripePaymentService {
 
       return await response.json()
     } catch (error) {
-      console.error('Failed to check payment status:', error)
+      logger.error('Failed to check payment status:', error)
       return {
         status: 'unknown',
         isPaid: false,
@@ -240,7 +241,7 @@ class StripePaymentService {
         expiresAt: tokenInfo.expiresAt
       }
     } catch (error) {
-      console.error('Failed to check existing access:', error)
+      logger.error('Failed to check existing access:', error)
       return { hasAccess: false }
     }
   }
@@ -260,7 +261,7 @@ class StripePaymentService {
       // 检查是否过期
       return tokenInfo.expiresAt > new Date()
     } catch (error) {
-      console.error('Failed to check report unlock status:', error)
+      logger.error('Failed to check report unlock status:', error)
       return false
     }
   }
@@ -285,7 +286,7 @@ class StripePaymentService {
 
       return session
     } catch (error) {
-      console.error('Failed to get payment session:', error)
+      logger.error('Failed to get payment session:', error)
       return null
     }
   }
@@ -300,7 +301,7 @@ class StripePaymentService {
         (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
       )
     } catch (error) {
-      console.error('Failed to get order history:', error)
+      logger.error('Failed to get order history:', error)
       return []
     }
   }
@@ -313,7 +314,7 @@ class StripePaymentService {
       const orders = this.getAllOrders()
       return orders.get(orderId) || null
     } catch (error) {
-      console.error('Failed to get order by id:', error)
+      logger.error('Failed to get order by id:', error)
       return null
     }
   }
@@ -365,7 +366,7 @@ class StripePaymentService {
         reason
       }
     } catch (error) {
-      console.error('Failed to request refund:', error)
+      logger.error('Failed to request refund:', error)
       throw error
     }
   }
@@ -406,7 +407,7 @@ class StripePaymentService {
         await this.saveAllAccessTokens(accessTokens)
       }
     } catch (error) {
-      console.error('Failed to cleanup expired data:', error)
+      logger.error('Failed to cleanup expired data:', error)
     }
   }
 
@@ -427,7 +428,7 @@ class StripePaymentService {
       )
       return sessionArray ? new Map(sessionArray) : new Map()
     } catch (error) {
-      console.error('Failed to get payment sessions:', error)
+      logger.error('Failed to get payment sessions:', error)
       return new Map()
     }
   }
@@ -447,7 +448,7 @@ class StripePaymentService {
       const orderArray = storageService.getEncryptedItem<[string, OrderInfo][]>(this.ordersKey)
       return orderArray ? new Map(orderArray) : new Map()
     } catch (error) {
-      console.error('Failed to get orders:', error)
+      logger.error('Failed to get orders:', error)
       return new Map()
     }
   }
@@ -486,7 +487,7 @@ class StripePaymentService {
       }
       return tokenMap
     } catch (error) {
-      console.error('Failed to get access tokens:', error)
+      logger.error('Failed to get access tokens:', error)
       return new Map()
     }
   }

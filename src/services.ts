@@ -7,6 +7,7 @@ import type {
   PaymentSession,
   PaymentResult
 } from '@/types'
+import logger from '@/utils/logger'
 
 // ECR题目数据（36题）
 const ECR_QUESTIONS: AssessmentQuestion[] = [
@@ -82,7 +83,7 @@ class ECRService {
     try {
       localStorage.setItem(key, JSON.stringify(value))
     } catch (error) {
-      console.error(`存储失败:`, error)
+      logger.error(`存储失败:`, error)
     }
   }
 
@@ -468,7 +469,7 @@ class ECRService {
   async createPaymentSession(assessmentId: string): Promise<PaymentSession> {
     // 开发环境模拟支付 - 临时禁用以测试真实Stripe
     if (false && import.meta.env.DEV) {
-      console.log('🔧 Development mode: Creating mock payment session')
+      logger.log('🔧 Development mode: Creating mock payment session')
       
       // 模拟支付会话
       const mockSession = {
@@ -493,18 +494,18 @@ class ECRService {
       }
       this.setItem(this.STORAGE_KEYS.sessions, sessions)
       
-      console.log('🔧 Mock payment session created:', mockSession)
+      logger.log('🔧 Mock payment session created:', mockSession)
       return mockSession
     }
     
     // 生产环境实际支付
     try {
-      console.log('🔧 Debug: baseUrl =', this.baseUrl)
-      console.log('🔧 Debug: VITE_API_BASE_URL =', import.meta.env.VITE_API_BASE_URL)
+      logger.log('🔧 Debug: baseUrl =', this.baseUrl)
+      logger.log('🔧 Debug: VITE_API_BASE_URL =', import.meta.env.VITE_API_BASE_URL)
       const successUrl = `${window.location.origin}/payment/success`
       const cancelUrl = `${window.location.origin}/payment/cancel`
       const requestUrl = `${this.baseUrl}/api/create-payment`
-      console.log('🔧 Debug: requestUrl =', requestUrl)
+      logger.log('🔧 Debug: requestUrl =', requestUrl)
       
       const response = await fetch(requestUrl, {
         method: 'POST',
@@ -535,7 +536,7 @@ class ECRService {
 
       return session
     } catch (error) {
-      console.error('创建支付会话失败:', error)
+      logger.error('创建支付会话失败:', error)
       throw error
     }
   }
@@ -564,7 +565,7 @@ class ECRService {
 
       return result
     } catch (error) {
-      console.error('支付验证失败:', error)
+      logger.error('支付验证失败:', error)
       return { success: false, error: '支付验证失败' }
     }
   }

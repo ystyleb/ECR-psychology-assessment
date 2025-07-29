@@ -12,7 +12,6 @@ const getStripeInstance = () => {
     
     // 清理环境变量
     const cleanedSecretKey = secretKey.trim().replace(/[\r\n\t]/g, '')
-    console.log('Initializing Stripe with cleaned key, length:', cleanedSecretKey.length)
     
     stripe = new Stripe(cleanedSecretKey, {
       apiVersion: '2023-10-16'
@@ -54,24 +53,11 @@ module.exports = async (req, res) => {
   try {
     // 验证环境变量
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.error('STRIPE_SECRET_KEY is not configured')
       return res.status(500).json({
         error: 'Configuration error',
         message: 'Payment service is not properly configured'
       })
     }
-
-    // 调试环境变量
-    const secretKey = process.env.STRIPE_SECRET_KEY
-    console.log('Debug - Secret key length:', secretKey.length)
-    console.log('Debug - Secret key starts with:', secretKey.substring(0, 10))
-    console.log('Debug - Secret key ends with:', secretKey.substring(secretKey.length - 10))
-    console.log('Debug - Secret key char codes (first 20):', secretKey.substring(0, 20).split('').map(c => c.charCodeAt(0)))
-    
-    // 清理环境变量（移除可能的空白字符）
-    const cleanedSecretKey = secretKey.trim().replace(/[\r\n\t]/g, '')
-    console.log('Debug - Cleaned key length:', cleanedSecretKey.length)
-    console.log('Debug - Keys are equal:', secretKey === cleanedSecretKey)
 
     // 解析请求体
     const { assessmentId, successUrl, cancelUrl, metadata } = req.body
@@ -150,16 +136,6 @@ module.exports = async (req, res) => {
       }
     })
 
-    // 记录支付会话
-    console.log('Payment session created successfully:', {
-      sessionId: session.id,
-      assessmentId,
-      amount: 1990,
-      currency: 'cny',
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    })
-
     // 返回成功响应
     return res.status(200).json({
       success: true,
@@ -177,8 +153,6 @@ module.exports = async (req, res) => {
       redirectUrl: session.url
     })
   } catch (error) {
-    console.error('Payment session creation failed:', error)
-
     // 处理Stripe特定错误
     if (error.name === 'StripeError') {
       return res.status(400).json({

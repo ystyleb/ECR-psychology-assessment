@@ -2,6 +2,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUIStore } from '@/stores/ui'
 import { debounce } from '@/utils/performance'
+import logger from '@/utils/logger'
 
 /**
  * 用户体验优化组合式函数
@@ -72,7 +73,7 @@ export function useErrorHandling() {
   }
 
   const handleError = (err: unknown, context = '操作') => {
-    console.error(`${context} failed:`, err)
+    logger.error(`${context} failed:`, err)
 
     let message = `${context}失败`
     let details = ''
@@ -258,7 +259,7 @@ export function useAutoSave(
       await saveFunction()
       lastSaved.value = new Date()
     } catch (error) {
-      console.error('Auto-save failed:', error)
+      logger.error('Auto-save failed:', error)
     } finally {
       saving.value = false
     }

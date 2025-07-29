@@ -3,6 +3,8 @@
  * 提供各种性能优化相关的工具函数
  */
 
+import logger from './logger'
+
 // 扩展Performance类型以支持内存信息
 interface PerformanceWithMemory extends Performance {
   memory?: {
@@ -306,7 +308,7 @@ export class PerformanceMonitor {
       const navObserver = new PerformanceObserver(list => {
         const entries = list.getEntries()
         entries.forEach(entry => {
-          console.log('Navigation timing:', entry)
+          logger.log('Navigation timing:', entry)
         })
       })
       navObserver.observe({ entryTypes: ['navigation'] })
@@ -318,7 +320,7 @@ export class PerformanceMonitor {
         entries.forEach(entry => {
           if (entry.duration > 1000) {
             // 只记录加载时间超过1秒的资源
-            console.warn('Slow resource:', entry.name, entry.duration)
+            logger.warn('Slow resource:', entry.name, entry.duration)
           }
         })
       })

@@ -112,6 +112,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import type { DetailedReportData, ReportExportOptions } from '@/types'
+import logger from '@/utils/logger'
 
 interface Props {
   report: DetailedReportData
@@ -177,7 +178,7 @@ const handleExport = async () => {
 
     closeModal()
   } catch (error) {
-    console.error('Export failed:', error)
+    logger.error('Export failed:', error)
   } finally {
     isExporting.value = false
   }
@@ -187,13 +188,13 @@ const handleExport = async () => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const exportToPDF = async () => {
   // 这里可以使用 jsPDF 或其他PDF生成库
-  console.log('Exporting to PDF...')
+  logger.log('Exporting to PDF...')
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const exportToImage = async () => {
   // 这里可以使用 html2canvas 生成图片
-  console.log('Exporting to Image...')
+  logger.log('Exporting to Image...')
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

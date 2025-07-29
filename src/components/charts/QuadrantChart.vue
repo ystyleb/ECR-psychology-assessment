@@ -142,6 +142,7 @@
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { Chart, ScatterController, LinearScale, PointElement, Tooltip, Legend } from 'chart.js'
 import type { AttachmentStyle } from '@/types'
+import logger from '@/utils/logger'
 
 // 注册Chart.js组件
 Chart.register(ScatterController, LinearScale, PointElement, Tooltip, Legend)
@@ -370,7 +371,7 @@ const createChart = async () => {
     }, props.animated ? 800 : 100)
 
   } catch (error) {
-    console.error('创建四象限图失败:', error)
+    logger.error('创建四象限图失败:', error)
     isLoading.value = false
   }
 }

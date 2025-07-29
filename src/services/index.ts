@@ -1,5 +1,7 @@
 // 统一导出所有服务
 
+import logger from '@/utils/logger'
+
 // 导出服务实例
 export { default as storageService } from './storageService'
 export { default as calculationService } from './calculationService'
@@ -54,9 +56,9 @@ export class ServiceFactory {
       // 清理过期支付会话
       await paymentService.cleanupExpiredSessions()
 
-      console.log('All services initialized successfully')
+      logger.log('All services initialized successfully')
     } catch (error) {
-      console.error('Failed to initialize services:', error)
+      logger.error('Failed to initialize services:', error)
     }
   }
 }
@@ -91,7 +93,7 @@ export const checkServiceHealth = async () => {
     const sessions = await paymentService.getOrderHistory()
     health.payment = Array.isArray(sessions)
   } catch (error) {
-    console.error('Service health check failed:', error)
+    logger.error('Service health check failed:', error)
   }
 
   return health
@@ -149,7 +151,7 @@ class ServiceEventBus {
         try {
           callback(data)
         } catch (error) {
-          console.error(`Error in event listener for ${event}:`, error)
+          logger.error(`Error in event listener for ${event}:`, error)
         }
       })
     }
@@ -171,7 +173,7 @@ export const startServiceMonitoring = () => {
         .map(([service]) => service)
 
       if (unhealthyServices.length > 0) {
-        console.warn('Unhealthy services detected:', unhealthyServices)
+        logger.warn('Unhealthy services detected:', unhealthyServices)
         serviceEventBus.emit('service-unhealthy', unhealthyServices)
       }
     },

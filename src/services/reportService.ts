@@ -14,6 +14,7 @@ import type {
 } from '@/types'
 
 import { ATTACHMENT_DESCRIPTIONS } from '@/data/attachmentDescriptions'
+import logger from '@/utils/logger'
 
 /**
  * 报告生成服务
@@ -371,7 +372,7 @@ class ReportService {
       reports.set(report.id, report)
       localStorage.setItem(this.storageKey, JSON.stringify(Array.from(reports.entries())))
     } catch (error) {
-      console.error('Failed to save report:', error)
+      logger.error('Failed to save report:', error)
     }
   }
 
@@ -405,7 +406,7 @@ class ReportService {
         return new Map(revivedEntries)
       }
     } catch (error) {
-      console.error('Failed to load reports:', error)
+      logger.error('Failed to load reports:', error)
     }
     return new Map()
   }

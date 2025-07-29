@@ -34,6 +34,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
 import { useReportData } from '@/composables/useReportData'
+import logger from '@/utils/logger'
 
 // 组件导入
 import BaseReportView from '@/components/BaseReportView.vue'
@@ -87,11 +88,11 @@ const loadBasicReport = async () => {
     loading.value = true
     error.value = null
     
-    console.log('📈 ReportView: Loading report for assessment ID:', assessmentId.value)
+    logger.log('📈 ReportView: Loading report for assessment ID:', assessmentId.value)
     
     // 从统一store获取评估数据
     const hasAssessment = appStore.hasAssessment(assessmentId.value)
-    console.log('📈 ReportView: hasAssessment:', hasAssessment)
+    logger.log('📈 ReportView: hasAssessment:', hasAssessment)
     
     if (!hasAssessment) {
       error.value = '未找到测评，请先完成测评'
@@ -101,7 +102,7 @@ const loadBasicReport = async () => {
     // 加载评估数据（如果需要）
     if (appStore.currentAssessment?.id !== assessmentId.value) {
       const success = await appStore.loadAssessment(assessmentId.value)
-      console.log('📈 ReportView: loadAssessment success:', success)
+      logger.log('📈 ReportView: loadAssessment success:', success)
       if (!success) {
         error.value = '无法加载测评数据'
         return
@@ -110,17 +111,17 @@ const loadBasicReport = async () => {
     
     // 检查是否有结果
     const assessment = appStore.currentAssessment
-    console.log('📈 ReportView: Current assessment:', assessment)
-    console.log('📈 ReportView: Has result:', !!(assessment as any)?.basicResult)
+    logger.log('📈 ReportView: Current assessment:', assessment)
+    logger.log('📈 ReportView: Has result:', !!(assessment as any)?.basicResult)
     
     if (!assessment || !(assessment as any)?.basicResult) {
       error.value = '测评尚未完成，请先完成所有题目'
       return
     }
     
-    console.log('📈 ReportView: Basic result:', assessment.result)
+    logger.log('📈 ReportView: Basic result:', assessment.result)
   } catch (err) {
-    console.error('Failed to load basic report:', err)
+    logger.error('Failed to load basic report:', err)
     error.value = err instanceof Error ? err.message : '报告加载失败'
   } finally {
     loading.value = false
@@ -134,21 +135,21 @@ const retryLoad = () => {
 
 const handleUnlock = async () => {
   try {
-    console.log('🔓 Starting payment process for assessment:', assessmentId.value)
+    logger.log('🔓 Starting payment process for assessment:', assessmentId.value)
     
     // 发起支付
     const session = await appStore.initiatePayment(assessmentId.value)
     
     if (session && (session as any).url) {
-      console.log('💳 Redirecting to payment URL:', (session as any).url)
+      logger.log('💳 Redirecting to payment URL:', (session as any).url)
       // 跳转到Stripe支付页面
       window.location.href = (session as any).url
     } else {
-      console.error('❌ No payment URL received')
+      logger.error('❌ No payment URL received')
       appStore.showError('支付创建失败，请重试')
     }
   } catch (error) {
-    console.error('❌ Payment initiation failed:', error)
+    logger.error('❌ Payment initiation failed:', error)
     appStore.showError('支付创建失败，请重试')
   }
 }

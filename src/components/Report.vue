@@ -100,6 +100,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useECR } from '@/store'
 import type { BasicResult, DetailedReport} from '@/types'
+import logger from '@/utils/logger'
 
 // 导入子组件
 import AttachmentTypeCard from './report/AttachmentTypeCard.vue'
@@ -198,7 +199,7 @@ onMounted(() => {
   // 检查支付状态，如果已支付但没有详细报告，尝试加载
   if (showDetailedReport.value && !props.detailedReport) {
     // 这里可以添加加载详细报告的逻辑
-    console.log('需要加载详细报告')
+    logger.log('需要加载详细报告')
   }
 })
 </script>

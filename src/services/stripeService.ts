@@ -2,6 +2,7 @@
 import { loadStripe } from '@stripe/stripe-js'
 import type { Stripe } from '@stripe/stripe-js'
 import type { PaymentSession, PaymentResult, StripeConfig } from '@/types'
+import logger from '@/utils/logger'
 
 // Stripe配置
 const STRIPE_CONFIG: StripeConfig = {
@@ -27,7 +28,7 @@ class StripeService {
     }
 
     if (!STRIPE_CONFIG.publishableKey) {
-      console.error('Stripe publishable key is not configured')
+      logger.error('Stripe publishable key is not configured')
       return null
     }
 
@@ -36,7 +37,7 @@ class StripeService {
       stripeInstance = this.stripe
       return this.stripe
     } catch (error) {
-      console.error('Failed to initialize Stripe:', error)
+      logger.error('Failed to initialize Stripe:', error)
       return null
     }
   }
@@ -77,7 +78,7 @@ class StripeService {
       const data = await response.json()
       return data.session
     } catch (error) {
-      console.error('Failed to create payment session:', error)
+      logger.error('Failed to create payment session:', error)
       throw error
     }
   }
@@ -117,7 +118,7 @@ class StripeService {
 
       return await response.json()
     } catch (error) {
-      console.error('Failed to verify payment:', error)
+      logger.error('Failed to verify payment:', error)
       throw error
     }
   }
@@ -136,7 +137,7 @@ class StripeService {
       const data = await response.json()
       return data.status
     } catch (error) {
-      console.error('Failed to check payment status:', error)
+      logger.error('Failed to check payment status:', error)
       return 'unknown'
     }
   }
@@ -155,7 +156,7 @@ class StripeService {
       const data = await response.json()
       return data.sessions || []
     } catch (error) {
-      console.error('Failed to get payment history:', error)
+      logger.error('Failed to get payment history:', error)
       return []
     }
   }

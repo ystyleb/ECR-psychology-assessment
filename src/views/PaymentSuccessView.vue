@@ -284,6 +284,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
+import logger from '@/utils/logger'
 // import { useUIStore } from '@/stores/ui'
 
 // 响应式数据
@@ -338,7 +339,7 @@ const verifyPayment = async () => {
   try {
     // 开发环境模拟支付验证成功
     if (import.meta.env.DEV && sessionId.value.includes('mock_session')) {
-      console.log('🔧 Development mode: Mock payment verification success')
+      logger.log('🔧 Development mode: Mock payment verification success')
       
       // 模拟支付状态更新
       const sessions = JSON.parse(localStorage.getItem('ecr_payment_sessions') || '{}')
@@ -371,7 +372,7 @@ const verifyPayment = async () => {
       errorMessage.value = '支付验证失败'
     }
   } catch (error) {
-    console.error('Payment verification failed:', error)
+    logger.error('Payment verification failed:', error)
     verificationError.value = true
     errorMessage.value = '验证过程中发生错误'
   } finally {
@@ -424,7 +425,7 @@ const shareResult = async () => {
       showToast('链接已复制到剪贴板')
     }
   } catch (error) {
-    console.error('Share failed:', error)
+    logger.error('Share failed:', error)
     showToast('分享功能暂不可用')
   }
 }

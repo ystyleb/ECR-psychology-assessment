@@ -1,6 +1,7 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { debounce, throttle, performanceTimer } from '@/utils/performance'
 import type { Ref } from 'vue'
+import logger from '@/utils/logger'
 
 // 扩展Navigator类型以支持网络连接信息
 interface NavigatorNetworkInformation extends Navigator {
@@ -346,7 +347,7 @@ export function useChartMemoryOptimization() {
       const usageRatio = memory.usedJSHeapSize / memory.jsHeapSizeLimit
 
       if (usageRatio > 0.8) {
-        console.warn('High memory usage detected, consider optimizing charts')
+        logger.warn('High memory usage detected, consider optimizing charts')
         return 'high'
       } else if (usageRatio > 0.6) {
         return 'medium'

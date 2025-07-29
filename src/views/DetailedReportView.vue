@@ -260,6 +260,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
 import { useReportData } from '@/composables/useReportData'
+import logger from '@/utils/logger'
 
 // 组件导入
 import BaseReportView from '@/components/BaseReportView.vue'
@@ -307,17 +308,17 @@ const { attachmentDescription, scores, percentiles, basicReportData } = useRepor
 
 // 生命周期
 onMounted(async () => {
-  console.log('🔒 DetailedReportView: Checking access for assessment:', assessmentId.value)
-  console.log('🔒 DetailedReportView: hasAccess:', hasAccess.value)
+  logger.log('🔒 DetailedReportView: Checking access for assessment:', assessmentId.value)
+  logger.log('🔒 DetailedReportView: hasAccess:', hasAccess.value)
   
   if (!hasAccess.value) {
-    console.log('🔒 DetailedReportView: No access, redirecting to basic report')
+    logger.log('🔒 DetailedReportView: No access, redirecting to basic report')
     // 没有访问权限，重定向到基础报告页面
     router.replace({ name: 'report', params: { id: assessmentId.value } })
     return
   }
   
-  console.log('🔒 DetailedReportView: Access granted, loading detailed report')
+  logger.log('🔒 DetailedReportView: Access granted, loading detailed report')
   await loadDetailedReport()
 })
 
@@ -327,7 +328,7 @@ const loadDetailedReport = async () => {
     loading.value = true
     error.value = null
 
-    console.log('📈 DetailedReportView: Loading report for assessment ID:', assessmentId.value)
+    logger.log('📈 DetailedReportView: Loading report for assessment ID:', assessmentId.value)
     
     // 从统一store获取评估数据
     const hasAssessment = appStore.hasAssessment(assessmentId.value)
@@ -352,9 +353,9 @@ const loadDetailedReport = async () => {
       return
     }
 
-    console.log('📈 DetailedReportView: Detailed report loaded successfully')
+    logger.log('📈 DetailedReportView: Detailed report loaded successfully')
   } catch (err) {
-    console.error('Failed to load detailed report:', err)
+    logger.error('Failed to load detailed report:', err)
     error.value = err instanceof Error ? err.message : '详细报告加载失败'
   } finally {
     loading.value = false
@@ -367,27 +368,27 @@ const retryLoad = () => {
 }
 
 const handleExportComparison = () => {
-  console.log('导出对比报告...')
+  logger.log('导出对比报告...')
   // 实际的导出逻辑
 }
 
 const handleShareComparison = () => {
-  console.log('分享对比报告...')
+  logger.log('分享对比报告...')
   // 实际的分享逻辑
 }
 
 const handleViewDetailed = () => {
-  console.log('查看详细信息...')
+  logger.log('查看详细信息...')
   // 实际的查看逻辑
 }
 
 const handleExportPDF = () => {
-  console.log('导出PDF...')
+  logger.log('导出PDF...')
   // 实际的PDF导出逻辑
 }
 
 const handleShare = () => {
-  console.log('分享报告...')
+  logger.log('分享报告...')
   // 实际的分享逻辑
 }
 </script>

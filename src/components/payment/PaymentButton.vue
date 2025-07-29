@@ -154,6 +154,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '@/store'
+import logger from '@/utils/logger'
 
 interface Props {
   assessmentId: string
@@ -307,7 +308,7 @@ const handlePayment = async (event: Event) => {
       emit('payment-initiated', session)
     }
   } catch (error) {
-    console.error('Payment initiation failed:', error)
+    logger.error('Payment initiation failed:', error)
     const errorMessage = error instanceof Error ? error.message : '支付启动失败'
     emit('payment-error', errorMessage)
   } finally {
@@ -363,7 +364,7 @@ const checkAccessStatus = async () => {
       appStore.paymentStatus = 'success'
     }
   } catch (error) {
-    console.error('Failed to check access status:', error)
+    logger.error('Failed to check access status:', error)
   }
 }
 

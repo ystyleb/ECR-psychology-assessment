@@ -252,6 +252,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
+import logger from '@/utils/logger'
 
 const route = useRoute()
 const router = useRouter()
@@ -344,7 +345,7 @@ const saveProgress = async () => {
     appStore.showInfo('进度已保存')
   } catch (error) {
     appStore.showError('保存失败')
-    console.error('Failed to save progress:', error)
+    logger.error('Failed to save progress:', error)
   }
 }
 
@@ -373,7 +374,7 @@ const completeAssessment = async () => {
       appStore.showError('请完成所有题目后再提交')
     }
   } catch (error) {
-    console.error('Failed to complete assessment:', error)
+    logger.error('Failed to complete assessment:', error)
     appStore.showError('完成测评时出现错误，请重试')
   }
 }
@@ -386,7 +387,7 @@ const quickComplete = async (style: 'secure' | 'anxious' | 'avoidant' | 'disorga
     const assessmentId = route.params.id as string
     router.push(`/report/${assessmentId}`)
   } catch (error) {
-    console.error('Quick complete failed:', error)
+    logger.error('Quick complete failed:', error)
     appStore.showError('快速完成失败')
   }
 }
@@ -426,7 +427,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 
 // 生命周期钩子
 onMounted(async () => {
-  console.log('📊 AssessmentDetailView: onMounted called')
+  logger.log('📊 AssessmentDetailView: onMounted called')
   
   try {
     // 初始化题目数据 (统一store会自动初始化)
@@ -434,14 +435,14 @@ onMounted(async () => {
 
     // 初始化或恢复测评状态
     const assessmentId = route.params.id as string
-    console.log('📊 AssessmentDetailView: Checking assessment ID:', assessmentId)
+    logger.log('📊 AssessmentDetailView: Checking assessment ID:', assessmentId)
 
     const hasAssessment = appStore.hasAssessment(assessmentId)
-    console.log('📊 AssessmentDetailView: hasAssessment result:', hasAssessment)
-    console.log('📊 AssessmentDetailView: Current assessment in store:', appStore.currentAssessment)
+    logger.log('📊 AssessmentDetailView: hasAssessment result:', hasAssessment)
+    logger.log('📊 AssessmentDetailView: Current assessment in store:', appStore.currentAssessment)
 
     if (!hasAssessment) {
-      console.log('📊 AssessmentDetailView: Assessment not found, redirecting')
+      logger.log('📊 AssessmentDetailView: Assessment not found, redirecting')
       appStore.showError('测评不存在，请重新开始')
       router.push('/assessment')
       return
@@ -449,21 +450,21 @@ onMounted(async () => {
 
     // 加载当前测评数据 (如果不是当前测评，尝试加载)
     if (appStore.currentAssessment?.id !== assessmentId) {
-      console.log('📊 AssessmentDetailView: Loading assessment from storage')
+      logger.log('📊 AssessmentDetailView: Loading assessment from storage')
       const success = await appStore.loadAssessment(assessmentId)
       if (!success) {
-        console.log('📊 AssessmentDetailView: Failed to load assessment')
+        logger.log('📊 AssessmentDetailView: Failed to load assessment')
         appStore.showError('无法加载测评数据')
         router.push('/assessment')
         return
       }
     } else {
-      console.log('📊 AssessmentDetailView: Using current assessment from store')
+      logger.log('📊 AssessmentDetailView: Using current assessment from store')
     }
 
     // 设置当前选中的答案
     selectedAnswer.value = responses.value[currentQuestionIndex.value] || null
-    console.log('📊 AssessmentDetailView: Set selected answer:', selectedAnswer.value)
+    logger.log('📊 AssessmentDetailView: Set selected answer:', selectedAnswer.value)
 
     // 启动计时器
     timer.value = setInterval(() => {
@@ -475,7 +476,7 @@ onMounted(async () => {
 
     appStore.showInfo('测评已恢复，请继续作答')
   } catch (error) {
-    console.error('Failed to initialize assessment:', error)
+    logger.error('Failed to initialize assessment:', error)
     appStore.showError('初始化测评失败')
     router.push('/assessment')
   }

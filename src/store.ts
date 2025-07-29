@@ -10,6 +10,7 @@ import type {
   NotificationType 
 } from '@/types'
 import { ecrService } from '@/services'
+import logger from '@/utils/logger'
 
 /**
  * 通知接口
@@ -84,34 +85,34 @@ export const useAppStore = defineStore('app', () => {
     try {
       questions.value = await ecrService.getQuestions()
     } catch (error) {
-      console.error('题目初始化失败:', error)
+      logger.error('题目初始化失败:', error)
       showError('题目加载失败')
     }
   }
 
   const createNewAssessment = async (): Promise<string> => {
-    console.log('🏪 Store: createNewAssessment called')
+    logger.log('🏪 Store: createNewAssessment called')
     
     try {
       setLoading('loading')
-      console.log('🏪 Store: Set loading state')
+      logger.log('🏪 Store: Set loading state')
       
       const assessment = await ecrService.createAssessment()
-      console.log('🏪 Store: Assessment created by service:', assessment)
+      logger.log('🏪 Store: Assessment created by service:', assessment)
       
       currentAssessment.value = assessment
       currentQuestionIndex.value = 0
       startTime.value = new Date()
       
-      console.log('🏪 Store: Updated store state, current assessment:', currentAssessment.value)
+      logger.log('🏪 Store: Updated store state, current assessment:', currentAssessment.value)
       
       setLoading('idle')
       showSuccess('测评已创建')
       
-      console.log('🏪 Store: Returning assessment ID:', assessment.id)
+      logger.log('🏪 Store: Returning assessment ID:', assessment.id)
       return assessment.id
     } catch (error) {
-      console.error('🏪 Store: Error in createNewAssessment:', error)
+      logger.error('🏪 Store: Error in createNewAssessment:', error)
       setLoading('error')
       showError('创建测评失败')
       throw error
@@ -159,39 +160,39 @@ export const useAppStore = defineStore('app', () => {
         await calculateAndSaveResult()
       }
     } catch (error) {
-      console.error('保存回答失败:', error)
+      logger.error('保存回答失败:', error)
       showError('保存失败')
     }
   }
 
   // 计算并保存测评结果
   const calculateAndSaveResult = async () => {
-    console.log('📊 Store: calculateAndSaveResult called')
-    console.log('📊 Store: currentAssessment exists:', !!currentAssessment.value)
-    console.log('📊 Store: isAssessmentComplete:', isAssessmentComplete.value)
+    logger.log('📊 Store: calculateAndSaveResult called')
+    logger.log('📊 Store: currentAssessment exists:', !!currentAssessment.value)
+    logger.log('📊 Store: isAssessmentComplete:', isAssessmentComplete.value)
     
     if (!currentAssessment.value || !isAssessmentComplete.value) {
-      console.log('📊 Store: Conditions not met, aborting calculation')
+      logger.log('📊 Store: Conditions not met, aborting calculation')
       return
     }
 
     try {
-      console.log('📊 Store: Calculating result...')
+      logger.log('📊 Store: Calculating result...')
       const result = ecrService.calculateResult(currentAssessment.value.responses)
-      console.log('📊 Store: Calculated result:', result)
+      logger.log('📊 Store: Calculated result:', result)
       
       currentAssessment.value.basicResult = result
-      console.log('📊 Store: Set basicResult on assessment')
+      logger.log('📊 Store: Set basicResult on assessment')
       
       // 保存更新的评估数据
-      console.log('📊 Store: Saving assessment to storage...')
+      logger.log('📊 Store: Saving assessment to storage...')
       await ecrService.updateAssessment(currentAssessment.value)
-      console.log('📊 Store: Assessment saved successfully')
+      logger.log('📊 Store: Assessment saved successfully')
       
       showSuccess('测评结果已生成！')
       return result
     } catch (error) {
-      console.error('📊 Store: 计算结果失败:', error)
+      logger.error('📊 Store: 计算结果失败:', error)
       showError('计算结果失败')
       throw error
     }
@@ -216,51 +217,51 @@ export const useAppStore = defineStore('app', () => {
   }
 
   const hasAssessment = (id: string): boolean => {
-    console.log('🔍 Store: hasAssessment called with ID:', id)
-    console.log('🔍 Store: Current assessment:', currentAssessment.value)
+    logger.log('🔍 Store: hasAssessment called with ID:', id)
+    logger.log('🔍 Store: Current assessment:', currentAssessment.value)
     
     const result = ecrService.hasAssessment(id)
-    console.log('🔍 Store: ecrService.hasAssessment result:', result)
+    logger.log('🔍 Store: ecrService.hasAssessment result:', result)
     
     // 如果当前正有一个评估并且ID匹配，也应该返回true
     const hasCurrentAssessment = currentAssessment.value?.id === id
-    console.log('🔍 Store: Current assessment ID matches:', hasCurrentAssessment)
+    logger.log('🔍 Store: Current assessment ID matches:', hasCurrentAssessment)
     
     const finalResult = result || hasCurrentAssessment
-    console.log('🔍 Store: Final hasAssessment result:', finalResult)
+    logger.log('🔍 Store: Final hasAssessment result:', finalResult)
     
     return finalResult
   }
 
   // ===== 开发者模式方法 =====
   const quickCompleteAssessment = async (style: 'secure' | 'anxious' | 'avoidant' | 'disorganized' = 'secure') => {
-    console.log('🚀 Store: quickCompleteAssessment called with style:', style)
+    logger.log('🚀 Store: quickCompleteAssessment called with style:', style)
     if (!currentAssessment.value) {
-      console.log('❌ Store: No current assessment, aborting quickComplete')
+      logger.log('❌ Store: No current assessment, aborting quickComplete')
       return
     }
     
     try {
       setLoading('loading')
-      console.log('⚡ Store: Starting quick complete with style:', style)
+      logger.log('⚡ Store: Starting quick complete with style:', style)
       
       // 根据指定的依恋类型生成模拟答案
       const mockResponses = generateMockResponses(style)
-      console.log('📊 Store: Generated mock responses:', mockResponses)
+      logger.log('📊 Store: Generated mock responses:', mockResponses)
       currentAssessment.value.responses = mockResponses
       
       // 保存更新的评估
       await ecrService.updateAssessment(currentAssessment.value)
-      console.log('💾 Store: Saved assessment with mock responses')
+      logger.log('💾 Store: Saved assessment with mock responses')
       
       // 计算并保存结果
       await calculateAndSaveResult()
-      console.log('✅ Store: Quick complete finished successfully')
+      logger.log('✅ Store: Quick complete finished successfully')
       
       setLoading('idle')
       showSuccess(`快速完成测评 - ${style} 类型`)
     } catch (error) {
-      console.error('❌ Store: Quick complete failed:', error)
+      logger.error('❌ Store: Quick complete failed:', error)
       setLoading('error')
       showError('快速完成失败')
       throw error

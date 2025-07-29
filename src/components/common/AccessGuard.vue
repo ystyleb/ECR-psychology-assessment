@@ -107,6 +107,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePaymentStore } from '@/stores/payment'
 import { useUIStore } from '@/stores/ui'
+import logger from '@/utils/logger'
 
 type AccessType = 'payment' | 'auth' | 'permission' | 'custom'
 
@@ -272,7 +273,7 @@ const checkAccess = async () => {
       emit('accessDenied', `Access denied for ${props.accessType}`)
     }
   } catch (err) {
-    console.error('Access check failed:', err)
+    logger.error('Access check failed:', err)
     error.value = err instanceof Error ? err.message : '访问验证失败'
   } finally {
     loading.value = false
@@ -288,7 +289,7 @@ const handleUnlock = async () => {
 
     await paymentStore.initiatePayment(props.resourceId)
   } catch (err) {
-    console.error('Unlock failed:', err)
+    logger.error('Unlock failed:', err)
     uiStore.showError('解锁失败，请重试')
   } finally {
     unlocking.value = false

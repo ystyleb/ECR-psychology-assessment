@@ -48,7 +48,8 @@
       "Bash(#!/bin/bash\n\necho \"\"🔄 开始完整支付流程测试...\"\"\n\n# 步骤1: 创建支付会话\necho \"\"步骤1: 创建支付会话\"\"\nCREATE_RESPONSE=$(curl -s -X POST http://localhost:3001/api/create-payment \\\n  -H \"\"Content-Type: application/json\"\" \\\n  -d ''{\n    \"\"assessmentId\"\": \"\"ecr_complete_flow_test_''$(date +%s)''\"\",\n    \"\"successUrl\"\": \"\"https://ecr-kappa.vercel.app/payment-success\"\",\n    \"\"cancelUrl\"\": \"\"https://ecr-kappa.vercel.app/payment-cancel\"\"\n  }'')\n\necho \"\"创建支付会话响应: $CREATE_RESPONSE\"\"\n\n# 提取sessionId\nSESSION_ID=$(echo $CREATE_RESPONSE | grep -o ''\"\"stripeSessionId\"\":\"\"[^\"\"]*'' | cut -d''\"\"'' -f4)\necho \"\"提取到的Session ID: $SESSION_ID\"\"\n\nif [ -z \"\"$SESSION_ID\"\" ]; then\n  echo \"\"❌ 创建支付会话失败\"\"\n  exit 1\nfi\n\necho \"\"✅ 支付会话创建成功: $SESSION_ID\"\"\n\n# 步骤2: 模拟用户支付延迟\necho \"\"步骤2: 模拟用户支付过程...\"\"\nsleep 2\n\n# 步骤3: 验证支付\necho \"\"步骤3: 验证支付结果\"\"\nVERIFY_RESPONSE=$(curl -s -X POST http://localhost:3001/api/verify-payment \\\n  -H \"\"Content-Type: application/json\"\" \\\n  -d \"\"{\\\"\"sessionId\\\"\": \\\"\"$SESSION_ID\\\"\"}\"\")\n\necho \"\"支付验证响应: $VERIFY_RESPONSE\"\"\n\n# 检查验证结果\nSUCCESS=$(echo $VERIFY_RESPONSE | grep -o ''\"\"success\"\":true'')\nif [ -n \"\"$SUCCESS\"\" ]; then\n  echo \"\"🎉 完整支付流程测试成功！所有步骤都正常工作。\"\"\nelse\n  echo \"\"❌ 支付验证失败\"\"\n  exit 1\nfi)",
       "Bash(npm cache clean:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(timeout 10s npm run dev)"
     ],
     "deny": []
   }

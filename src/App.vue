@@ -9,10 +9,6 @@
  * Copyright (c) 2025 by Tencent, All Rights Reserved. 
 -->
 <template>
-  <StagewiseToolbar
-    v-if="isDev"
-    :config="{ plugins: [VuePlugin] }"
-  />
   <div id="app" class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
     <RouterView />
   </div>
@@ -20,10 +16,6 @@
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { StagewiseToolbar } from '@stagewise/toolbar-vue'
-import VuePlugin from '@stagewise-plugins/vue'
-
-const isDev = import.meta.env.DEV
 </script>
 
 <style scoped>
