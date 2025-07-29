@@ -10,6 +10,14 @@ export default defineConfig(({ mode }) => ({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  define: {
+    // 生产环境禁用Vue DevTools
+    __VUE_PROD_DEVTOOLS__: false,
+    // 生产环境关闭Vue选项API的警告
+    __VUE_OPTIONS_API__: true,
+    // 禁用HMR在生产环境
+    __VUE_PROD_HMR__: false
+  },
   server: {
     port: 5173,
     open: true,
