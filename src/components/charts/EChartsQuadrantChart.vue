@@ -119,7 +119,7 @@ const chartOption = computed<EChartsOption>(() => {
       },
       borderColor: 'rgba(59, 130, 246, 0.5)',
       borderWidth: 1,
-      formatter: function(params: any) {
+      formatter(params: any) {
         if (params.seriesName === '您的位置') {
           return `<div style="padding: 8px;">
             <div style="font-weight: bold; margin-bottom: 4px;">您的位置</div>
