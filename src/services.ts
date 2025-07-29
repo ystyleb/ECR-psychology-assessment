@@ -58,7 +58,10 @@ class ECRService {
     tokens: 'ecr_access_tokens'
   }
 
-  private readonly baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  // 基础URL - 支持相对路径作为fallback
+  private readonly baseUrl = import.meta.env.VITE_API_BASE_URL || (
+    typeof window !== 'undefined' ? window.location.origin : ''
+  )
 
   // 题目配置
   private readonly anxiousItems = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35]
