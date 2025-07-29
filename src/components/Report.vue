@@ -59,12 +59,12 @@
           <p class="text-gray-600 mb-6">获取个性化的深度分析、成长建议和关系改善方案</p>
         </div>
         
-        <UnlockButton 
+        <!-- <UnlockButton 
           :assessment-id="assessmentId"
           :is-processing="isPaymentProcessing"
           @payment-success="handlePaymentSuccess"
           @payment-error="handlePaymentError"
-        />
+        /> -->
       </div>
     </div>
 
@@ -110,7 +110,7 @@ import RecommendationCard from './report/RecommendationCard.vue'
 import ReportExporter from './report/ReportExporter.vue'
 import ReportSharer from './report/ReportSharer.vue'
 import ScoreDisplay from './report/ScoreDisplay.vue'
-import UnlockButton from './report/UnlockButton.vue'
+// import UnlockButton from './report/UnlockButton.vue'
 
 interface Props {
   assessmentId: string

@@ -20,12 +20,12 @@
     </template>
 
     <!-- 解锁按钮 -->
-    <template #unlock-button="{ assessmentId }">
+    <!-- <template #unlock-button="{ assessmentId }">
       <UnlockButton 
         :assessment-id="assessmentId"
         @unlock="handleUnlock"
       />
-    </template>
+    </template> -->
   </BaseReportView>
 </template>
 
@@ -39,7 +39,7 @@ import logger from '@/utils/logger'
 // 组件导入
 import BaseReportView from '@/components/BaseReportView.vue'
 import AttachmentTypeCard from '@/components/report/AttachmentTypeCard.vue'
-import UnlockButton from '@/components/report/UnlockButton.vue'
+// import UnlockButton from '@/components/report/UnlockButton.vue'
 
 const route = useRoute()
 const router = useRouter()

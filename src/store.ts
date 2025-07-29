@@ -235,6 +235,13 @@ export const useAppStore = defineStore('app', () => {
 
   // ===== 开发者模式方法 =====
   const quickCompleteAssessment = async (style: 'secure' | 'anxious' | 'avoidant' | 'disorganized' = 'secure') => {
+    // 仅在开发环境中允许快速完成
+    if (import.meta.env.PROD) {
+      logger.warn('Quick complete is disabled in production')
+      showError('此功能在生产环境中不可用')
+      return
+    }
+    
     logger.log('🚀 Store: quickCompleteAssessment called with style:', style)
     if (!currentAssessment.value) {
       logger.log('❌ Store: No current assessment, aborting quickComplete')

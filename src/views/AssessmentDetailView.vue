@@ -258,8 +258,8 @@ const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 
-// 开发者模式状态 (临时禁用以排查问题)
-const isDevelopment = ref(true) // 临时设为false
+// 开发者模式状态 (仅在开发环境中启用)
+const isDevelopment = ref(import.meta.env.DEV)
 const showDevTools = ref(false)
 
 // 响应式数据 (现在从统一store获取)

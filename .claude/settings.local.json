@@ -50,7 +50,9 @@
       "Bash(npx tsc:*)",
       "Bash(npm run lint)",
       "Bash(timeout 10s npm run dev)",
-      "Bash(npm run preview:*)"
+      "Bash(npm run preview:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(xmllint:*)"
     ],
     "deny": []
   }
