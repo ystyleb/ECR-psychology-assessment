@@ -1,9 +1,25 @@
 const Stripe = require('stripe')
 
-// 初始化Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16'
-})
+// 初始化Stripe（延迟初始化，确保使用清理后的key）
+let stripe = null
+
+const getStripeInstance = () => {
+  if (!stripe) {
+    const secretKey = process.env.STRIPE_SECRET_KEY
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured')
+    }
+    
+    // 清理环境变量
+    const cleanedSecretKey = secretKey.trim().replace(/[\r\n\t]/g, '')
+    console.log('Initializing Stripe with cleaned key, length:', cleanedSecretKey.length)
+    
+    stripe = new Stripe(cleanedSecretKey, {
+      apiVersion: '2023-10-16'
+    })
+  }
+  return stripe
+}
 
 // CORS头部配置
 const corsHeaders = {
@@ -44,6 +60,18 @@ module.exports = async (req, res) => {
         message: 'Payment service is not properly configured'
       })
     }
+
+    // 调试环境变量
+    const secretKey = process.env.STRIPE_SECRET_KEY
+    console.log('Debug - Secret key length:', secretKey.length)
+    console.log('Debug - Secret key starts with:', secretKey.substring(0, 10))
+    console.log('Debug - Secret key ends with:', secretKey.substring(secretKey.length - 10))
+    console.log('Debug - Secret key char codes (first 20):', secretKey.substring(0, 20).split('').map(c => c.charCodeAt(0)))
+    
+    // 清理环境变量（移除可能的空白字符）
+    const cleanedSecretKey = secretKey.trim().replace(/[\r\n\t]/g, '')
+    console.log('Debug - Cleaned key length:', cleanedSecretKey.length)
+    console.log('Debug - Keys are equal:', secretKey === cleanedSecretKey)
 
     // 解析请求体
     const { assessmentId, successUrl, cancelUrl, metadata } = req.body
@@ -92,6 +120,7 @@ module.exports = async (req, res) => {
     }
 
     // 创建Stripe Checkout会话
+    const stripe = getStripeInstance()
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
