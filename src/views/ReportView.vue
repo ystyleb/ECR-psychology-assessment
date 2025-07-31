@@ -20,12 +20,14 @@
     </template>
 
     <!-- 解锁按钮 -->
-    <!-- <template #unlock-button="{ assessmentId }">
-      <UnlockButton 
+    <template #unlock-button="{ assessmentId }">
+      <Payment 
         :assessment-id="assessmentId"
-        @unlock="handleUnlock"
+        @payment-success="handlePaymentSuccess"
+        @payment-error="handlePaymentError"
+        @payment-cancel="handlePaymentCancel"
       />
-    </template> -->
+    </template>
   </BaseReportView>
 </template>
 
@@ -39,7 +41,7 @@ import logger from '@/utils/logger'
 // 组件导入
 import BaseReportView from '@/components/BaseReportView.vue'
 import AttachmentTypeCard from '@/components/report/AttachmentTypeCard.vue'
-// import UnlockButton from '@/components/report/UnlockButton.vue'
+import Payment from '@/components/Payment.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -152,5 +154,23 @@ const handleUnlock = async () => {
     logger.error('❌ Payment initiation failed:', error)
     appStore.showError('支付创建失败，请重试')
   }
+}
+
+// 支付处理函数
+const handlePaymentSuccess = (result: any) => {
+  logger.log('💳 Payment success:', result)
+  appStore.showSuccess('支付成功！正在准备您的详细报告...')
+  // 刷新报告状态
+  loadBasicReport()
+}
+
+const handlePaymentError = (error: string) => {
+  logger.error('💳 Payment error:', error)
+  appStore.showError(`支付失败：${error}`)
+}
+
+const handlePaymentCancel = () => {
+  logger.log('💳 Payment cancelled')
+  appStore.showInfo('支付已取消')
 }
 </script>
