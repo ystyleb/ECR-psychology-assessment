@@ -145,7 +145,7 @@ module.exports = async (req, res) => {
         paymentInfo: {
           amount: session.amount_total,
           currency: session.currency,
-          paymentMethod: paymentIntent.payment_method_types?.[0],
+          paymentMethod: paymentIntent.charges?.data?.[0]?.payment_method_details?.type,
           customerEmail: session.customer_details?.email,
           receiptUrl: paymentIntent.charges?.data?.[0]?.receipt_url
         }

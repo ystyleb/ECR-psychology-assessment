@@ -7,10 +7,9 @@
 ### 代码已完成的配置
 
 ✅ API 端点已更新支持多种支付方式：
-- `api/create-payment.js` 中的 `payment_method_types` 已包含：
-  - `'card'` - 银行卡支付
-  - `'wechat_pay'` - 微信支付
-  - `'alipay'` - 支付宝支付
+- `api/create-payment.js` 中使用 `payment_method_configuration` 来配置支付方式
+- `api/verify-payment.js` 中正确获取支付方式信息
+- 支持微信支付、支付宝、银行卡等多种支付方式
 
 ✅ 前端界面已更新：
 - 支付说明文案已更新为"支持微信支付、支付宝、银行卡支付"
