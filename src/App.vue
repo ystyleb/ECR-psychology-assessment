@@ -10,7 +10,7 @@
 -->
 <template>
   <StagewiseToolbar
-    v-if="isDev"
+    v-if="showDevelopmentTools"
     :config="{ plugins: [VuePlugin] }"
   />
   <div id="app" class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -22,8 +22,15 @@
 import { RouterView } from 'vue-router'
 import { StagewiseToolbar } from '@stagewise/toolbar-vue'
 import VuePlugin from '@stagewise-plugins/vue'
+import { isFeatureEnabled } from '@/config/features'
+import { features } from '@/services/featureService'
 
-const isDev = import.meta.env.DEV
+const showDevelopmentTools = isFeatureEnabled('enableDevelopmentTools')
+
+// 在开发环境下输出功能开关调试信息
+features.when('enableDebugMode', () => {
+  features.debugInfo()
+})
 </script>
 
 <style scoped>

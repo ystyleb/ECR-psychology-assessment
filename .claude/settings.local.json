@@ -42,7 +42,9 @@
       "Bash(mv:*)",
       "Bash(git config:*)",
       "Bash(ssh:*)",
-      "WebFetch(domain:vercel.com)"
+      "WebFetch(domain:vercel.com)",
+      "Bash(npm run test:run:*)",
+      "Bash(npx vitest run:*)"
     ],
     "deny": []
   }
