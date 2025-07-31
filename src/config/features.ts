@@ -68,13 +68,13 @@ export const featureFlags: FeatureFlags = {
 if (import.meta.env.DEV) {
   // 开发环境下，如果没有明确设置，则默认开启调试功能
   if (import.meta.env.VITE_ENABLE_DEBUG_MODE === undefined) {
-    (featureFlags as any).enableDebugMode = true;
+    (featureFlags as Record<string, unknown>).enableDebugMode = true;
   }
   if (import.meta.env.VITE_ENABLE_DEV_TOOLS === undefined) {
-    (featureFlags as any).enableDevelopmentTools = true;
+    (featureFlags as Record<string, unknown>).enableDevelopmentTools = true;
   }
   if (import.meta.env.VITE_ENABLE_CONSOLE_LOGGING === undefined) {
-    (featureFlags as any).enableConsoleLogging = true;
+    (featureFlags as Record<string, unknown>).enableConsoleLogging = true;
   }
 }
 

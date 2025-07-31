@@ -264,10 +264,10 @@ const createChart = async () => {
         showLine: false
       },
       // 典型类型位置
-      ...Object.entries(attachmentTypeCoordinates).map(([name, coords]) => ({
+      ...Object.entries(attachmentTypeCoordinates).map(([_name, coords]) => ({
         label: coords.label,
         data: [{ x: coords.x, y: coords.y }],
-        backgroundColor: coords.color + '80',
+        backgroundColor: `${coords.color  }80`,
         borderColor: coords.color,
         borderWidth: 2,
         pointRadius: 8,
@@ -299,10 +299,10 @@ const createChart = async () => {
             borderWidth: 1,
             cornerRadius: 8,
             callbacks: {
-              title: function(context: any) {
+              title(context: any) {
                 return context[0].dataset.label
               },
-              label: function(context: any) {
+              label(context: any) {
                 const x = Math.round(context.parsed.x * 10) / 10
                 const y = Math.round(context.parsed.y * 10) / 10
                 return `坐标: (${x}, ${y})`

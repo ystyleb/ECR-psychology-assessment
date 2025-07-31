@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useECR } from '@/store'
-import type { BasicResult, DetailedReport, AttachmentStyle } from '@/types'
+import type { BasicResult, DetailedReport } from '@/types'
 
 // 导入子组件
 import AttachmentTypeCard from './report/AttachmentTypeCard.vue'
@@ -180,7 +180,7 @@ const exportData = computed(() => ({
 }))
 
 // 方法
-const handlePaymentSuccess = (paymentResult: any) => {
+const handlePaymentSuccess = (_paymentResult: unknown) => {
   isPaymentProcessing.value = false
   store.showSuccess('支付成功！正在加载详细报告...')
   

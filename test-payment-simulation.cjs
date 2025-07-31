@@ -32,11 +32,11 @@ const server = http.createServer((req, res) => {
       const data = JSON.parse(body);
       console.log('模拟 create-payment 调用:', data);
       
-      const { assessmentId, successUrl, cancelUrl } = data;
+      const { assessmentId } = data;
       
       // 模拟Stripe会话
       const mockSession = {
-        id: 'cs_test_mock_session_' + Date.now(),
+        id: `cs_test_mock_session_${  Date.now()}`,
         url: `https://checkout.stripe.com/pay/cs_test_mock_session_${Date.now()}`,
         amount_total: 1990,
         currency: 'cny'
@@ -70,7 +70,7 @@ const server = http.createServer((req, res) => {
       const { sessionId } = data;
       
       // 模拟JWT token
-      const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock_token_' + Date.now();
+      const mockToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock_token_${  Date.now()}`;
       
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({

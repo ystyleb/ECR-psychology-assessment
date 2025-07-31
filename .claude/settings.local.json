@@ -44,7 +44,14 @@
       "Bash(ssh:*)",
       "WebFetch(domain:vercel.com)",
       "Bash(npm run test:run:*)",
-      "Bash(npx vitest run:*)"
+      "Bash(npx vitest run:*)",
+      "Bash(timeout 5 npm run dev)",
+      "Bash(timeout 10 npm run dev)",
+      "Bash(echo:*)",
+      "Bash(export VITE_ENABLE_DEV_TOOLS=false)",
+      "Bash(VITE_ENABLE_DEV_TOOLS=false npm run dev)",
+      "Bash(VITE_ENABLE_DEV_TOOLS=false node test-env.js)",
+      "Bash(npm run lint)"
     ],
     "deny": []
   }

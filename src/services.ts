@@ -7,6 +7,7 @@ import type {
   PaymentSession,
   PaymentResult
 } from '@/types'
+import { debugLog } from '@/utils/debugLog'
 
 // ECR题目数据（36题）
 const ECR_QUESTIONS: AssessmentQuestion[] = [
@@ -276,7 +277,7 @@ class ECRService {
     return modifiedTraits.slice(0, 6) // 返回最多6个特质
   }
 
-  private generateRelationshipPatterns(style: AttachmentStyle, scores: { anxious: number; avoidant: number }): string[] {
+  private generateRelationshipPatterns(style: AttachmentStyle, _scores: { anxious: number; avoidant: number }): string[] {
     const patternMap = {
       secure: [
         '您倾向于建立平等、互相尊重的关系',
@@ -359,7 +360,7 @@ class ECRService {
 
   private generateStrengthsAndChallenges(
     style: AttachmentStyle, 
-    scores: { anxious: number; avoidant: number }
+    _scores: { anxious: number; avoidant: number }
   ): { strengths: string[]; challenges: string[] } {
     const strengthsChallengesMap = {
       secure: {
@@ -466,45 +467,45 @@ class ECRService {
 
   // ===== 支付相关方法 =====
   async createPaymentSession(assessmentId: string): Promise<PaymentSession> {
-    // 开发环境模拟支付 - 临时禁用以测试真实Stripe
-    if (false && import.meta.env.DEV) {
-      console.log('🔧 Development mode: Creating mock payment session')
-      
-      // 模拟支付会话
-      const mockSession = {
-        id: `mock_session_${Date.now()}`,
-        assessmentId,
-        amount: 1990,
-        currency: 'cny',
-        status: 'pending' as const,
-        stripeSessionId: `mock_stripe_${Date.now()}`,
-        url: `${window.location.origin}/payment/success?session_id=mock_session&assessment_id=${assessmentId}`,
-        createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30分钟后过期
-      } as PaymentSession
-      
-      // 保存会话信息
-      const sessions = this.getItem<Record<string, any>>(this.STORAGE_KEYS.sessions) || {}
-      sessions[assessmentId] = {
-        sessionId: mockSession.id,
-        status: 'pending',
-        createdAt: new Date(),
-        assessmentId
-      }
-      this.setItem(this.STORAGE_KEYS.sessions, sessions)
-      
-      console.log('🔧 Mock payment session created:', mockSession)
-      return mockSession
-    }
+    // 开发环境模拟支付功能已禁用
+    // if (import.meta.env.DEV) {
+    //   debugLog.log('🔧 Development mode: Creating mock payment session')
+    //   
+    //   // 模拟支付会话
+    //   const mockSession = {
+    //     id: `mock_session_${Date.now()}`,
+    //     assessmentId,
+    //     amount: 1990,
+    //     currency: 'cny',
+    //     status: 'pending' as const,
+    //     stripeSessionId: `mock_stripe_${Date.now()}`,
+    //     url: `${window.location.origin}/payment/success?session_id=mock_session&assessment_id=${assessmentId}`,
+    //     createdAt: new Date(),
+    //     expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30分钟后过期
+    //   } as PaymentSession
+    //   
+    //   // 保存会话信息
+    //   const sessions = this.getItem<Record<string, unknown>>(this.STORAGE_KEYS.sessions) || {}
+    //   sessions[assessmentId] = {
+    //     sessionId: mockSession.id,
+    //     status: 'pending',
+    //     createdAt: new Date(),
+    //     assessmentId
+    //   }
+    //   this.setItem(this.STORAGE_KEYS.sessions, sessions)
+    //   
+    //   debugLog.log('🔧 Mock payment session created:', mockSession)
+    //   return mockSession
+    // }
     
     // 生产环境实际支付
     try {
-      console.log('🔧 Debug: baseUrl =', this.baseUrl)
-      console.log('🔧 Debug: VITE_API_BASE_URL =', import.meta.env.VITE_API_BASE_URL)
+      debugLog.log('🔧 Debug: baseUrl =', this.baseUrl)
+      debugLog.log('🔧 Debug: VITE_API_BASE_URL =', import.meta.env.VITE_API_BASE_URL)
       const successUrl = `${window.location.origin}/payment/success`
       const cancelUrl = `${window.location.origin}/payment/cancel`
       const requestUrl = `${this.baseUrl}/api/create-payment`
-      console.log('🔧 Debug: requestUrl =', requestUrl)
+      debugLog.log('🔧 Debug: requestUrl =', requestUrl)
       
       const response = await fetch(requestUrl, {
         method: 'POST',
@@ -524,7 +525,7 @@ class ECRService {
       const session = data.session
       
       // 保存会话信息
-      const sessions = this.getItem<Record<string, any>>(this.STORAGE_KEYS.sessions) || {}
+      const sessions = this.getItem<Record<string, unknown>>(this.STORAGE_KEYS.sessions) || {}
       sessions[assessmentId] = {
         sessionId: session.id,
         status: 'pending',
@@ -552,7 +553,7 @@ class ECRService {
       
       if (result.success) {
         // 更新本地会话状态
-        const sessions = this.getItem<Record<string, any>>(this.STORAGE_KEYS.sessions) || {}
+        const sessions = this.getItem<Record<string, unknown>>(this.STORAGE_KEYS.sessions) || {}
         Object.keys(sessions).forEach(key => {
           if (sessions[key].sessionId === sessionId) {
             sessions[key].status = 'completed'

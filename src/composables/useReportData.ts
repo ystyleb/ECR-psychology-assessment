@@ -6,10 +6,9 @@ import type {
 import type {
   BasicReport,
   AttachmentScores,
-  AttachmentPercentiles,
-  AttachmentTypeDescription
+  AttachmentPercentiles
 } from '@/types/report'
-import { ATTACHMENT_DESCRIPTIONS, ATTACHMENT_LABELS } from '@/data/attachmentDescriptions'
+import { ATTACHMENT_DESCRIPTIONS } from '@/data/attachmentDescriptions'
 
 /**
  * 报告数据处理的组合式API
@@ -23,7 +22,7 @@ export function useReportData(
     if (!basicResult.value) return null
     
     const description = ATTACHMENT_DESCRIPTIONS[basicResult.value.attachmentStyle]
-    const labels = ATTACHMENT_LABELS[basicResult.value.attachmentStyle]
+    // const _labels = ATTACHMENT_LABELS[basicResult.value.attachmentStyle]
     
     return {
       name: description.title,

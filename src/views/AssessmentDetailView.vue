@@ -252,13 +252,15 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
+import { isFeatureEnabled } from '@/config/features'
+import { debugLog } from '@/utils/debugLog'
 
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 
-// 开发者模式状态 (临时禁用以排查问题)
-const isDevelopment = ref(true) // 临时设为false
+// 开发者模式状态 - 使用统一的功能开关控制
+const isDevelopment = isFeatureEnabled('enableDevelopmentTools')
 const showDevTools = ref(false)
 
 // 响应式数据 (现在从统一store获取)
@@ -426,7 +428,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 
 // 生命周期钩子
 onMounted(async () => {
-  console.log('📊 AssessmentDetailView: onMounted called')
+  debugLog.log('📊 AssessmentDetailView: onMounted called')
   
   try {
     // 初始化题目数据 (统一store会自动初始化)
@@ -434,14 +436,14 @@ onMounted(async () => {
 
     // 初始化或恢复测评状态
     const assessmentId = route.params.id as string
-    console.log('📊 AssessmentDetailView: Checking assessment ID:', assessmentId)
+    debugLog.log('📊 AssessmentDetailView: Checking assessment ID:', assessmentId)
 
     const hasAssessment = appStore.hasAssessment(assessmentId)
-    console.log('📊 AssessmentDetailView: hasAssessment result:', hasAssessment)
-    console.log('📊 AssessmentDetailView: Current assessment in store:', appStore.currentAssessment)
+    debugLog.log('📊 AssessmentDetailView: hasAssessment result:', hasAssessment)
+    debugLog.log('📊 AssessmentDetailView: Current assessment in store:', appStore.currentAssessment)
 
     if (!hasAssessment) {
-      console.log('📊 AssessmentDetailView: Assessment not found, redirecting')
+      debugLog.log('📊 AssessmentDetailView: Assessment not found, redirecting')
       appStore.showError('测评不存在，请重新开始')
       router.push('/assessment')
       return
@@ -449,21 +451,21 @@ onMounted(async () => {
 
     // 加载当前测评数据 (如果不是当前测评，尝试加载)
     if (appStore.currentAssessment?.id !== assessmentId) {
-      console.log('📊 AssessmentDetailView: Loading assessment from storage')
+      debugLog.log('📊 AssessmentDetailView: Loading assessment from storage')
       const success = await appStore.loadAssessment(assessmentId)
       if (!success) {
-        console.log('📊 AssessmentDetailView: Failed to load assessment')
+        debugLog.log('📊 AssessmentDetailView: Failed to load assessment')
         appStore.showError('无法加载测评数据')
         router.push('/assessment')
         return
       }
     } else {
-      console.log('📊 AssessmentDetailView: Using current assessment from store')
+      debugLog.log('📊 AssessmentDetailView: Using current assessment from store')
     }
 
     // 设置当前选中的答案
     selectedAnswer.value = responses.value[currentQuestionIndex.value] || null
-    console.log('📊 AssessmentDetailView: Set selected answer:', selectedAnswer.value)
+    debugLog.log('📊 AssessmentDetailView: Set selected answer:', selectedAnswer.value)
 
     // 启动计时器
     timer.value = setInterval(() => {

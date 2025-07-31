@@ -46,5 +46,20 @@ module.exports = {
   },
   env: {
     'vue/setup-compiler-macros': true
-  }
+  },
+  overrides: [
+    {
+      files: ['api/**/*.js', 'server-test.js', 'test-payment-simulation.cjs'],
+      env: {
+        node: true
+      }
+    },
+    {
+      files: ['tests/**/*.ts', '**/*.test.ts', '**/*.spec.ts'],
+      env: {
+        node: true,
+        jest: true
+      }
+    }
+  ]
 }

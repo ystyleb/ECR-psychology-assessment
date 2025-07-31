@@ -9,7 +9,7 @@
     @retry="retryLoad"
   >
     <!-- 基础报告内容（在详细报告中也显示） -->
-    <template #basic-content="{ reportData }">
+    <template #basic-content>
       <div class="bg-white rounded-2xl shadow-lg p-8">
         <div class="text-center mb-8">
           <div

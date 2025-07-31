@@ -23,7 +23,7 @@ export class ConditionalLogger {
   /**
    * 调试日志
    */
-  static debug(...args: any[]): void {
+  static debug(...args: unknown[]): void {
     if (isFeatureEnabled('enableConsoleLogging') && isFeatureEnabled('enableDebugMode')) {
       console.debug('[DEBUG]', ...args);
     }
@@ -32,7 +32,7 @@ export class ConditionalLogger {
   /**
    * 信息日志
    */
-  static info(...args: any[]): void {
+  static info(...args: unknown[]): void {
     if (isFeatureEnabled('enableConsoleLogging')) {
       console.info('[INFO]', ...args);
     }
@@ -41,7 +41,7 @@ export class ConditionalLogger {
   /**
    * 警告日志
    */
-  static warn(...args: any[]): void {
+  static warn(...args: unknown[]): void {
     if (isFeatureEnabled('enableConsoleLogging')) {
       console.warn('[WARN]', ...args);
     }
@@ -50,7 +50,7 @@ export class ConditionalLogger {
   /**
    * 错误日志
    */
-  static error(...args: any[]): void {
+  static error(...args: unknown[]): void {
     if (isFeatureEnabled('enableConsoleLogging')) {
       console.error('[ERROR]', ...args);
     }
@@ -86,7 +86,7 @@ export class ConditionalLogger {
   /**
    * 表格形式输出数据
    */
-  static table(data: any, label?: string): void {
+  static table(data: unknown, label?: string): void {
     if (isFeatureEnabled('enableConsoleLogging') && isFeatureEnabled('enableDebugMode')) {
       if (label) {
         console.group(`[TABLE] ${label}`);

@@ -130,7 +130,7 @@ interface Props {
   }
   title?: string
   description?: string
-  config?: Record<string, any>
+  config?: Record<string, unknown>
   loading?: boolean
   showDataTable?: boolean
   showActions?: boolean
@@ -282,7 +282,7 @@ const chartOptions = computed<ChartOptions<'radar'>>(() => {
 const chartPlugins = computed(() => [
   {
     id: 'customCanvasBackgroundColor',
-    beforeDraw: (chart: any) => {
+    beforeDraw: (chart: { ctx: CanvasRenderingContext2D; width: number; height: number }) => {
       const { ctx } = chart
       ctx.save()
       ctx.globalCompositeOperation = 'destination-over'

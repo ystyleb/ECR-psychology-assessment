@@ -96,13 +96,13 @@ const props = withDefaults(defineProps<Props>(), {
 // 响应式数据
 const isLoading = ref(true)
 
-// 依恋类型坐标定义
-const attachmentTypeCoordinates = {
-  secure: { x: 2.5, y: 2.8, label: '安全型', color: '#10B981' },
-  anxious: { x: 2.8, y: 5.2, label: '恐惧型', color: '#F59E0B' },
-  avoidant: { x: 5.1, y: 2.9, label: '专注型 / 迷恋型', color: '#8B5CF6' },
-  disorganized: { x: 4.6, y: 4.8, label: '冷漠型 / 疏离型', color: '#EF4444' }
-}
+// 依恋类型坐标定义（当前未使用，保留以备后续功能）
+// const _attachmentTypeCoordinates = {
+//   secure: { x: 2.5, y: 2.8, label: '安全型', color: '#10B981' },
+//   anxious: { x: 2.8, y: 5.2, label: '恐惧型', color: '#F59E0B' },
+//   avoidant: { x: 5.1, y: 2.9, label: '专注型 / 迷恋型', color: '#8B5CF6' },
+//   disorganized: { x: 4.6, y: 4.8, label: '冷漠型 / 疏离型', color: '#EF4444' }
+// }
 
 // 计算属性
 const chartOption = computed<EChartsOption>(() => {
@@ -119,7 +119,7 @@ const chartOption = computed<EChartsOption>(() => {
       },
       borderColor: 'rgba(59, 130, 246, 0.5)',
       borderWidth: 1,
-      formatter: function(params: any) {
+      formatter(params: any) {
         if (params.seriesName === '您的位置') {
           return `<div style="padding: 8px;">
             <div style="font-weight: bold; margin-bottom: 4px;">您的位置</div>
@@ -436,22 +436,22 @@ const chartOption = computed<EChartsOption>(() => {
   }
 })
 
-const sortedDistances = computed(() => {
-  const distances = Object.entries(attachmentTypeCoordinates).map(([name, coords]) => {
-    const distance = Math.sqrt(
-      Math.pow(props.scores.avoidant - coords.x, 2) + 
-      Math.pow(props.scores.anxious - coords.y, 2)
-    )
-    return {
-      name: name as AttachmentStyle,
-      label: coords.label,
-      color: coords.color,
-      distance: distance.toFixed(2)
-    }
-  })
-  
-  return distances.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
-})
+// const _sortedDistances = computed(() => {
+//   const distances = Object.entries(attachmentTypeCoordinates).map(([name, coords]) => {
+//     const distance = Math.sqrt(
+//       Math.pow(props.scores.avoidant - coords.x, 2) + 
+//       Math.pow(props.scores.anxious - coords.y, 2)
+//     )
+//     return {
+//       name: name as AttachmentStyle,
+//       label: coords.label,
+//       color: coords.color,
+//       distance: distance.toFixed(2)
+//     }
+//   })
+//   
+//   return distances.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance))
+// })
 
 // 方法
 const formatScore = (score: number): string => {

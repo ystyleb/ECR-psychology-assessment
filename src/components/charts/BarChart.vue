@@ -181,7 +181,7 @@ interface Props {
   }
   title?: string
   description?: string
-  config?: Record<string, any>
+  config?: Record<string, unknown>
   loading?: boolean
   showComparison?: boolean
   showSuggestions?: boolean
@@ -354,7 +354,7 @@ const chartOptions = computed<ChartOptions<'bar'>>(() => {
 const chartPlugins = computed(() => [
   {
     id: 'customCanvasBackgroundColor',
-    beforeDraw: (chart: any) => {
+    beforeDraw: (chart: { ctx: CanvasRenderingContext2D; width: number; height: number }) => {
       const { ctx } = chart
       ctx.save()
       ctx.globalCompositeOperation = 'destination-over'

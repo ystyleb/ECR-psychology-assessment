@@ -276,7 +276,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAppStore } from '@/store'
+// import { useAppStore } from '@/store'
 // import { useUIStore } from '@/stores/ui'
 
 // 响应式数据
@@ -299,7 +299,7 @@ const premiumFeatures = [
 // 路由和状态管理
 const route = useRoute()
 const router = useRouter()
-const appStore = useAppStore()
+// const _appStore = useAppStore()
 // const uiStore = useUIStore()
 
 // 计算属性

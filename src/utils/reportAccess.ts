@@ -1,34 +1,35 @@
 import { useAppStore } from '@/store'
 import reportService from '@/services/reportService'
 import type { BasicReport, DetailedReportData } from '@/types'
+import { debugLog } from '@/utils/debugLog'
 
 /**
  * 检查是否有基础报告访问权限
  */
 export async function canAccessBasicReport(assessmentId: string): Promise<boolean> {
-  console.log('🔐 canAccessBasicReport called for ID:', assessmentId)
+  debugLog.log('🔐 canAccessBasicReport called for ID:', assessmentId)
   
   const appStore = useAppStore()
   
   // 检查是否存在评估数据
   const hasAssessment = appStore.hasAssessment(assessmentId)
-  console.log('🔐 hasAssessment result:', hasAssessment)
+  debugLog.log('🔐 hasAssessment result:', hasAssessment)
   if (!hasAssessment) {
-    console.log('🔐 Assessment not found, denying access')
+    debugLog.log('🔐 Assessment not found, denying access')
     return false
   }
   
   // 如果当前store中已经有这个评估且ID匹配，就不需要重新加载
   if (appStore.currentAssessment?.id === assessmentId) {
-    console.log('🔐 Using current assessment from store, no need to reload')
+    debugLog.log('🔐 Using current assessment from store, no need to reload')
   } else {
     // 尝试加载评估数据
     const success = await appStore.loadAssessment(assessmentId)
-    console.log('🔐 loadAssessment success:', success)
-    console.log('🔐 currentAssessment after load:', appStore.currentAssessment)
+    debugLog.log('🔐 loadAssessment success:', success)
+    debugLog.log('🔐 currentAssessment after load:', appStore.currentAssessment)
     
     if (!success || !appStore.currentAssessment) {
-      console.log('🔐 Failed to load assessment or no current assessment')
+      debugLog.log('🔐 Failed to load assessment or no current assessment')
       return false
     }
   }
@@ -36,11 +37,11 @@ export async function canAccessBasicReport(assessmentId: string): Promise<boolea
   // 检查是否已经完成并有结果
   const isComplete = appStore.isAssessmentComplete
   const hasResult = !!appStore.currentAssessment.basicResult
-  console.log('🔐 isAssessmentComplete:', isComplete)
-  console.log('🔐 has basicResult:', hasResult)
+  debugLog.log('🔐 isAssessmentComplete:', isComplete)
+  debugLog.log('🔐 has basicResult:', hasResult)
   
   const canAccess = isComplete && hasResult
-  console.log('🔐 Final canAccessBasicReport result:', canAccess)
+  debugLog.log('🔐 Final canAccessBasicReport result:', canAccess)
   
   return canAccess
 }
@@ -195,7 +196,7 @@ export function getReportExpiryDate(_assessmentId: string): Date | null {
 export function cleanupExpiredAccess(): void {
   // 这个方法应该定期调用以清理过期的访问权限
   // 具体实现取决于存储机制
-  console.log('Cleaning up expired report access...')
+  debugLog.log('Cleaning up expired report access...')
 }
 
 // 默认导出

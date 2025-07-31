@@ -284,6 +284,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
+import { isFeatureEnabled } from '@/config/features'
 // import { useUIStore } from '@/stores/ui'
 
 // 响应式数据
@@ -337,7 +338,7 @@ const verifyPayment = async () => {
 
   try {
     // 开发环境模拟支付验证成功
-    if (import.meta.env.DEV && sessionId.value.includes('mock_session')) {
+    if (isFeatureEnabled('enableDevelopmentTools') && sessionId.value.includes('mock_session')) {
       console.log('🔧 Development mode: Mock payment verification success')
       
       // 模拟支付状态更新

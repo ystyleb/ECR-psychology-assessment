@@ -209,12 +209,12 @@ const onEnter = (el: Element) => {
   const height = element.offsetHeight
   element.style.height = '0'
   element.offsetHeight // 强制重排
-  element.style.height = height + 'px'
+  element.style.height = `${height  }px`
 }
 
 const onLeave = (el: Element) => {
   const element = el as HTMLElement
-  element.style.height = element.offsetHeight + 'px'
+  element.style.height = `${element.offsetHeight  }px`
   element.offsetHeight // 强制重排
   element.style.height = '0'
 }

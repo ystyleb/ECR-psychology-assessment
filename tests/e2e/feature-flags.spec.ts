@@ -9,7 +9,7 @@ test.describe('功能开关系统端到端测试', () => {
   })
 
   test.describe('生产环境模拟 - 调试功能关闭', () => {
-    test.beforeEach(async ({ page, context }) => {
+    test.beforeEach(async ({ page: _page, context }) => {
       // 设置生产环境变量
       await context.addInitScript(() => {
         // 模拟生产环境的环境变量
@@ -74,7 +74,7 @@ test.describe('功能开关系统端到端测试', () => {
   })
 
   test.describe('开发环境模拟 - 调试功能开启', () => {
-    test.beforeEach(async ({ page, context }) => {
+    test.beforeEach(async ({ page: _page, context }) => {
       // 设置开发环境变量
       await context.addInitScript(() => {
         window.localStorage.setItem('test-env', 'development')
@@ -106,7 +106,7 @@ test.describe('功能开关系统端到端测试', () => {
       await expect(appContainer).toBeVisible()
       
       // 检查是否有开发工具相关的 DOM 元素
-      const body = await page.locator('body').innerHTML()
+      // const _body = await page.locator('body').innerHTML()
       // 这里需要根据 StagewiseToolbar 的实际渲染内容进行调整
     })
 
@@ -171,15 +171,15 @@ test.describe('功能开关系统端到端测试', () => {
       await page.goto('/')
       
       // 通过浏览器执行 JavaScript 检查功能开关状态
-      const featureFlags = await page.evaluate(() => {
-        // 尝试访问全局功能开关状态
-        try {
-          // 这需要根据实际的全局暴露方式调整
-          return window.__FEATURE_FLAGS__ || null
-        } catch (e) {
-          return null
-        }
-      })
+      // const _featureFlags = await page.evaluate(() => {
+      //   // 尝试访问全局功能开关状态
+      //   try {
+      //     // 这需要根据实际的全局暴露方式调整
+      //     return window.__FEATURE_FLAGS__ || null
+      //   } catch (e) {
+      //     return null
+      //   }
+      // })
       
       // 检查是否能够在浏览器中访问到功能配置
       // 注意：这可能需要在实际代码中暴露一些调试接口

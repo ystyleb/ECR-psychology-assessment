@@ -3,6 +3,7 @@ import type { RouteLocationNormalized } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useAppStore } from '@/store'
 import { canAccessBasicReport, canAccessDetailedReport } from '@/utils/reportAccess'
+import { debugLog } from '@/utils/debugLog'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -107,21 +108,21 @@ router.beforeEach(async (to: RouteLocationNormalized, from: RouteLocationNormali
   // 验证测评详情页面的访问权限
   if (to.name === 'assessment-detail') {
     const assessmentId = to.params.id as string
-    console.log('🛡️ Router Guard: Checking assessment-detail access for ID:', assessmentId)
+    debugLog.log('🛡️ Router Guard: Checking assessment-detail access for ID:', assessmentId)
     
     const appStore = useAppStore()
     const hasAssessment = appStore.hasAssessment(assessmentId)
     
-    console.log('🛡️ Router Guard: hasAssessment result:', hasAssessment)
-    console.log('🛡️ Router Guard: Current assessment in store:', appStore.currentAssessment)
+    debugLog.log('🛡️ Router Guard: hasAssessment result:', hasAssessment)
+    debugLog.log('🛡️ Router Guard: Current assessment in store:', appStore.currentAssessment)
 
     if (!hasAssessment) {
-      console.log('🛡️ Router Guard: Assessment not found, redirecting to /assessment')
+      debugLog.log('🛡️ Router Guard: Assessment not found, redirecting to /assessment')
       // 如果测评不存在，重定向到测评开始页面
       next({ name: 'assessment' })
       return
     } else {
-      console.log('🛡️ Router Guard: Assessment found, allowing access')
+      debugLog.log('🛡️ Router Guard: Assessment found, allowing access')
     }
   }
 
@@ -162,7 +163,7 @@ router.afterEach((to: RouteLocationNormalized) => {
   window.scrollTo(0, 0)
 
   // 可以在这里添加页面访问统计等逻辑
-  console.log(`Navigated to: ${to.path}`)
+  debugLog.log(`Navigated to: ${to.path}`)
 })
 
 export default router

@@ -38,8 +38,8 @@ const mockPerformance = {
 }
 
 describe('功能开关服务测试', () => {
-  let originalConsole: any
-  let originalPerformance: any
+  let originalConsole: typeof console
+  let originalPerformance: typeof performance
   
   beforeEach(() => {
     // 保存原始对象
@@ -48,7 +48,7 @@ describe('功能开关服务测试', () => {
     
     // 替换为 mock 对象
     Object.assign(console, mockConsole)
-    global.performance = mockPerformance as any
+    global.performance = mockPerformance as typeof performance
     
     // 清理所有 mock 调用记录
     vi.clearAllMocks()
