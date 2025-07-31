@@ -77,7 +77,7 @@
         <!-- 支付说明 -->
         <div class="mt-4 text-center">
           <div class="text-xs text-gray-500 space-y-1">
-            <p>• 支持微信、支付宝、银行卡支付</p>
+            <p>• 支持微信支付、支付宝、银行卡支付</p>
             <p>• 安全加密，保护您的隐私</p>
             <p>• 7天无理由退款保障</p>
           </div>
