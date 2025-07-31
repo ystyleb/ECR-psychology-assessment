@@ -122,7 +122,7 @@ module.exports = async (req, res) => {
     // 创建Stripe Checkout会话
     const stripe = getStripeInstance()
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'wechat_pay', 'alipay'],
+      payment_method_configuration: 'pmc_1Rlm3CPNsV5WpIudqFpfipzn',
       line_items: [
         {
           price_data: {
