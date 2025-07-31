@@ -52,7 +52,9 @@
       "Bash(timeout 10s npm run dev)",
       "Bash(npm run preview:*)",
       "Bash(npx vue-tsc:*)",
-      "Bash(xmllint:*)"
+      "Bash(xmllint:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git pull:*)"
     ],
     "deny": []
   }
