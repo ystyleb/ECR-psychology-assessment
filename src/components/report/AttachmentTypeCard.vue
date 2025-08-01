@@ -13,17 +13,12 @@
   >
     <!-- 头部 -->
     <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center space-x-3">
-        <div
-          class="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
-          :style="{ backgroundColor: description.bgColor }"
-        >
-          {{ description.icon }}
-        </div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-800">{{ description.name }}</h3>
-          <p class="text-sm text-gray-600">{{ description.shortDescription }}</p>
-        </div>
+      <div class="flex-1">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+          <span class="emoji-icon mr-2">{{ description.icon }}</span>
+          {{ description.name }}
+        </h3>
+        <p class="text-sm text-gray-600 mt-1">{{ description.shortDescription }}</p>
       </div>
 
     </div>

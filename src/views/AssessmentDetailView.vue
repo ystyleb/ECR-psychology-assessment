@@ -16,13 +16,7 @@
           <p class="text-sm text-gray-600">{{ formatTime(elapsedTime) }}</p>
         </div>
 
-        <button
-          @click="saveProgress"
-          class="flex items-center text-gray-600 hover:text-gray-800 transition-colors duration-200"
-        >
-          <i class="fas fa-save mr-2"></i>
-          <span class="hidden sm:inline">保存</span>
-        </button>
+        <div class="w-16"></div>
       </div>
 
       <!-- 进度指示器 -->

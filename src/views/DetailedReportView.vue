@@ -12,13 +12,8 @@
     <template #basic-content>
       <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
         <div class="text-center mb-8">
-          <div
-            class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-            :style="{ backgroundColor: attachmentDescription?.bgColor }"
-          >
-            <span class="text-3xl">{{ attachmentDescription?.icon }}</span>
-          </div>
-          <h2 class="text-2xl font-bold text-gray-800 mb-2">
+          <h2 class="text-3xl font-bold text-gray-800 mb-2 flex items-center justify-center">
+            <span class="emoji-icon mr-3">{{ attachmentDescription?.icon }}</span>
             {{ attachmentDescription?.name }}
           </h2>
           <p class="text-gray-600 max-w-2xl mx-auto">

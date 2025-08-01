@@ -65,6 +65,27 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Emoji 字体支持 */
+.emoji-icon {
+  font-family: 
+    'Apple Color Emoji',
+    'Segoe UI Emoji', 
+    'Segoe UI Symbol',
+    'Noto Color Emoji',
+    'Android Emoji',
+    'EmojiSymbols',
+    sans-serif;
+  font-variant-emoji: emoji;
+  font-feature-settings: normal;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  /* 确保 emoji 与文本垂直居中对齐 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
 /* 自定义工具类 */
 .gradient-bg {
   background: var(--bg-gradient);
@@ -126,6 +147,32 @@ body {
   body {
     font-size: 14px;
     line-height: 1.5;
+  }
+  
+  /* 移动端 Emoji 特殊优化 */
+  .emoji-icon {
+    font-family: 
+      'Apple Color Emoji',
+      'Segoe UI Emoji', 
+      'Segoe UI Symbol',
+      'Noto Color Emoji',
+      'Android Emoji',
+      'EmojiSymbols',
+      sans-serif !important;
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
+    font-variant-emoji: emoji !important;
+    font-feature-settings: normal !important;
+    -webkit-font-smoothing: auto !important;
+    -moz-osx-font-smoothing: auto !important;
+    text-rendering: auto !important;
+    /* 确保 emoji 在移动端正确显示和对齐 */
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    width: auto;
+    height: auto;
   }
   
   /* 触摸优化 */
