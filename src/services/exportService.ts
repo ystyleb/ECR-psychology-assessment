@@ -34,7 +34,7 @@ export class ExportService {
       const loadingIndicator = this.showLoadingIndicator('正在生成图片...')
 
       // 临时修改元素样式以优化导出效果
-      const originalStyles = this.prepareElementForExport(element)
+      const exportData = this.prepareElementForExport(element)
 
       // 等待样式应用
       await new Promise(resolve => setTimeout(resolve, 500))
@@ -59,11 +59,9 @@ export class ExportService {
           if (clonedElement) {
             clonedElement.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)'
             clonedElement.style.minHeight = 'auto'
-            // clonedElement.style.transform = 'translateX(100px)' // 直接用transform移动
-            // clonedElement.style.marginLeft = '100px' // 额外的左边距
           }
           
-          // 确保隐藏元素变为可见，但不修改位置
+          // 确保其他隐藏元素变为可见
           const hiddenElements = clonedDoc.querySelectorAll('[style*="display: none"], [style*="visibility: hidden"]') as NodeListOf<HTMLElement>
           hiddenElements.forEach(el => {
             if (el.style.display === 'none') {
@@ -76,8 +74,8 @@ export class ExportService {
         }
       })
 
-      // 恢复原始样式
-      this.restoreElementStyles(element, originalStyles)
+      // 恢复原始样式和重新插入删除的元素
+      this.restoreElementStyles(element, exportData)
 
       // 创建下载链接
       const imgDataURL = canvas.toDataURL('image/png', quality)
@@ -103,8 +101,9 @@ export class ExportService {
   /**
    * 准备元素用于导出 - 优化样式
    */
-  private static prepareElementForExport(element: HTMLElement): Map<HTMLElement, string> {
+  private static prepareElementForExport(element: HTMLElement): { styles: Map<HTMLElement, string>, removedElements: Array<{element: HTMLElement, parent: HTMLElement, nextSibling: Node | null}> } {
     const originalStyles = new Map<HTMLElement, string>()
+    const removedElements: Array<{element: HTMLElement, parent: HTMLElement, nextSibling: Node | null}> = []
     
     // 保存并优化主容器样式 - 简化设置，主要通过html2canvas配置调整位置
     originalStyles.set(element, element.style.cssText)
@@ -120,12 +119,51 @@ export class ExportService {
       min-height: auto !important;
     `
 
-    // 不要修改父容器，保持原有布局
+    // 临时删除不需要导出的元素 - 更直接有效
+    const noExportElements = element.querySelectorAll('.no-export') as NodeListOf<HTMLElement>
+    noExportElements.forEach(el => {
+      const parent = el.parentElement!
+      const nextSibling = el.nextSibling
+      removedElements.push({ element: el, parent, nextSibling })
+      parent.removeChild(el)
+    })
+
+    // 临时删除包含导出相关文本的元素
+    const allDivs = element.querySelectorAll('div') as NodeListOf<HTMLElement>
+    allDivs.forEach(div => {
+      if (div.textContent?.includes('导出和分享') || 
+          div.textContent?.includes('导出图片') ||
+          div.textContent?.includes('打印PDF')) {
+        const parent = div.parentElement
+        if (parent && !removedElements.find(r => r.element === div)) {
+          const nextSibling = div.nextSibling
+          removedElements.push({ element: div, parent, nextSibling })
+          parent.removeChild(div)
+        }
+      }
+    })
+
+    // 临时删除所有导出相关的按钮
+    const buttons = element.querySelectorAll('button') as NodeListOf<HTMLElement>
+    buttons.forEach(btn => {
+      if (btn.textContent?.includes('导出') || 
+          btn.textContent?.includes('分享') || 
+          btn.textContent?.includes('打印')) {
+        const parent = btn.parentElement
+        if (parent && !removedElements.find(r => r.element === btn)) {
+          const nextSibling = btn.nextSibling
+          removedElements.push({ element: btn, parent, nextSibling })
+          parent.removeChild(btn)
+        }
+      }
+    })
 
     // 优化所有白色背景卡片
     const whiteCards = element.querySelectorAll('.bg-white') as NodeListOf<HTMLElement>
     whiteCards.forEach(card => {
-      originalStyles.set(card, card.style.cssText)
+      if (!originalStyles.has(card)) {
+        originalStyles.set(card, card.style.cssText)
+      }
       card.style.cssText += `
         background-color: #ffffff !important;
         border-radius: 16px !important;
@@ -189,15 +227,25 @@ export class ExportService {
       `
     })
 
-    return originalStyles
+    return { styles: originalStyles, removedElements }
   }
 
   /**
-   * 恢复元素原始样式
+   * 恢复元素原始样式和重新插入删除的元素
    */
-  private static restoreElementStyles(element: HTMLElement, originalStyles: Map<HTMLElement, string>): void {
-    originalStyles.forEach((style, el) => {
+  private static restoreElementStyles(element: HTMLElement, data: { styles: Map<HTMLElement, string>, removedElements: Array<{element: HTMLElement, parent: HTMLElement, nextSibling: Node | null}> }): void {
+    // 恢复样式
+    data.styles.forEach((style, el) => {
       el.style.cssText = style
+    })
+    
+    // 重新插入删除的元素
+    data.removedElements.forEach(({ element: el, parent, nextSibling }) => {
+      if (nextSibling) {
+        parent.insertBefore(el, nextSibling)
+      } else {
+        parent.appendChild(el)
+      }
     })
   }
 

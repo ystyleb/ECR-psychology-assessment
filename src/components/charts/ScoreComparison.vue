@@ -13,49 +13,52 @@
     <div class="main-comparison mb-8">
       <div class="grid lg:grid-cols-2 gap-8">
         <!-- 得分对比图 -->
-        <div class="score-chart bg-gray-50 rounded-xl p-6">
+        <div class="score-chart bg-gray-50 rounded-xl p-6 min-h-[480px] flex flex-col">
           <h5 class="font-medium text-gray-800 mb-4 flex items-center">
             <i class="fas fa-chart-line mr-2 text-blue-600"></i>
             我的得分 vs 人群平均
           </h5>
           
-          <div class="space-y-4">
+          <div class="space-y-6 flex-1">
             <div
               v-for="(item, index) in comparisonItems"
               :key="index"
               class="comparison-bar-item"
             >
-              <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center justify-between mb-3">
                 <span class="font-medium text-gray-700">{{ item.label }}</span>
-                <div class="text-sm text-gray-600">
-                  <span class="font-semibold" :style="{ color: item.color }">
+                <div class="text-right">
+                  <div class="text-lg font-bold" :style="{ color: item.color }">
                     {{ item.myScore.toFixed(1) }}
-                  </span>
-                  vs
-                  <span class="font-semibold text-gray-500">
-                    {{ item.avgScore.toFixed(1) }}
-                  </span>
+                  </div>
+                  <div class="text-xs text-gray-500">vs {{ item.avgScore.toFixed(1) }} (平均)</div>
                 </div>
               </div>
               
               <!-- 对比条形图 -->
               <div class="relative">
-                <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                <div class="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    class="h-4 rounded-full transition-all duration-1000 ease-out flex"
+                    class="h-3 rounded-full transition-all duration-1500 ease-out flex"
                     style="width: 100%"
                   >
                     <!-- 我的得分 -->
                     <div
-                      class="h-full rounded-l-full transition-all duration-1000"
+                      class="h-3 rounded-l-full transition-all duration-1500 relative"
                       :style="{
                         width: `${(item.myScore / 7) * 50}%`,
                         backgroundColor: item.color
                       }"
-                    ></div>
+                    >
+                      <!-- 指示点 -->
+                      <div
+                        class="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-md"
+                        :style="{ backgroundColor: item.color }"
+                      ></div>
+                    </div>
                     <!-- 人群平均 -->
                     <div
-                      class="h-full rounded-r-full transition-all duration-1000"
+                      class="h-3 rounded-r-full transition-all duration-1500"
                       :style="{
                         width: `${(item.avgScore / 7) * 50}%`,
                         backgroundColor: '#9CA3AF'
@@ -65,7 +68,7 @@
                 </div>
                 
                 <!-- 标尺 -->
-                <div class="flex justify-between text-xs text-gray-500">
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
                   <span>0</span>
                   <span>3.5</span>
                   <span>7</span>
@@ -73,7 +76,7 @@
               </div>
               
               <!-- 解释 -->
-              <div class="mt-2">
+              <div class="mt-2 p-2 bg-white rounded-lg">
                 <p class="text-xs text-gray-600">{{ item.interpretation }}</p>
               </div>
             </div>
@@ -81,13 +84,13 @@
         </div>
 
         <!-- 百分位分布 -->
-        <div class="percentile-chart bg-gray-50 rounded-xl p-6">
+        <div class="percentile-chart bg-gray-50 rounded-xl p-6 min-h-[480px] flex flex-col">
           <h5 class="font-medium text-gray-800 mb-4 flex items-center">
             <i class="fas fa-users mr-2 text-green-600"></i>
             在人群中的位置
           </h5>
           
-          <div class="space-y-6">
+          <div class="space-y-6 flex-1">
             <div
               v-for="(item, index) in percentileItems"
               :key="index"
@@ -300,7 +303,7 @@ const props = withDefaults(defineProps<Props>(), {
   showActions: true
 })
 
-const emit = defineEmits<Emits>()
+defineEmits<Emits>()
 
 // 计算属性
 const comparisonItems = computed(() => {
@@ -499,18 +502,6 @@ const getTrendDescription = (change: number, dimension: string): string => {
       return '呈下降趋势，这是积极的变化'
     }
   }
-}
-
-const exportComparison = () => {
-  emit('export')
-}
-
-const shareComparison = () => {
-  emit('share')
-}
-
-const viewDetailedAnalysis = () => {
-  emit('view-detailed')
 }
 </script>
 

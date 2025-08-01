@@ -52,7 +52,8 @@
       "Bash(VITE_ENABLE_DEV_TOOLS=false npm run dev)",
       "Bash(VITE_ENABLE_DEV_TOOLS=false node test-env.js)",
       "Bash(npm run lint)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(npm run lint:*)"
     ],
     "deny": []
   }
