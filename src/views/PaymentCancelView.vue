@@ -276,8 +276,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-// import { useAppStore } from '@/store'
-// import { useUIStore } from '@/stores/ui'
+import { useAppStore } from '@/store'
 
 // 响应式数据
 const isRetrying = ref(false)
@@ -299,8 +298,7 @@ const premiumFeatures = [
 // 路由和状态管理
 const route = useRoute()
 const router = useRouter()
-// const _appStore = useAppStore()
-// const uiStore = useUIStore()
+const store = useAppStore()
 
 // 计算属性
 const assessmentId = computed(() => route.query.assessment_id as string)
@@ -316,15 +314,14 @@ const retryPayment = async () => {
     isRetrying.value = true
     showToast('正在跳转到支付页面...')
 
-    // 重置支付状态
-    paymentStore.resetPaymentState()
-
     // 发起新的支付
-    const session = await paymentStore.initiatePayment(assessmentId.value)
+    const session = await store.initiatePayment(assessmentId.value)
 
-    if (session) {
-      // 如果成功创建会话，会自动跳转到 Stripe
-      console.log('Payment retry initiated:', session)
+    if (session && session.url) {
+      // 跳转到 Stripe 支付页面
+      window.location.href = session.url
+    } else {
+      showToast('支付跳转失败，请稍后重试')
     }
   } catch (error) {
     console.error('Retry payment failed:', error)
@@ -364,9 +361,6 @@ const showToast = (message: string) => {
 
 // 生命周期
 onMounted(() => {
-  // 清理支付状态
-  paymentStore.cancelPayment()
-
   // 记录取消事件（用于分析）
   console.log('Payment cancelled:', {
     assessmentId: assessmentId.value,
@@ -375,7 +369,7 @@ onMounted(() => {
   })
 
   // 显示提示
-  uiStore.showInfo('支付已取消，您可以随时重新购买')
+  store.showInfo('支付已取消，您可以随时重新购买')
 })
 </script>
 
