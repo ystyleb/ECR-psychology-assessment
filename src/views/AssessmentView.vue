@@ -4,49 +4,49 @@
       <!-- 页面头部 -->
       <div class="text-center mb-8">
         <div
-          class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-6"
+          class="inline-flex items-center justify-center w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4 sm:mb-6"
         >
-          <i class="fas fa-heart text-white text-2xl"></i>
+          <i class="fas fa-heart text-white text-lg sm:text-xl md:text-2xl"></i>
         </div>
-        <h1 class="text-4xl font-bold text-gray-800 mb-4">ECR亲密关系经历量表</h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4">ECR亲密关系经历量表</h1>
+        <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
           了解您在亲密关系中的依恋模式，探索更健康的关系模式
         </p>
-        <div class="mt-4 text-sm text-gray-500">
+        <div class="mt-4 text-xs sm:text-sm text-gray-500">
           基于 Fraley, Waller & Brennan (2000) 标准化量表
         </div>
       </div>
 
       <!-- 测评信息卡片 -->
-      <div class="grid md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+      <div class="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 text-center">
           <div
-            class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4"
           >
-            <i class="fas fa-clock text-blue-600 text-xl"></i>
+            <i class="fas fa-clock text-blue-600 text-base sm:text-lg md:text-xl"></i>
           </div>
-          <h3 class="font-semibold text-gray-800 mb-2">测评时长</h3>
-          <p class="text-gray-600">10-15分钟</p>
+          <h3 class="font-semibold text-gray-800 mb-1 sm:mb-2 text-sm sm:text-base">测评时长</h3>
+          <p class="text-gray-600 text-xs sm:text-sm">10-15分钟</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 text-center">
           <div
-            class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4"
           >
-            <i class="fas fa-list-ol text-green-600 text-xl"></i>
+            <i class="fas fa-list-ol text-green-600 text-base sm:text-lg md:text-xl"></i>
           </div>
-          <h3 class="font-semibold text-gray-800 mb-2">题目数量</h3>
-          <p class="text-gray-600">36题</p>
+          <h3 class="font-semibold text-gray-800 mb-1 sm:mb-2 text-sm sm:text-base">题目数量</h3>
+          <p class="text-gray-600 text-xs sm:text-sm">36题</p>
         </div>
 
-        <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-4 md:p-6 text-center">
           <div
-            class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            class="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4"
           >
-            <i class="fas fa-chart-pie text-purple-600 text-xl"></i>
+            <i class="fas fa-chart-pie text-purple-600 text-base sm:text-lg md:text-xl"></i>
           </div>
-          <h3 class="font-semibold text-gray-800 mb-2">结果类型</h3>
-          <p class="text-gray-600">4种依恋类型</p>
+          <h3 class="font-semibold text-gray-800 mb-1 sm:mb-2 text-sm sm:text-base">结果类型</h3>
+          <p class="text-gray-600 text-xs sm:text-sm">4种依恋类型</p>
         </div>
       </div>
 

@@ -1,14 +1,17 @@
 <template>
   <div class="echarts-quadrant-container">
-    <div class="chart-header mb-4">
-      <h3 class="text-lg font-semibold text-gray-800 mb-2">依恋类型四象限图</h3>
-      <p class="text-sm text-gray-600">基于焦虑和回避维度的依恋类型分布图</p>
+    <div class="chart-header mb-3 sm:mb-4">
+      <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-1 sm:mb-2">依恋类型四象限图</h3>
+      <p class="text-xs sm:text-sm text-gray-600">基于焦虑和回避维度的依恋类型分布图</p>
     </div>
     
     <div class="chart-wrapper relative">
       <v-chart
         :option="chartOption"
-        :style="{ width: '100%', height: '500px' }"
+        :style="{ 
+          width: '100%', 
+          height: isMobile ? '300px' : isTablet ? '400px' : '500px'
+        }"
         autoresize
         @click="handleChartClick"
       />
@@ -23,10 +26,10 @@
     </div>
 
     <!-- 位置分析 -->
-    <div class="position-analysis mt-6 space-y-4">
+    <div class="position-analysis mt-4 sm:mt-6 space-y-3 sm:space-y-4">
       <div class="analysis-section">
-        <h4 class="font-medium text-gray-800 mb-2">您的位置分析</h4>
-        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+        <h4 class="font-medium text-gray-800 mb-2 text-sm sm:text-base">您的位置分析</h4>
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-3 sm:p-4 rounded-r-lg">
           <div class="flex items-start">
             <div class="flex-shrink-0">
               <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
@@ -37,10 +40,10 @@
               </div>
             </div>
             <div class="ml-3">
-              <p class="text-sm font-medium text-blue-800">
+              <p class="text-xs sm:text-sm font-medium text-blue-800">
                 {{ getPositionDescription() }}
               </p>
-              <p class="text-sm text-blue-700 mt-1">
+              <p class="text-xs sm:text-sm text-blue-700 mt-1">
                 坐标: ({{ formatScore(scores.avoidant) }}, {{ formatScore(scores.anxious) }})
               </p>
             </div>
@@ -96,6 +99,17 @@ const props = withDefaults(defineProps<Props>(), {
 // 响应式数据
 const isLoading = ref(true)
 
+// 移动端检测
+const isMobile = computed(() => {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth < 640
+})
+
+const isTablet = computed(() => {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth >= 640 && window.innerWidth < 1024
+})
+
 // 依恋类型坐标定义（当前未使用，保留以备后续功能）
 // const _attachmentTypeCoordinates = {
 //   secure: { x: 2.5, y: 2.8, label: '安全型', color: '#10B981' },
@@ -106,6 +120,14 @@ const isLoading = ref(true)
 
 // 计算属性
 const chartOption = computed<EChartsOption>(() => {
+  // 移动端字体大小调整
+  const fontSize = {
+    title: isMobile.value ? 10 : isTablet.value ? 12 : 14,
+    axis: isMobile.value ? 9 : isTablet.value ? 10 : 12,
+    label: isMobile.value ? 8 : isTablet.value ? 10 : 13,
+    tooltip: isMobile.value ? 10 : 12
+  }
+  
   return {
     animation: props.animated,
     animationDuration: props.animated ? 1500 : 0,
@@ -115,7 +137,7 @@ const chartOption = computed<EChartsOption>(() => {
       backgroundColor: 'rgba(0, 0, 0, 0.8)',
       textStyle: {
         color: '#fff',
-        fontSize: 12
+        fontSize: fontSize.tooltip
       },
       borderColor: 'rgba(59, 130, 246, 0.5)',
       borderWidth: 1,
@@ -134,19 +156,19 @@ const chartOption = computed<EChartsOption>(() => {
       }
     },
     grid: {
-      left: '10%',
-      right: '10%',
-      top: '15%',
-      bottom: '15%',
+      left: isMobile.value ? '15%' : '10%',
+      right: isMobile.value ? '15%' : '10%',
+      top: isMobile.value ? '20%' : '15%',
+      bottom: isMobile.value ? '20%' : '15%',
       containLabel: true
     },
     xAxis: {
       type: 'value',
       name: '焦虑',
       nameLocation: 'end',
-      nameGap: 15,
+      nameGap: isMobile.value ? 10 : 15,
       nameTextStyle: {
-        fontSize: 14,
+        fontSize: fontSize.title,
         fontWeight: 'bold',
         color: '#666'
       },
@@ -174,7 +196,7 @@ const chartOption = computed<EChartsOption>(() => {
         length: 6
       },
       axisLabel: {
-        fontSize: 12,
+        fontSize: fontSize.axis,
         color: '#666'
       }
     },
@@ -182,9 +204,9 @@ const chartOption = computed<EChartsOption>(() => {
       type: 'value',
       name: '回避',
       nameLocation: 'end',
-      nameGap: 15,
+      nameGap: isMobile.value ? 10 : 15,
       nameTextStyle: {
-        fontSize: 14,
+        fontSize: fontSize.title,
         fontWeight: 'bold',
         color: '#666'
       },
@@ -212,7 +234,7 @@ const chartOption = computed<EChartsOption>(() => {
         length: 6
       },
       axisLabel: {
-        fontSize: 12,
+        fontSize: fontSize.axis,
         color: '#666'
       }
     },
@@ -311,7 +333,7 @@ const chartOption = computed<EChartsOption>(() => {
           ],
           label: {
             show: true,
-            fontSize: 13,
+            fontSize: fontSize.label,
             fontWeight: 'bold',
             color: '#666',
             position: 'inside'
@@ -344,7 +366,7 @@ const chartOption = computed<EChartsOption>(() => {
         top: `${85 - ((props.scores.avoidant - 1) / 6) * 70 + 5}%`,
         style: {
           text: `${props.scores.anxious.toFixed(2)}, ${props.scores.avoidant.toFixed(2)}`,
-          font: 'bold 12px Arial',
+          font: `bold ${fontSize.axis}px Arial`,
           fill: '#3B82F6'
         }
       },
@@ -355,7 +377,7 @@ const chartOption = computed<EChartsOption>(() => {
         top: '20%',
         style: {
           text: '冷漠型 / 疏离型',
-          font: 'bold 13px Arial',
+          font: `bold ${fontSize.label}px Arial`,
           fill: '#666'
         }
       },
@@ -365,7 +387,7 @@ const chartOption = computed<EChartsOption>(() => {
         top: '20%',
         style: {
           text: '恐惧型',
-          font: 'bold 13px Arial',
+          font: `bold ${fontSize.label}px Arial`,
           fill: '#666',
           textAlign: 'right'
         }
@@ -373,20 +395,20 @@ const chartOption = computed<EChartsOption>(() => {
       {
         type: 'text',
         left: '15%',
-        bottom: '20%',
+        bottom: isMobile.value ? '25%' : '20%',
         style: {
           text: '安全型',
-          font: 'bold 13px Arial',
+          font: `bold ${fontSize.label}px Arial`,
           fill: '#666'
         }
       },
       {
         type: 'text',
         right: '15%',
-        bottom: '20%',
+        bottom: isMobile.value ? '25%' : '20%',
         style: {
           text: '专注型 / 迷恋型',
-          font: 'bold 13px Arial',
+          font: `bold ${fontSize.label}px Arial`,
           fill: '#666',
           textAlign: 'right'
         }
@@ -395,40 +417,40 @@ const chartOption = computed<EChartsOption>(() => {
       {
         type: 'text',
         left: '20%',
-        top: '10%',
+        top: isMobile.value ? '8%' : '10%',
         style: {
           text: '高',
-          font: '12px Arial',
+          font: `${fontSize.axis}px Arial`,
           fill: '#f87171'
         }
       },
       {
         type: 'text',
         left: '20%',
-        bottom: '8%',
+        bottom: isMobile.value ? '5%' : '8%',
         style: {
           text: '低',
-          font: '12px Arial',
+          font: `${fontSize.axis}px Arial`,
           fill: '#a3e635'
         }
       },
       {
         type: 'text',
-        left: '8%',
+        left: isMobile.value ? '5%' : '8%',
         bottom: '50%',
         style: {
           text: '低',
-          font: '12px Arial',
+          font: `${fontSize.axis}px Arial`,
           fill: '#a3e635'
         }
       },
       {
         type: 'text',
-        right: '8%',
+        right: isMobile.value ? '5%' : '8%',
         bottom: '50%',
         style: {
           text: '高',
-          font: '12px Arial',
+          font: `${fontSize.axis}px Arial`,
           fill: '#f87171'
         }
       }
@@ -516,9 +538,30 @@ watch(
 }
 
 /* 响应式设计 */
+@media (max-width: 640px) {
+  .chart-wrapper {
+    min-height: 280px;
+  }
+  
+  .echarts-quadrant-container {
+    padding: 1rem;
+  }
+  
+  .position-analysis {
+    padding: 0.75rem;
+    margin-top: 1rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .chart-wrapper {
+    min-height: 380px;
+  }
+}
+
 @media (max-width: 768px) {
   .chart-wrapper {
-    min-height: 400px;
+    /* 保留原有的样式作为退路 */
   }
 }
 

@@ -248,7 +248,7 @@ const features: Feature[] = [
 // 计算属性
 const discountText = computed(() => {
   const discount = Math.round(
-    ((props.originalPrice - props.currentPrice) / props.originalPrice) * 100
+    ((props.originalPrice - props.currentPrice) / props.originalPrice) * 10
   )
   return `${discount}折优惠`
 })

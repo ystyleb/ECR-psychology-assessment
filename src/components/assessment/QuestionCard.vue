@@ -73,19 +73,6 @@
           </div>
         </div>
 
-        <!-- 移动端滑块（可选） -->
-        <div v-if="showSlider" class="mobile-slider md:hidden mt-8">
-          <div class="text-center text-sm text-gray-600 mb-4">或使用滑块选择</div>
-          <input
-            type="range"
-            min="1"
-            max="7"
-            :value="selectedScore || 4"
-            @input="selectScore(parseInt($event.target.value))"
-            :disabled="disabled"
-            class="slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
       </div>
     </div>
   </div>
@@ -101,7 +88,6 @@ interface Props {
   totalQuestions: number
   selectedScore?: number | null
   disabled?: boolean
-  showSlider?: boolean
   hint?: string
 }
 
@@ -111,7 +97,6 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
-  showSlider: true,
   hint: '请根据您在亲密关系中的真实感受选择最符合的选项'
 })
 
@@ -194,61 +179,6 @@ const selectScore = (score: number) => {
   }
 }
 
-/* 自定义滑块样式 */
-.slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 8px;
-  background: linear-gradient(to right, #3b82f6, #8b5cf6);
-  outline: none;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-}
-
-.slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-}
-
-.slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-}
-
-.slider::-moz-range-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* 禁用状态 */
-.scale-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-.slider:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 /* 响应式调整 */
 @media (max-width: 640px) {

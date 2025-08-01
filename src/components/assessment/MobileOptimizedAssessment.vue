@@ -107,25 +107,6 @@
                 </div>
               </div>
 
-              <!-- 滑块选择器（备选） -->
-              <div v-if="showSlider" class="slider-container mt-6">
-                <div class="text-center text-sm text-gray-600 mb-3">或拖动滑块选择</div>
-                <div class="relative">
-                  <input
-                    type="range"
-                    min="1"
-                    max="7"
-                    :value="selectedAnswer || 4"
-                    @input="selectAnswer(parseInt($event.target.value))"
-                    class="mobile-slider w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div class="slider-labels flex justify-between text-xs text-gray-500 mt-2">
-                    <span>1</span>
-                    <span>4</span>
-                    <span>7</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -139,35 +120,43 @@
 
     <!-- 底部导航栏 -->
     <div class="bottom-navigation fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg">
-      <div class="flex items-center justify-between p-4">
-        <button
-          @click="previousQuestion"
-          :disabled="currentQuestionIndex === 0"
-          class="nav-button flex items-center px-4 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100"
-        >
-          <i class="fas fa-chevron-left mr-1"></i>
-          <span class="hidden sm:inline">上一题</span>
-        </button>
-
-        <div class="flex-1 text-center mx-4">
-          <div class="text-sm text-gray-600">{{ answeredCount }}/{{ totalQuestions }} 已完成</div>
+      <div class="grid grid-cols-3 items-center p-4 gap-4">
+        <!-- 左侧：上一题按钮 -->
+        <div class="flex justify-start">
+          <button
+            @click="previousQuestion"
+            :disabled="currentQuestionIndex === 0"
+            class="nav-button flex items-center px-4 py-3 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100"
+          >
+            <i class="fas fa-chevron-left mr-2"></i>
+            <span>上一题</span>
+          </button>
         </div>
 
-        <button
-          @click="nextQuestion"
-          :disabled="selectedAnswer === null"
-          :class="[
-            'nav-button flex items-center px-4 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
-            selectedAnswer === null
-              ? 'bg-gray-200 text-gray-400'
-              : isLastQuestion
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700'
-          ]"
-        >
-          <span class="hidden sm:inline">{{ isLastQuestion ? '完成' : '下一题' }}</span>
-          <i :class="isLastQuestion ? 'fas fa-check ml-1' : 'fas fa-chevron-right ml-1'"></i>
-        </button>
+        <!-- 中间：进度信息 -->
+        <div class="text-center">
+          <div class="text-sm font-medium text-gray-800 mb-1">{{ currentQuestionIndex + 1 }}/{{ totalQuestions }}</div>
+          <div class="text-xs text-gray-500">{{ answeredCount }} 已完成</div>
+        </div>
+
+        <!-- 右侧：下一题/完成按钮 -->
+        <div class="flex justify-end">
+          <button
+            @click="nextQuestion"
+            :disabled="selectedAnswer === null"
+            :class="[
+              'nav-button flex items-center px-4 py-3 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
+              selectedAnswer === null
+                ? 'bg-gray-200 text-gray-400'
+                : isLastQuestion
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700'
+            ]"
+          >
+            <span>{{ isLastQuestion ? '完成' : '下一题' }}</span>
+            <i :class="[isLastQuestion ? 'fas fa-check ml-2' : 'fas fa-chevron-right ml-2']"></i>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -196,7 +185,6 @@ interface Props {
   currentQuestionIndex: number
   selectedAnswer: number | null
   responses: (number | null)[]
-  showSlider?: boolean
 }
 
 interface Emits {
@@ -207,9 +195,7 @@ interface Emits {
   (e: 'save'): void
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  showSlider: true
-})
+const props = defineProps<Props>()
 
 const emit = defineEmits<Emits>()
 
@@ -318,36 +304,6 @@ onMounted(() => {
   transform: scale(0.98);
 }
 
-/* 自定义滑块样式 */
-.mobile-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e);
-  outline: none;
-  border-radius: 6px;
-}
-
-.mobile-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.mobile-slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
 
 /* 动画效果 */
 .question-card {
@@ -376,7 +332,21 @@ onMounted(() => {
   }
 
   .bottom-navigation {
-    padding: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .bottom-navigation .grid {
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+  }
+  
+  .bottom-navigation .nav-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .bottom-navigation .nav-button span {
+    font-weight: 500;
   }
 }
 

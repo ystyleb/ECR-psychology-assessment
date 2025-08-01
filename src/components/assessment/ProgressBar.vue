@@ -273,6 +273,10 @@ const getCurrentStageIndex = () => {
     gap: 0.25rem;
   }
 
+  .progress-track {
+    height: 0.2em !important; /* 在移动端将高度从 h-3(12px) 调整为更小，需要!important覆盖Tailwind类 */
+  }
+
   .progress-details {
     flex-direction: column;
     gap: 0.25rem;

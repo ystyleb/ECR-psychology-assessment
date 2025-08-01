@@ -49,33 +49,6 @@
       </div>
     </div>
 
-    <!-- 移动端滑块（可选） -->
-    <div v-if="showSlider" class="mobile-slider lg:hidden">
-      <div class="text-center text-sm text-gray-600 mb-4">{{ sliderLabel }}</div>
-      <div class="relative px-4">
-        <input
-          type="range"
-          min="1"
-          max="7"
-          step="1"
-          :value="selectedScore || 4"
-          @input="handleSliderInput"
-          @change="handleSliderChange"
-          :disabled="disabled"
-          :aria-label="`使用滑块选择分数，当前值：${selectedScore || 4}`"
-          class="slider w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-        />
-        <div class="slider-labels flex justify-between text-xs text-gray-400 mt-2">
-          <span>1</span>
-          <span>2</span>
-          <span>3</span>
-          <span>4</span>
-          <span>5</span>
-          <span>6</span>
-          <span>7</span>
-        </div>
-      </div>
-    </div>
 
     <!-- 当前选择显示 -->
     <div v-if="showCurrentSelection && selectedScore" class="current-selection text-center mt-4">
@@ -100,12 +73,10 @@ import { computed } from 'vue'
 interface Props {
   selectedScore?: number | null
   disabled?: boolean
-  showSlider?: boolean
   showCurrentSelection?: boolean
   leftLabel?: string
   centerLabel?: string
   rightLabel?: string
-  sliderLabel?: string
   helpText?: string
   labels?: string[]
 }
@@ -118,12 +89,10 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
-  showSlider: true,
   showCurrentSelection: false,
   leftLabel: '非常不同意',
   centerLabel: '中立',
   rightLabel: '非常同意',
-  sliderLabel: '或使用滑块选择',
   helpText: '',
   labels: () => ['', '非常不同意', '不同意', '有点不同意', '中立', '有点同意', '同意', '非常同意']
 })
@@ -150,22 +119,6 @@ const selectScore = (score: number) => {
   }
 }
 
-const handleSliderInput = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const score = parseInt(target.value)
-  if (!isNaN(score) && score >= 1 && score <= 7) {
-    emit('update:selectedScore', score)
-    emit('select', score)
-  }
-}
-
-const handleSliderChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const score = parseInt(target.value)
-  if (!isNaN(score) && score >= 1 && score <= 7) {
-    emit('change', score)
-  }
-}
 
 // 键盘导航支持 - 暂时注释掉，因为模板中未使用
 // const handleKeydown = (event: KeyboardEvent) => {
@@ -258,73 +211,6 @@ defineExpose({
   }
 }
 
-/* 自定义滑块样式 */
-.slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 8px;
-  background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e);
-  outline: none;
-  transition: opacity 0.2s;
-}
-
-.slider:hover {
-  opacity: 1;
-}
-
-.slider:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-}
-
-.slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-  border-color: #2563eb;
-}
-
-.slider::-webkit-slider-thumb:active {
-  transform: scale(1.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-.slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-  border: none;
-}
-
-.slider::-moz-range-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-}
-
-.slider::-moz-range-track {
-  height: 8px;
-  border-radius: 8px;
-  background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e);
-  border: none;
-}
 
 /* 禁用状态 */
 .scale-button:disabled {
@@ -439,8 +325,5 @@ defineExpose({
     break-inside: avoid;
   }
 
-  .mobile-slider {
-    display: none;
-  }
 }
 </style>

@@ -10,7 +10,7 @@
   >
     <!-- 基础报告内容（在详细报告中也显示） -->
     <template #basic-content>
-      <div class="bg-white rounded-2xl shadow-lg p-8">
+      <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
         <div class="text-center mb-8">
           <div
             class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -27,9 +27,9 @@
         </div>
 
         <!-- 得分总览 -->
-        <div class="grid md:grid-cols-3 gap-6 mb-8">
-          <div class="text-center p-4 bg-red-50 rounded-lg">
-            <div class="text-2xl font-bold text-red-600 mb-1">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div class="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
+            <div class="text-xl sm:text-2xl font-bold text-red-600 mb-1">
               {{ scores?.anxious.toFixed(1) }}
             </div>
             <div class="text-sm text-gray-600">焦虑依恋</div>
@@ -38,8 +38,8 @@
             </div>
           </div>
 
-          <div class="text-center p-4 bg-blue-50 rounded-lg">
-            <div class="text-2xl font-bold text-blue-600 mb-1">
+          <div class="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
+            <div class="text-xl sm:text-2xl font-bold text-blue-600 mb-1">
               {{ scores?.avoidant.toFixed(1) }}
             </div>
             <div class="text-sm text-gray-600">回避依恋</div>
@@ -48,8 +48,8 @@
             </div>
           </div>
 
-          <div class="text-center p-4 bg-green-50 rounded-lg">
-            <div class="text-2xl font-bold text-green-600 mb-1">
+          <div class="text-center p-3 sm:p-4 bg-green-50 rounded-lg">
+            <div class="text-xl sm:text-2xl font-bold text-green-600 mb-1">
               {{ scores?.secure.toFixed(1) }}
             </div>
             <div class="text-sm text-gray-600">安全依恋</div>
@@ -64,14 +64,14 @@
     <!-- 详细报告内容 -->
     <template #detailed-content="{ reportData }">
       <!-- 可视化图表 -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
+      <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
         <div class="text-center mb-8">
           <h3 class="text-xl font-bold text-gray-800 mb-2">数据可视化</h3>
           <p class="text-gray-600">您的依恋维度图表分析</p>
         </div>
 
         <!-- 核心图表 - 得分展示和四象限图 -->
-        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
           <ScoreDisplay
             :scores="scores"
             :percentiles="percentiles"
@@ -140,10 +140,10 @@
       <!-- 深度分析章节 -->
       <div class="space-y-8">
         <!-- 特征分析 -->
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-          <h3 class="text-xl font-bold text-gray-800 mb-6">详细特征分析</h3>
+        <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">详细特征分析</h3>
           
-          <div class="grid md:grid-cols-2 gap-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
             <!-- 优势 -->
             <div>
               <h4 class="text-lg font-semibold text-green-600 mb-4 flex items-center">
@@ -183,8 +183,8 @@
         </div>
 
         <!-- 建议指导 -->
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-          <h3 class="text-xl font-bold text-gray-800 mb-6">成长建议</h3>
+        <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">成长建议</h3>
           
           <div class="space-y-4">
             <div 
@@ -201,8 +201,8 @@
         </div>
 
         <!-- 关系模式分析 -->
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-          <h3 class="text-xl font-bold text-gray-800 mb-6">关系模式分析</h3>
+        <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">关系模式分析</h3>
           
           <div class="space-y-6">
             <div 
@@ -216,8 +216,8 @@
         </div>
 
         <!-- 兼容性分析 -->
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-          <h3 class="text-xl font-bold text-gray-800 mb-6">关系兼容性分析</h3>
+        <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">关系兼容性分析</h3>
           
           <div class="space-y-4">
             <div 
@@ -232,27 +232,27 @@
       </div>
 
       <!-- 报告导出和分享 -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
+      <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
         <div class="text-center">
-          <h3 class="text-xl font-bold text-gray-800 mb-4">导出和分享</h3>
-          <div class="flex flex-wrap justify-center gap-4">
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">导出和分享</h3>
+          <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4">
             <button
               @click="handleExportImage"
-              class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base min-w-[120px]"
             >
               <i class="fas fa-image mr-2"></i>
               导出图片
             </button>
             <button
               @click="handleExportWithPrint"
-              class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm sm:text-base min-w-[120px]"
             >
               <i class="fas fa-print mr-2"></i>
               打印PDF
             </button>
             <button
               @click="handleShare"
-              class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base min-w-[120px]"
             >
               <i class="fas fa-share mr-2"></i>
               分享报告

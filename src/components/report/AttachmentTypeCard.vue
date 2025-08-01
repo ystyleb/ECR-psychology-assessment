@@ -26,25 +26,6 @@
         </div>
       </div>
 
-      <!-- 置信度指示器 -->
-      <div v-if="showConfidence" class="text-right">
-        <div class="text-sm text-gray-500 mb-1">匹配度</div>
-        <div class="flex items-center space-x-2">
-          <div class="w-16 bg-gray-200 rounded-full h-2">
-            <div
-              class="h-2 rounded-full transition-all duration-500"
-              :class="{
-                'bg-green-500': attachmentType === 'secure',
-                'bg-orange-500': attachmentType === 'anxious',
-                'bg-blue-500': attachmentType === 'avoidant',
-                'bg-purple-500': attachmentType === 'disorganized'
-              }"
-              :style="{ width: `${confidence}%` }"
-            ></div>
-          </div>
-          <span class="text-sm font-medium text-gray-700">{{ confidence }}%</span>
-        </div>
-      </div>
     </div>
 
     <!-- 描述 -->

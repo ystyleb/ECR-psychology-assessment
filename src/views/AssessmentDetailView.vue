@@ -168,76 +168,112 @@
               </div>
             </div>
 
-            <!-- 移动端滑块（可选） -->
-            <div class="md:hidden mt-8">
-              <div class="text-center text-sm text-gray-600 mb-4">或使用滑块选择</div>
-              <input
-                type="range"
-                min="1"
-                max="7"
-                :value="selectedAnswer || 4"
-                @input="selectAnswer(parseInt($event.target.value))"
-                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-              />
-            </div>
           </div>
         </div>
       </div>
 
       <!-- 导航按钮 -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-between items-center">
-        <button
-          @click="previousQuestion"
-          :disabled="currentQuestionIndex === 0"
-          class="flex items-center px-6 py-3 rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100"
-        >
-          <i class="fas fa-chevron-left mr-2"></i>
-          上一题
-        </button>
+      <div class="flex flex-col gap-4">
+        <!-- 移动端布局：两个主要按钮分居两侧 -->
+        <div class="grid grid-cols-3 items-center gap-4 sm:hidden">
+          <!-- 左侧：上一题按钮 -->
+          <div class="flex justify-start">
+            <button
+              @click="previousQuestion"
+              :disabled="currentQuestionIndex === 0"
+              class="flex items-center justify-center px-3 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100 whitespace-nowrap"
+            >
+              <i class="fas fa-chevron-left mr-1 text-sm"></i>
+              <span class="text-sm">上一题</span>
+            </button>
+          </div>
 
-        <!-- 题目导航点 -->
-        <div class="flex items-center space-x-2 overflow-x-auto max-w-xs sm:max-w-md">
-          <div
-            v-for="(question, index) in questions.slice(
-              Math.max(0, currentQuestionIndex - 2),
-              currentQuestionIndex + 3
-            )"
-            :key="question.id"
-            @click="goToQuestion(Math.max(0, currentQuestionIndex - 2) + index)"
-            :class="[
-              'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium cursor-pointer transition-all duration-200',
-              Math.max(0, currentQuestionIndex - 2) + index === currentQuestionIndex
-                ? 'bg-blue-600 text-white'
-                : responses[Math.max(0, currentQuestionIndex - 2) + index] !== null
-                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-            ]"
-          >
-            {{ Math.max(0, currentQuestionIndex - 2) + index + 1 }}
+          <!-- 中间：当前题目数 -->
+          <div class="text-center">
+            <div class="text-sm font-medium text-gray-800">{{ currentQuestionIndex + 1 }}/{{ totalQuestions }}</div>
+          </div>
+
+          <!-- 右侧：下一题/完成按钮 -->
+          <div class="flex justify-end">
+            <button
+              @click="nextQuestion"
+              :disabled="selectedAnswer === null"
+              :class="[
+                'flex items-center justify-center px-3 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap',
+                selectedAnswer === null
+                  ? 'bg-gray-200 text-gray-400'
+                  : currentQuestionIndex === totalQuestions - 1
+                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg'
+                    : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg'
+              ]"
+            >
+              <span class="text-sm">{{ currentQuestionIndex === totalQuestions - 1 ? '完成' : '下一题' }}</span>
+              <i
+                :class="[
+                  currentQuestionIndex === totalQuestions - 1
+                    ? 'fas fa-check ml-1 text-sm'
+                    : 'fas fa-chevron-right ml-1 text-sm'
+                ]"
+              ></i>
+            </button>
           </div>
         </div>
 
-        <button
-          @click="nextQuestion"
-          :disabled="selectedAnswer === null"
-          :class="[
-            'flex items-center px-6 py-3 rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
-            selectedAnswer === null
-              ? 'bg-gray-200 text-gray-400'
-              : currentQuestionIndex === totalQuestions - 1
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg'
-                : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg'
-          ]"
-        >
-          {{ currentQuestionIndex === totalQuestions - 1 ? '完成测评' : '下一题' }}
-          <i
-            :class="
-              currentQuestionIndex === totalQuestions - 1
-                ? 'fas fa-check ml-2'
-                : 'fas fa-chevron-right ml-2'
-            "
-          ></i>
-        </button>
+        <!-- 桌面端布局：保持原有的flex布局 -->
+        <div class="hidden sm:flex flex-row gap-4 justify-between items-center">
+          <button
+            @click="previousQuestion"
+            :disabled="currentQuestionIndex === 0"
+            class="flex items-center px-6 py-3 rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100"
+          >
+            <i class="fas fa-chevron-left mr-2"></i>
+            上一题
+          </button>
+
+          <!-- 题目导航点 -->
+          <div class="flex items-center space-x-2 overflow-x-auto max-w-xs sm:max-w-md">
+            <div
+              v-for="(question, index) in questions.slice(
+                Math.max(0, currentQuestionIndex - 2),
+                currentQuestionIndex + 3
+              )"
+              :key="question.id"
+              @click="goToQuestion(Math.max(0, currentQuestionIndex - 2) + index)"
+              :class="[
+                'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium cursor-pointer transition-all duration-200',
+                Math.max(0, currentQuestionIndex - 2) + index === currentQuestionIndex
+                  ? 'bg-blue-600 text-white'
+                  : responses[Math.max(0, currentQuestionIndex - 2) + index] !== null
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              ]"
+            >
+              {{ Math.max(0, currentQuestionIndex - 2) + index + 1 }}
+            </div>
+          </div>
+
+          <button
+            @click="nextQuestion"
+            :disabled="selectedAnswer === null"
+            :class="[
+              'flex items-center px-6 py-3 rounded-full font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed',
+              selectedAnswer === null
+                ? 'bg-gray-200 text-gray-400'
+                : currentQuestionIndex === totalQuestions - 1
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg'
+            ]"
+          >
+            {{ currentQuestionIndex === totalQuestions - 1 ? '完成测评' : '下一题' }}
+            <i
+              :class="
+                currentQuestionIndex === totalQuestions - 1
+                  ? 'fas fa-check ml-2'
+                  : 'fas fa-chevron-right ml-2'
+              "
+            ></i>
+          </button>
+        </div>
       </div>
 
       <!-- 快捷键提示 -->
@@ -509,49 +545,6 @@ watch(
 </script>
 
 <style scoped>
-/* 自定义滑块样式 */
-.slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 8px;
-  border-radius: 8px;
-  background: linear-gradient(to right, #3b82f6, #8b5cf6);
-  outline: none;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-}
-
-.slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-}
-
-.slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  transition: all 0.2s ease;
-}
-
-.slider::-moz-range-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-}
 
 /* 动画效果 */
 @keyframes pulse {
@@ -585,6 +578,20 @@ watch(
 
   .text-xs {
     font-size: 0.65rem;
+  }
+  
+  /* 确保按钮文字横排显示 */
+  .grid-cols-3 button {
+    width: auto;
+    height: auto;
+    min-height: 2.5rem;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+  
+  .grid-cols-3 button span {
+    display: inline;
+    white-space: nowrap;
   }
 }
 

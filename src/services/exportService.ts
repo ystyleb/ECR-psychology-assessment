@@ -19,14 +19,43 @@ export interface ShareOptions {
  */
 export class ExportService {
   /**
+   * 检测移动端设备
+   */
+  private static isMobileDevice(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           window.innerWidth <= 768
+  }
+
+  /**
+   * 获取设备像素比例
+   */
+  private static getDevicePixelRatio(): number {
+    return window.devicePixelRatio || 1
+  }
+
+  /**
+   * 计算最优的canvas scale
+   */
+  private static getOptimalScale(): number {
+    const isMobile = this.isMobileDevice()
+    const pixelRatio = this.getDevicePixelRatio()
+    
+    if (isMobile) {
+      // 移动端使用更高的scale来确保清晰度，但考虑内存限制
+      return Math.min(pixelRatio * 2, 3)
+    } else {
+      // 桌面端使用适中的scale
+      return Math.min(pixelRatio * 1.5, 2.5)
+    }
+  }
+  /**
    * 导出为图片 - 完美保留视觉效果，不分页
    * @param element - 要导出的DOM元素
    * @param options - 导出选项
    */
   static async exportToImage(element: HTMLElement, options: ExportOptions = {}): Promise<void> {
     const {
-      filename = 'ECR心理测评报告',
-      quality = 0.95
+      filename = 'ECR心理测评报告'
     } = options
 
     try {
@@ -41,24 +70,49 @@ export class ExportService {
 
       // 获取元素的完整高度和宽度，生成高质量图片
       const canvas = await html2canvas(element, {
-        scale: 2, // 适中的缩放比例，避免内存问题
+        scale: this.getOptimalScale(), // 动态scale
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#f0f9ff', // 使用和渐变背景相近的颜色
         logging: false,
         height: element.scrollHeight,
-        width: element.scrollWidth - 30, // 增加宽度给右侧留空间
+        width: this.isMobileDevice() ? Math.max(element.scrollWidth, 375) : element.scrollWidth - 30, // 移动端确保最小宽度
         foreignObjectRendering: true,
         imageTimeout: 30000,
         removeContainer: false,
-        scrollX: -10, // 向右偏移100px
-        scrollY: 220,
+        scrollX: this.isMobileDevice() ? 0 : -10, // 移动端不偏移
+        scrollY: this.isMobileDevice() ? 0 : 220, // 移动端不偏移
         onclone: (clonedDoc) => {
+          const isMobileDevice = this.isMobileDevice()
+          
           // 在克隆文档中只做最基本的样式确保
           const clonedElement = clonedDoc.querySelector('.detailed-report-container') as HTMLElement
           if (clonedElement) {
             clonedElement.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)'
             clonedElement.style.minHeight = 'auto'
+            
+            // 移动端特殊处理
+            if (isMobileDevice) {
+              clonedElement.style.minWidth = '375px'
+              clonedElement.style.fontSize = '14px'
+            }
+          }
+          
+          // 强制放大图表在移动端的显示
+          if (isMobileDevice) {
+            const charts = clonedDoc.querySelectorAll('[class*="echarts"], canvas, svg') as NodeListOf<HTMLElement>
+            charts.forEach(chart => {
+              const currentWidth = parseInt(chart.style.width) || chart.offsetWidth
+              const currentHeight = parseInt(chart.style.height) || chart.offsetHeight
+              
+              // 确保图表在移动端有足够的尺寸
+              if (currentWidth < 350) {
+                chart.style.width = '350px'
+              }
+              if (currentHeight < 280) {
+                chart.style.height = '280px'
+              }
+            })
           }
           
           // 确保其他隐藏元素变为可见
@@ -77,16 +131,38 @@ export class ExportService {
       // 恢复原始样式和重新插入删除的元素
       this.restoreElementStyles(element, exportData)
 
-      // 创建下载链接
-      const imgDataURL = canvas.toDataURL('image/png', quality)
-      const link = document.createElement('a')
-      link.download = `${filename}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`
-      link.href = imgDataURL
+      const isMobile = this.isMobileDevice()
       
-      // 触发下载
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      // 创建下载链接
+      const quality = isMobile ? Math.min(options.quality || 0.95, 0.9) : (options.quality || 0.95) // 移动端限制质量避免内存问题
+      const imgDataURL = canvas.toDataURL('image/png', quality)
+      
+      // 移动端特殊处理下载
+      if (isMobile && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        // iOS设备特殊处理
+        const newWindow = window.open()
+        if (newWindow) {
+          newWindow.document.write(`
+            <html>
+              <head><title>下载图片</title></head>
+              <body style="margin:0;padding:20px;text-align:center;">
+                <h3>长按图片保存到相册</h3>
+                <img src="${imgDataURL}" style="max-width:100%;height:auto;" />
+              </body>
+            </html>
+          `)
+        }
+      } else {
+        // 其他设备使用传统下载
+        const link = document.createElement('a')
+        link.download = `${filename}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`
+        link.href = imgDataURL
+        
+        // 触发下载
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
 
       this.hideLoadingIndicator(loadingIndicator)
       this.showSuccessMessage('图片导出成功！')
@@ -104,19 +180,26 @@ export class ExportService {
   private static prepareElementForExport(element: HTMLElement): { styles: Map<HTMLElement, string>, removedElements: Array<{element: HTMLElement, parent: HTMLElement, nextSibling: Node | null}> } {
     const originalStyles = new Map<HTMLElement, string>()
     const removedElements: Array<{element: HTMLElement, parent: HTMLElement, nextSibling: Node | null}> = []
+    const isMobile = this.isMobileDevice()
     
-    // 保存并优化主容器样式 - 简化设置，主要通过html2canvas配置调整位置
+    // 保存并优化主容器样式 - 移动端特殊处理
     originalStyles.set(element, element.style.cssText)
+    const mobileStyles = isMobile ? `
+      min-width: 375px !important;
+      font-size: 14px !important;
+    ` : ''
+    
     element.style.cssText += `
       position: relative !important;
       transform: none !important;
       overflow: visible !important;
       background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%) !important;
-      padding: 2rem !important;
+      padding: ${isMobile ? '1rem' : '2rem'} !important;
       box-sizing: border-box !important;
       display: block !important;
       margin: 0 !important;
       min-height: auto !important;
+      ${mobileStyles}
     `
 
     // 临时删除不需要导出的元素 - 更直接有效
@@ -164,12 +247,13 @@ export class ExportService {
       if (!originalStyles.has(card)) {
         originalStyles.set(card, card.style.cssText)
       }
+      const cardPadding = isMobile ? '1rem' : '2rem'
       card.style.cssText += `
         background-color: #ffffff !important;
         border-radius: 16px !important;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-        margin-bottom: 2rem !important;
-        padding: 2rem !important;
+        margin-bottom: ${isMobile ? '1rem' : '2rem'} !important;
+        padding: ${cardPadding} !important;
         box-sizing: border-box !important;
       `
     })
@@ -214,17 +298,37 @@ export class ExportService {
       `
     })
 
-    // 确保图表和组件正常显示
-    const chartElements = element.querySelectorAll('canvas, svg') as NodeListOf<HTMLElement>
+    // 确保图表和组件正常显示，移动端特殊处理
+    const chartElements = element.querySelectorAll('canvas, svg, [class*="echarts"]') as NodeListOf<HTMLElement>
     chartElements.forEach(chart => {
       if (!originalStyles.has(chart)) {
         originalStyles.set(chart, chart.style.cssText)
       }
-      chart.style.cssText += `
+      
+      let chartStyles = `
         max-width: 100% !important;
-        height: auto !important;
         display: block !important;
+        margin: 0 auto !important;
       `
+      
+      if (isMobile) {
+        // 移动端强制设置图表最小尺寸
+        const currentWidth = chart.offsetWidth || parseInt(chart.style.width) || 300
+        const currentHeight = chart.offsetHeight || parseInt(chart.style.height) || 250
+        
+        chartStyles += `
+          min-width: ${Math.max(currentWidth, 350)}px !important;
+          min-height: ${Math.max(currentHeight, 280)}px !important;
+          width: ${Math.max(currentWidth, 350)}px !important;
+          height: ${Math.max(currentHeight, 280)}px !important;
+        `
+      } else {
+        chartStyles += `
+          height: auto !important;
+        `
+      }
+      
+      chart.style.cssText += chartStyles
     })
 
     return { styles: originalStyles, removedElements }

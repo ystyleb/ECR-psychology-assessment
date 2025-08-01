@@ -101,3 +101,213 @@ body {
 .slide-leave-to {
   transform: translateX(-100%);
 }
+
+/* ========================================= */
+/* 移动端专用样式优化 */
+/* ========================================= */
+
+/* 基础移动端优化 */
+@media (max-width: 640px) {
+  :root {
+    /* 移动端调整的变量 */
+    --mobile-padding: 1rem;
+    --mobile-margin: 0.75rem; 
+    --mobile-gap: 0.5rem;
+    --mobile-radius: 12px;
+  }
+  
+  /* 防止横向滚动 */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  /* 移动端字体大小调整 */
+  body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  /* 触摸优化 */
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* 文本元素可以选择 */
+  p, span, div[class*="text"], h1, h2, h3, h4, h5, h6 {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+  
+  /* 输入元素优化 */
+  input, textarea, select {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    font-size: 16px; /* 防止iOS缩放 */
+  }
+  
+  /* 按钮触摸优化 */
+  button, .btn, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  
+  /* 卡片和容器优化 */
+  .bg-white, [class*="rounded"] {
+    border-radius: var(--mobile-radius);
+  }
+  
+  /* 间距优化 */
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.5rem;
+  }
+  
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1rem;
+  }
+  
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.75rem;
+  }
+  
+  /* 网格布局优化 */
+  .grid {
+    gap: var(--mobile-gap);
+  }
+  
+  /* 弹性布局优化 */
+  .flex {
+    gap: var(--mobile-gap);
+  }
+  
+  /* 滚动区域优化 */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 超小屏幕优化 (iPhone SE等) */
+@media (max-width: 375px) {
+  body {
+    font-size: 13px;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+  
+  .text-xl {
+    font-size: 1.125rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+  
+  .p-8 {
+    padding: 1rem;
+  }
+  
+  .p-6 {
+    padding: 0.75rem;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .mb-6 {
+    margin-bottom: 1rem;
+  }
+}
+
+/* 平板优化 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* 平板特定优化 */
+  .grid-cols-1 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  /* 适中的间距 */
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 2rem;
+  }
+}
+
+/* 移动端专用工具类 */
+@media (max-width: 640px) {
+  .mobile-hide {
+    display: none !important;
+  }
+  
+  .mobile-show {
+    display: block !important;
+  }
+  
+  .mobile-flex {
+    display: flex !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-center {
+    text-align: center !important;
+  }
+  
+  .mobile-p-4 {
+    padding: 1rem !important;
+  }
+  
+  .mobile-text-sm {
+    font-size: 0.875rem !important;
+  }
+  
+  /* 触摸友好的间距 */
+  .mobile-touch-spacing {
+    padding: 0.75rem 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  /* 移动端卡片优化 */
+  .mobile-card {
+    margin: 0 1rem 1rem 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 移动端按钮优化 */
+  .mobile-btn {
+    min-height: 44px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  
+  /* 移动端表单优化 */
+  .mobile-input {
+    font-size: 16px; /* 防止iOS缩放 */
+    padding: 0.75rem;
+    border-radius: 8px;
+    min-height: 44px;
+  }
+}
