@@ -144,9 +144,11 @@
             <div class="action-buttons space-y-4">
               <button
                 @click="goToReport"
-                class="primary-button w-full py-4 px-6 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-2xl font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                :disabled="isNavigatingToReport"
+                class="primary-button w-full py-4 px-6 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-2xl font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 <svg
+                  v-if="!isNavigatingToReport"
                   class="w-5 h-5 mr-2 inline-block"
                   fill="none"
                   stroke="currentColor"
@@ -159,7 +161,28 @@
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   ></path>
                 </svg>
-                查看详细报告
+                <svg
+                  v-else
+                  class="w-5 h-5 mr-2 inline-block animate-spin"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {{ isNavigatingToReport ? '正在加载报告...' : '查看详细报告' }}
               </button>
 
 
@@ -252,6 +275,7 @@ const verificationSuccess = ref(false)
 const verificationError = ref(false)
 const errorMessage = ref('')
 const toastMessage = ref('')
+const isNavigatingToReport = ref(false)
 const paymentInfo = ref({
   customerEmail: '',
   receiptUrl: ''
@@ -350,13 +374,30 @@ const retryVerification = async () => {
   }, 1000)
 }
 
-const goToReport = () => {
-  if (assessmentId.value) {
-    // 跳转到详细报告页面
-    router.push(`/report/${assessmentId.value}/detailed`)
-  } else {
-    // 没有assessmentId时跳转到首页
-    router.push('/')
+const goToReport = async () => {
+  if (isNavigatingToReport.value) return // 防止重复点击
+  
+  isNavigatingToReport.value = true
+  
+  try {
+    // 模拟一个短暂的延时来展示loading状态
+    await new Promise(resolve => setTimeout(resolve, 500))
+    
+    if (assessmentId.value) {
+      // 跳转到详细报告页面
+      router.push(`/report/${assessmentId.value}/detailed`)
+    } else {
+      // 没有assessmentId时跳转到首页
+      router.push('/')
+    }
+  } catch (error) {
+    console.error('Navigation failed:', error)
+    showToast('跳转失败，请重试')
+  } finally {
+    // 延迟重置loading状态，确保用户能看到loading效果
+    setTimeout(() => {
+      isNavigatingToReport.value = false
+    }, 1000)
   }
 }
 
@@ -449,9 +490,20 @@ onMounted(() => {
 }
 
 /* 按钮悬停效果 */
-.primary-button:hover {
+.primary-button:hover:not(:disabled) {
   transform: scale(1.02) translateY(-2px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.primary-button:disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .secondary-button:hover {
