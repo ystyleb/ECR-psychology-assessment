@@ -52,18 +52,18 @@
 
     <!-- 安全保障 -->
     <div class="bg-green-50 rounded-lg p-4 mb-6">
-      <div class="flex items-center justify-center space-x-6 text-sm text-green-700">
+      <div class="flex items-center justify-center space-x-3 sm:space-x-6 text-xs sm:text-sm text-green-700">
         <div class="flex items-center space-x-1">
-          <i class="fas fa-shield-alt"></i>
-          <span>安全支付</span>
+          <i class="fas fa-shield-alt text-xs sm:text-sm"></i>
+          <span class="whitespace-nowrap">安全支付</span>
         </div>
         <div class="flex items-center space-x-1">
-          <i class="fas fa-lock"></i>
-          <span>隐私保护</span>
+          <i class="fas fa-lock text-xs sm:text-sm"></i>
+          <span class="whitespace-nowrap">隐私保护</span>
         </div>
         <div class="flex items-center space-x-1">
-          <i class="fas fa-infinity"></i>
-          <span>永久访问</span>
+          <i class="fas fa-infinity text-xs sm:text-sm"></i>
+          <span class="whitespace-nowrap">永久访问</span>
         </div>
       </div>
     </div>
