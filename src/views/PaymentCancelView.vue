@@ -333,9 +333,9 @@ const retryPayment = async () => {
 
 const viewBasicReport = () => {
   if (assessmentId.value) {
-    router.push(`/assessment/${assessmentId.value}/report`)
+    router.push(`/report/${assessmentId.value}`)
   } else {
-    router.push('/assessments')
+    router.push('/')
   }
 }
 
