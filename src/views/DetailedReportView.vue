@@ -237,11 +237,18 @@
           <h3 class="text-xl font-bold text-gray-800 mb-4">导出和分享</h3>
           <div class="flex flex-wrap justify-center gap-4">
             <button
-              @click="handleExportPDF"
+              @click="handleExportImage"
               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <i class="fas fa-file-pdf mr-2"></i>
-              导出PDF
+              <i class="fas fa-image mr-2"></i>
+              导出图片
+            </button>
+            <button
+              @click="handleExportWithPrint"
+              class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <i class="fas fa-print mr-2"></i>
+              打印PDF
             </button>
             <button
               @click="handleShare"
@@ -251,6 +258,9 @@
               分享报告
             </button>
           </div>
+          <p class="text-sm text-gray-500 mt-3">
+            推荐使用"导出图片"获得最佳视觉效果，完整保留背景和布局
+          </p>
         </div>
       </div>
     </template>
@@ -382,9 +392,9 @@ const handleViewDetailed = () => {
   // 实际的查看逻辑
 }
 
-const handleExportPDF = async () => {
+const handleExportImage = async () => {
   try {
-    console.log('开始导出PDF...')
+    console.log('開始导出图片...')
     
     // 获取整个报告容器元素
     const reportElement = document.querySelector('.detailed-report-container') as HTMLElement
@@ -398,16 +408,40 @@ const handleExportPDF = async () => {
     const style = assessment?.basicResult?.style || 'Unknown'
     const filename = `ECR心理测评详细报告_${style}型依恋风格`
 
-    await ExportService.exportToPDF(reportElement, {
+    await ExportService.exportToImage(reportElement, {
       filename,
-      quality: 0.95,
-      format: 'a4',
-      margin: 15
+      quality: 0.95
     })
 
-    console.log('PDF导出完成')
+    console.log('图片导出完成')
   } catch (error) {
-    console.error('PDF导出失败:', error)
+    console.error('图片导出失败:', error)
+  }
+}
+
+const handleExportWithPrint = async () => {
+  try {
+    console.log('开始打印导出PDF...')
+    
+    // 获取整个报告容器元素
+    const reportElement = document.querySelector('.detailed-report-container') as HTMLElement
+    if (!reportElement) {
+      console.error('未找到报告容器元素')
+      return
+    }
+
+    // 生成文件名
+    const assessment = currentAssessment.value as any
+    const style = assessment?.basicResult?.style || 'Unknown'
+    const filename = `ECR心理测评详细报告_${style}型依恋风格`
+
+    await ExportService.exportWithBrowserPrint(reportElement, {
+      filename
+    })
+
+    console.log('打印导出完成')
+  } catch (error) {
+    console.error('打印导出失败:', error)
   }
 }
 
@@ -442,10 +476,29 @@ const handleShare = async () => {
     page-break-before: always;
   }
 
+  /* 确保所有背景颜色在打印时显示 */
   .bg-gradient-to-br,
   .bg-gradient-to-r {
-    background: white !important;
-    border: 1px solid #e5e7eb !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 确保彩色背景显示 */
+  .bg-red-50, .bg-blue-50, .bg-green-50, .bg-purple-50, .bg-orange-50 {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 确保白色背景显示 */
+  .bg-white {
+    background-color: white !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* 优化边框显示 */
+  .border, .border-l-4 {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 }
 

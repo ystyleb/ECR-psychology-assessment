@@ -19,11 +19,256 @@ export interface ShareOptions {
  */
 export class ExportService {
   /**
-   * 导出PDF
+   * 导出为图片 - 完美保留视觉效果，不分页
    * @param element - 要导出的DOM元素
    * @param options - 导出选项
    */
-  static async exportToPDF(element: HTMLElement, options: ExportOptions = {}): Promise<void> {
+  static async exportToImage(element: HTMLElement, options: ExportOptions = {}): Promise<void> {
+    const {
+      filename = 'ECR心理测评报告',
+      quality = 0.95
+    } = options
+
+    try {
+      // 显示加载状态
+      const loadingIndicator = this.showLoadingIndicator('正在生成图片...')
+
+      // 临时修改元素样式以优化导出效果
+      const originalStyles = this.prepareElementForExport(element)
+
+      // 等待样式应用
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // 获取元素的完整高度和宽度，生成高质量图片
+      const canvas = await html2canvas(element, {
+        scale: 2, // 适中的缩放比例，避免内存问题
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#f0f9ff', // 使用和渐变背景相近的颜色
+        logging: false,
+        height: element.scrollHeight,
+        width: element.scrollWidth - 30, // 增加宽度给右侧留空间
+        foreignObjectRendering: true,
+        imageTimeout: 30000,
+        removeContainer: false,
+        scrollX: -10, // 向右偏移100px
+        scrollY: 220,
+        onclone: (clonedDoc) => {
+          // 在克隆文档中只做最基本的样式确保
+          const clonedElement = clonedDoc.querySelector('.detailed-report-container') as HTMLElement
+          if (clonedElement) {
+            clonedElement.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)'
+            clonedElement.style.minHeight = 'auto'
+            // clonedElement.style.transform = 'translateX(100px)' // 直接用transform移动
+            // clonedElement.style.marginLeft = '100px' // 额外的左边距
+          }
+          
+          // 确保隐藏元素变为可见，但不修改位置
+          const hiddenElements = clonedDoc.querySelectorAll('[style*="display: none"], [style*="visibility: hidden"]') as NodeListOf<HTMLElement>
+          hiddenElements.forEach(el => {
+            if (el.style.display === 'none') {
+              el.style.display = 'block'
+            }
+            if (el.style.visibility === 'hidden') {
+              el.style.visibility = 'visible'
+            }
+          })
+        }
+      })
+
+      // 恢复原始样式
+      this.restoreElementStyles(element, originalStyles)
+
+      // 创建下载链接
+      const imgDataURL = canvas.toDataURL('image/png', quality)
+      const link = document.createElement('a')
+      link.download = `${filename}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`
+      link.href = imgDataURL
+      
+      // 触发下载
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      this.hideLoadingIndicator(loadingIndicator)
+      this.showSuccessMessage('图片导出成功！')
+
+    } catch (error) {
+      console.error('图片导出失败:', error)
+      this.showErrorMessage('图片导出失败，请重试')
+      throw error
+    }
+  }
+
+  /**
+   * 准备元素用于导出 - 优化样式
+   */
+  private static prepareElementForExport(element: HTMLElement): Map<HTMLElement, string> {
+    const originalStyles = new Map<HTMLElement, string>()
+    
+    // 保存并优化主容器样式 - 简化设置，主要通过html2canvas配置调整位置
+    originalStyles.set(element, element.style.cssText)
+    element.style.cssText += `
+      position: relative !important;
+      transform: none !important;
+      overflow: visible !important;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%) !important;
+      padding: 2rem !important;
+      box-sizing: border-box !important;
+      display: block !important;
+      margin: 0 !important;
+      min-height: auto !important;
+    `
+
+    // 不要修改父容器，保持原有布局
+
+    // 优化所有白色背景卡片
+    const whiteCards = element.querySelectorAll('.bg-white') as NodeListOf<HTMLElement>
+    whiteCards.forEach(card => {
+      originalStyles.set(card, card.style.cssText)
+      card.style.cssText += `
+        background-color: #ffffff !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        margin-bottom: 2rem !important;
+        padding: 2rem !important;
+        box-sizing: border-box !important;
+      `
+    })
+
+    // 确保所有容器元素的可见性，但不强制修改宽度
+    const containers = element.querySelectorAll('.space-y-8, .grid, .flex') as NodeListOf<HTMLElement>
+    containers.forEach(container => {
+      if (!originalStyles.has(container)) {
+        originalStyles.set(container, container.style.cssText)
+      }
+      container.style.cssText += `
+        overflow: visible !important;
+        min-height: auto !important;
+      `
+    })
+
+    // 优化彩色背景元素
+    const colorBgs = element.querySelectorAll('.bg-red-50, .bg-blue-50, .bg-green-50, .bg-purple-50, .bg-orange-50') as NodeListOf<HTMLElement>
+    colorBgs.forEach(bg => {
+      if (!originalStyles.has(bg)) {
+        originalStyles.set(bg, bg.style.cssText)
+      }
+      const computedStyle = window.getComputedStyle(bg)
+      bg.style.backgroundColor = computedStyle.backgroundColor
+      bg.style.cssText += `
+        border-radius: 8px !important;
+        padding: 1rem !important;
+        margin: 0.5rem 0 !important;
+      `
+    })
+
+    // 确保所有文本清晰可见
+    const textElements = element.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, li') as NodeListOf<HTMLElement>
+    textElements.forEach(el => {
+      if (!originalStyles.has(el)) {
+        originalStyles.set(el, el.style.cssText)
+      }
+      el.style.cssText += `
+        color: inherit !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+      `
+    })
+
+    // 确保图表和组件正常显示
+    const chartElements = element.querySelectorAll('canvas, svg') as NodeListOf<HTMLElement>
+    chartElements.forEach(chart => {
+      if (!originalStyles.has(chart)) {
+        originalStyles.set(chart, chart.style.cssText)
+      }
+      chart.style.cssText += `
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+      `
+    })
+
+    return originalStyles
+  }
+
+  /**
+   * 恢复元素原始样式
+   */
+  private static restoreElementStyles(element: HTMLElement, originalStyles: Map<HTMLElement, string>): void {
+    originalStyles.forEach((style, el) => {
+      el.style.cssText = style
+    })
+  }
+
+  /**
+   * 为单页PDF添加页脚
+   */
+  private static addSinglePageFooter(pdf: jsPDF): void {
+    const pageSize = pdf.internal.pageSize
+    const pageWidth = pageSize.width || pageSize.getWidth()
+    const pageHeight = pageSize.height || pageSize.getHeight()
+
+    pdf.setFontSize(8)
+    pdf.setTextColor(128, 128, 128)
+    
+    // 添加生成时间
+    const now = new Date()
+    const dateStr = now.toLocaleDateString('zh-CN')
+    const timeStr = now.toLocaleTimeString('zh-CN')
+    pdf.text(
+      `生成时间：${dateStr} ${timeStr}  |  ECR心理测评系统`,
+      pageWidth / 2,
+      pageHeight - 5,
+      { align: 'center' }
+    )
+  }
+
+  /**
+   * 使用浏览器打印功能导出PDF (备用方案)
+   * @param element - 要导出的DOM元素
+   * @param options - 导出选项
+   */
+  static async exportWithBrowserPrint(element: HTMLElement, options: ExportOptions = {}): Promise<void> {
+    const {
+      filename = 'ECR心理测评报告'
+    } = options
+
+    try {
+      // 显示提示信息
+      this.showMessage('请在打印对话框中选择"保存为PDF"选项', 'success')
+      
+      // 添加打印样式类
+      document.body.classList.add('print-mode')
+      element.classList.add('print-export')
+      
+      // 设置页面标题
+      const originalTitle = document.title
+      document.title = filename
+      
+      // 使用浏览器原生打印
+      window.print()
+      
+      // 清理
+      setTimeout(() => {
+        document.body.classList.remove('print-mode')
+        element.classList.remove('print-export')
+        document.title = originalTitle
+      }, 1000)
+
+    } catch (error) {
+      console.error('打印导出失败:', error)
+      this.showErrorMessage('打印导出失败，请重试')
+      throw error
+    }
+  }
+
+  /**
+   * 备用导出方法 - 使用html2canvas (如果用户需要)
+   * @param element - 要导出的DOM元素
+   * @param options - 导出选项
+   */
+  static async exportToPDFWithCanvas(element: HTMLElement, options: ExportOptions = {}): Promise<void> {
     const {
       filename = 'ECR心理测评报告',
       quality = 0.95,
@@ -40,10 +285,11 @@ export class ExportService {
         scale: 2, // 提高清晰度
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: null, // 保持透明背景，让html2canvas捕获原始背景
         logging: false,
         height: element.scrollHeight,
-        width: element.scrollWidth
+        width: element.scrollWidth,
+        foreignObjectRendering: true // 启用更好的渲染支持
       })
 
       // 创建PDF文档

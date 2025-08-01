@@ -8,17 +8,6 @@
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ title }}</h1>
         <p class="text-gray-600">{{ subtitle }}</p>
-        
-        <!-- 返回按钮（仅详细报告模式显示） -->
-        <div v-if="mode === 'detailed'" class="mt-4">
-          <button
-            @click="goBack"
-            class="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            <i class="fas fa-arrow-left"></i>
-            <span>返回基础报告</span>
-          </button>
-        </div>
       </div>
 
       <!-- 访问权限检查 -->
@@ -154,6 +143,59 @@ const redirectToBasicReport = () => {
 
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+
+/* 打印样式优化 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
+
+  /* 确保背景渐变在打印时显示 */
+  .bg-gradient-to-br {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%) !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 打印时隐藏导航和不必要元素 */
+  nav, header, .navigation, .sidebar {
+    display: none !important;
+  }
+
+  /* 优化内容布局 */
+  .detailed-report-container,
+  .basic-report-container {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  /* 确保白色卡片背景显示 */
+  .bg-white {
+    background-color: white !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* 优化阴影效果 */
+  .shadow-lg {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* 打印模式下的特殊样式 */
+:global(.print-mode) {
+  overflow: visible !important;
+}
+
+:global(.print-export) {
+  position: relative !important;
+  transform: none !important;
+  overflow: visible !important;
 }
 
 /* 响应式设计 */
