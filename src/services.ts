@@ -571,6 +571,18 @@ class ECRService {
   }
 
   checkPaymentStatus(assessmentId: string): { isPaid: boolean; sessionId?: string } {
+    // 开发环境跳过支付检查
+    const isDevelopment = import.meta.env.DEV
+    const skipPaymentInDev = import.meta.env.VITE_SKIP_PAYMENT_IN_DEV === 'true'
+    
+    if (isDevelopment && skipPaymentInDev) {
+      console.log('🔧 开发环境：跳过支付检查，直接允许访问详细报告')
+      return {
+        isPaid: true,
+        sessionId: 'dev-mock-session'
+      }
+    }
+    
     const sessions = this.getItem<Record<string, any>>(this.STORAGE_KEYS.sessions) || {}
     const session = sessions[assessmentId]
     

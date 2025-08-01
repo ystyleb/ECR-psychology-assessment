@@ -42,3 +42,5 @@ ehthumbs.db
 .husky/_
 .vercel
 .claude/*
+.env.development
+.env.example

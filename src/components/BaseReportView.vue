@@ -60,7 +60,10 @@
       </div>
 
       <!-- 报告内容 -->
-      <div v-else-if="reportData" class="space-y-8">
+      <div v-else-if="reportData" :class="[
+        'space-y-8',
+        mode === 'detailed' ? 'detailed-report-container' : 'basic-report-container'
+      ]">
         <!-- 基础报告插槽 -->
         <slot name="basic-content" :report-data="reportData" />
         

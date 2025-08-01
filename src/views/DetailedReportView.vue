@@ -89,9 +89,10 @@
           </div>
         </div>
 
-        <!-- 高级图表 -->
+        <!-- 
+        高级图表功能暂时注释
         <div class="grid lg:grid-cols-2 gap-8">
-          <!-- 雷达图 -->
+          雷达图
           <RadarChart
             :data="{
               scores: scores,
@@ -103,7 +104,7 @@
             :show-actions="true"
           />
           
-          <!-- 柱状图 -->
+          柱状图
           <BarChart
             :data="{
               scores: scores,
@@ -117,6 +118,7 @@
             :show-actions="true"
           />
         </div>
+        -->
 
         <!-- 得分对比分析 -->
         <ScoreComparison
@@ -260,11 +262,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/store'
 import { useReportData } from '@/composables/useReportData'
+import { ExportService } from '@/services/exportService'
 
 // 组件导入
 import BaseReportView from '@/components/BaseReportView.vue'
-import RadarChart from '@/components/charts/RadarChart.vue'
-import BarChart from '@/components/charts/BarChart.vue'
 import ScoreComparison from '@/components/charts/ScoreComparison.vue'
 import ScoreDisplay from '@/components/report/ScoreDisplay.vue'
 import EChartsQuadrantChart from '@/components/charts/EChartsQuadrantChart.vue'
@@ -381,14 +382,52 @@ const handleViewDetailed = () => {
   // 实际的查看逻辑
 }
 
-const handleExportPDF = () => {
-  console.log('导出PDF...')
-  // 实际的PDF导出逻辑
+const handleExportPDF = async () => {
+  try {
+    console.log('开始导出PDF...')
+    
+    // 获取整个报告容器元素
+    const reportElement = document.querySelector('.detailed-report-container') as HTMLElement
+    if (!reportElement) {
+      console.error('未找到报告容器元素')
+      return
+    }
+
+    // 生成文件名
+    const assessment = currentAssessment.value as any
+    const style = assessment?.basicResult?.style || 'Unknown'
+    const filename = `ECR心理测评详细报告_${style}型依恋风格`
+
+    await ExportService.exportToPDF(reportElement, {
+      filename,
+      quality: 0.95,
+      format: 'a4',
+      margin: 15
+    })
+
+    console.log('PDF导出完成')
+  } catch (error) {
+    console.error('PDF导出失败:', error)
+  }
 }
 
-const handleShare = () => {
-  console.log('分享报告...')
-  // 实际的分享逻辑
+const handleShare = async () => {
+  try {
+    console.log('开始分享报告...')
+    
+    const assessment = currentAssessment.value as any
+    const style = assessment?.basicResult?.style || 'Unknown'
+    
+    await ExportService.shareReport({
+      title: 'ECR心理测评详细报告',
+      text: `我刚完成了ECR依恋风格测评，测评结果显示我是${style}型依恋风格。这个专业的心理测评帮助我更好地了解了自己在亲密关系中的模式。`,
+      url: window.location.href
+    })
+
+    console.log('报告分享完成')
+  } catch (error) {
+    console.error('报告分享失败:', error)
+  }
 }
 </script>
 

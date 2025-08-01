@@ -239,7 +239,7 @@
       </div>
     </div>
 
-    <!-- 操作按钮 -->
+    <!-- 操作按钮
     <div v-if="showActions" class="actions mt-8 flex flex-wrap gap-3">
       <button
         @click="exportComparison"
@@ -262,7 +262,7 @@
         <i class="fas fa-microscope mr-2"></i>
         查看详细分析
       </button>
-    </div>
+    </div> -->
   </div>
 </template>
 
