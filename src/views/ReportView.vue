@@ -23,6 +23,7 @@
     <template #unlock-button="{ assessmentId }">
       <UnlockButton 
         :assessment-id="assessmentId"
+        :is-processing="isPaymentLoading"
         @unlock="handleUnlock"
       />
     </template>
@@ -48,6 +49,7 @@ const appStore = useAppStore()
 // 响应式状态
 const loading = ref(true)
 const error = ref<string | null>(null)
+const isPaymentLoading = ref(false)
 
 // 计算属性
 const assessmentId = computed(() => route.params.id as string)
@@ -135,6 +137,7 @@ const retryLoad = () => {
 
 const handleUnlock = async () => {
   try {
+    isPaymentLoading.value = true
     debugLog.log('🔓 Starting payment process for assessment:', assessmentId.value)
     
     // 发起支付
@@ -151,6 +154,8 @@ const handleUnlock = async () => {
   } catch (error) {
     console.error('❌ Payment initiation failed:', error)
     appStore.showError('支付创建失败，请重试')
+  } finally {
+    isPaymentLoading.value = false
   }
 }
 </script>
