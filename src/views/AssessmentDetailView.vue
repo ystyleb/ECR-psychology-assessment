@@ -181,7 +181,8 @@
             <button
               @click="previousQuestion"
               :disabled="currentQuestionIndex === 0"
-              class="flex items-center justify-center px-3 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100 whitespace-nowrap"
+              class="flex flex-row items-center justify-center px-3 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:hover:bg-gray-100 whitespace-nowrap"
+              style="writing-mode: horizontal-tb; text-orientation: mixed;"
             >
               <i class="fas fa-chevron-left mr-1 text-sm"></i>
               <span class="text-sm">上一题</span>
@@ -199,13 +200,14 @@
               @click="nextQuestion"
               :disabled="selectedAnswer === null"
               :class="[
-                'flex items-center justify-center px-3 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap',
+                'flex flex-row items-center justify-center px-3 py-2 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap',
                 selectedAnswer === null
                   ? 'bg-gray-200 text-gray-400'
                   : currentQuestionIndex === totalQuestions - 1
                     ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg'
                     : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg'
               ]"
+              style="writing-mode: horizontal-tb; text-orientation: mixed;"
             >
               <span class="text-sm">{{ currentQuestionIndex === totalQuestions - 1 ? '完成' : '下一题' }}</span>
               <i
@@ -431,7 +433,7 @@ const quickComplete = async (style: 'secure' | 'anxious' | 'avoidant' | 'disorga
 
 const handleExit = async () => {
   if (responses.value.some(r => r !== null)) {
-    if (confirm('您的测评进度将被保存，确定要退出吗？')) {
+    if (confirm('确定要退出吗？')) {
       await saveProgress()
       router.push('/assessment')
     }
@@ -580,18 +582,24 @@ watch(
     font-size: 0.65rem;
   }
   
-  /* 确保按钮文字横排显示 */
+  /* 强制按钮文字横排显示 */
   .grid-cols-3 button {
-    width: auto;
-    height: auto;
+    width: auto !important;
+    height: auto !important;
     min-height: 2.5rem;
-    writing-mode: horizontal-tb;
-    text-orientation: mixed;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    flex-direction: row !important;
   }
   
   .grid-cols-3 button span {
-    display: inline;
-    white-space: nowrap;
+    display: inline !important;
+    white-space: nowrap !important;
+    writing-mode: horizontal-tb !important;
+  }
+  
+  .grid-cols-3 button i {
+    writing-mode: horizontal-tb !important;
   }
 }
 
